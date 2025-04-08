@@ -84,7 +84,8 @@ class StaffCustomer(db.Model, SerializerMixin):
 class Loan(db.Model,SerializerMixin): 
     __tablename__ = 'loans'
     serialize_rules = ('-customer.loans', '-repayments.loan',)
-    id = db.Column(db.Integer, primary_key=Tr    amount = db.Column(db.Float, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    amount = db.Column(db.Float, nullable=False)
     interest_rate = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(20), nullable=False)  # 'pending', 'approved', 'rejected'
     issued_date = db.Column(db.DateTime, default=db.func.current_timestamp())
