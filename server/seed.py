@@ -96,7 +96,11 @@ if __name__ == '__main__':
         # Create Staff
         staff = []
         for i in range(2):
-            staff_member = Staff(full_name=f"Staff {i}")
+
+            staff_member = Staff(full_name=f"Staff {i}",
+                                 email=f'{i}@gmail.com', password='xxxx', role='staff', created_at=datetime.now()
+                                 )
+
             db.session.add(staff_member)
             staff.append(staff_member)
 
@@ -127,4 +131,6 @@ if __name__ == '__main__':
 
         db.session.commit()
 
+
         print("✅ Done seeding!")
+

@@ -1,31 +1,21 @@
 #!/usr/bin/env python3
-
 # Standard library imports
-from flask import Flask, request, make_response, session
-from flask_restful import Resource, Api
-from werkzeug.exceptions import NotFound
 
 # Remote library imports
+
+
+
+from flask import request, make_response, session
+from flask_restful import Resource
+from werkzeug.exceptions import NotFound
 from flask import request
 from flask_restful import Resource
+# from decorators import login_required, role_required
 
-# Local imports
-from config import app, db, api
-from decorators import login_required, role_required
+# from models import app,db,api
 
-# Add your model imports
-from models import db, migrate, User, Customer, StaffCustomer, Loan, Repayment, AuditLog
+from models import app,db,api,Staff, StaffCustomer, User, Customer, SavingsTransaction, AuditLog, Loan, Repayment
 
-
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///malibora.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-db.init_app(app)
-migrate.init_app(app, db)
-api = Api(app)
-
-# Views go here!
 
 @app.route('/')
 def index():
@@ -97,7 +87,7 @@ class CheckSession(Resource):
         
 
 
-class User(Resource):
+class UserResource(Resource):
 
     def get(self, id=None):
         if id == None:
@@ -132,8 +122,43 @@ class User(Resource):
 
         return make_response({user.to_dict()}, 200)
 
+class StaffResource(Resource):
 
-class Customer(Resource):
+    def get(self, id=None):
+        if id == None:
+            staffs = Staff.query.all()
+            print(staffs)
+            return make_response([staff.to_dict() for staff in staffs],201)
+        
+        staff = Staff.query.filter_by(id=id).first()
+
+        if not staff:
+            return make_response({"error":"Staff not found"}, 404)
+        
+        return make_response(staff.to_dict(only=("email")), 201)
+   
+    def put(self,id):
+        data = request.get_json()
+
+        if not data:
+            return make_response({"error":"Invalid request"}, 400)
+        
+        staff = Staff.query.get(id)
+
+        if not staff:
+            return make_response({"error": "Staff not found"}, 404)
+    
+        staff.username = data.get('username', staff.name)
+        staff.email = data.get('email', staff.email)
+        staff.password = data.get('password', staff.password)
+        staff.created_at = data.get('created_at', staff.created_at)
+        staff.updated_at= data.get('updated_at', staff.updated_at)
+
+        db.session.commit()
+
+        return make_response({staff.to_dict()}, 200)
+
+class CustomerResource(Resource):
     def get(self, id=None):
         if id == None:
             customers = Customer.query.all()
@@ -142,9 +167,9 @@ class Customer(Resource):
         customer = Customer.query.filter_by(id=id).first()
 
         if not customer:
-            return make_response({"error":"User not found"}, 404)
+            return make_response({"error":"Customer not found"}, 404)
         
-        return make_response(customer.to_dict(), 201)
+        return make_response(customer.to_dict(only=('id', 'linked_user_id', 'full_name')), 201)
     
     def put(self,id):
         data = request.get_json()
@@ -168,8 +193,8 @@ class Customer(Resource):
 
         return make_response({customer.to_dict()}, 200)
     
-    @login_required
-    @role_required("borrower")
+    # @login_required
+    # @role_required("borrower")
     def post(self):
         data = request.get_json()
 
@@ -192,21 +217,21 @@ class Customer(Resource):
             return  make_response({"error":"Bad Request"}, 400)
 
 
-# class StaffCustomer(Resource):
-#     def get(self, id=None):
-#         if id == None:
-#             staff_customers = StaffCustomer.query.all()
-#             return make_response([sc.to_dict() for sc in staff_customers],201)
+class StaffCustomerResource(Resource):
+    def get(self, id=None):
+        if id == None:
+            staff_customers = StaffCustomer.query.all()
+            return make_response([sc.to_dict() for sc in staff_customers],201)
         
-#         sc = StaffCustomer.query.filter_by(id=id).first()
+        sc = StaffCustomer.query.filter_by(id=id).first()
 
-#         if not sc:
-#             return make_response({"error":"User not found"}, 404)
+        if not sc:
+            return make_response({"error":"StaffCustomer not found"}, 404)
         
-#         return make_response(sc.to_dict(), 201)
+        return make_response(sc.to_dict(), 201)
     
 
-class Loan(Resource):
+class LoanResource(Resource):
     def get(self, id=None):
         if id == None:
             loans = Loan.query.all()
@@ -215,7 +240,7 @@ class Loan(Resource):
         loan = Loan.query.filter_by(id=id).first()
 
         if not loan:
-            return make_response({"error":"User not found"}, 404)
+            return make_response({"error":"Loan not found"}, 404)
         
         return make_response(loan.to_dict(), 201)
     
@@ -265,7 +290,7 @@ class Loan(Resource):
             return  make_response({"error":"Bad Request"}, 400) 
     
 
-class Repayment(Resource):
+class RepaymentResource(Resource):
     def get(self, id=None):
         if id == None:
             repayments = Repayment.query.all()
@@ -274,7 +299,7 @@ class Repayment(Resource):
         repayment = Repayment.query.filter_by(id=id).first()
 
         if not repayment:
-            return make_response({"error":"User not found"}, 404)
+            return make_response({"error":"Repayment not found"}, 404)
         
         return make_response(repayment.to_dict(), 201)
     
@@ -297,7 +322,7 @@ class Repayment(Resource):
             return  make_response({"error":"Bad Request"}, 400) 
     
 
-class SavingsTransaction(Resource):
+class SavingsTransactionResource(Resource):
     def get(self, id=None):
         if id == None:
             savings_transactions = SavingsTransaction.query.all()
@@ -306,7 +331,7 @@ class SavingsTransaction(Resource):
         st = SavingsTransaction.query.filter_by(id=id).first()
 
         if not st:
-            return make_response({"error":"User not found"}, 404)
+            return make_response({"error":"Savings Transaction not found"}, 404)
         
         return make_response(st.to_dict(), 201)
     
@@ -331,7 +356,7 @@ class SavingsTransaction(Resource):
             return  make_response({"error":"Bad Request"}, 400) 
     
 
-class AuditLog(Resource):
+class AuditLogResource(Resource):
     def get(self, id=None):
         if id == None:
             audit_logs = AuditLog.query.all()
@@ -340,19 +365,20 @@ class AuditLog(Resource):
         al = AuditLog.query.filter_by(id=id).first()
 
         if not al:
-            return make_response({"error":"User not found"}, 404)
+            return make_response({"error":"Audit log not found"}, 404)
         
         return make_response(al.to_dict(), 201)
 
 
 app.register_error_handler(404, handle_error)
-api.add_resource(User, "/users")
-api.add_resource(Customer, "/customers")
-api.add_resource(StaffCustomer, "/staff-customers")
-api.add_resource(Loan, "/loans")
-api.add_resource(Repayment, "/repayments")
-api.add_resource(SavingsTransaction, "/savings-transactions")
-api.add_resource(AuditLog, "/audit-logs")
+api.add_resource(UserResource, "/users")
+api.add_resource(StaffResource, "/staff")
+api.add_resource(CustomerResource, "/customers")
+api.add_resource(StaffCustomerResource, "/staff-customers")
+api.add_resource(LoanResource, "/loans")
+api.add_resource(RepaymentResource, "/repayments")
+api.add_resource(SavingsTransactionResource, "/savings-transactions")
+api.add_resource(AuditLogResource, "/audit-logs")
 api.add_resource(Logout, "/logout")
 api.add_resource(CheckSession, '/check_session')
 api.add_resource(Login, "/login")
