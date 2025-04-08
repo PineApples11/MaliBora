@@ -24,7 +24,7 @@ migrate = Migrate(app, db)
 
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
-    serialize_rules = ('-customer.user','-audit_logs.user')
+    serialize_rules = ('-customer.user','-audit_logs.user',)
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -38,7 +38,8 @@ class User(db.Model, SerializerMixin):
 
 class Customer(db.Model,SerializerMixin):
     __tablename__ = 'customers'
-    serialize_rules = ('-savings_transactions.customer', '-staff_customers.customer', '-user.customer', '-loans.customer')
+    serialize_rules = ('-savings_transactions.customer', '-staff_customers.customer',
+                        '-user.customer', '-loans.customer',)
     
     id = db.Column(db.Integer, primary_key=True)
     linked_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
@@ -55,7 +56,7 @@ class Customer(db.Model,SerializerMixin):
 
 class Staff(db.Model, SerializerMixin):
     __tablename__ = 'staff'
-    serialize_rules = ('-staff_customer.staff',)
+    serialize_rules = ('-staff_customers.staff',)
     
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(80), unique=True, nullable=False)
@@ -64,12 +65,11 @@ class Staff(db.Model, SerializerMixin):
     role = db.Column(db.String(20), nullable=False)  # 'admin', 'staff', etc.
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
-    # Relationships
     staff_customers = db.relationship('StaffCustomer', back_populates='staff')
 
 class StaffCustomer(db.Model, SerializerMixin):
     __tablename__ = 'staff_customers'
-    serialize_rules = ('-staff.staff_customer', '-customer.staff_customers')
+    serialize_rules = ('-staff.staff_customers', '-customer.staff_customers',)
 
     id = db.Column(db.Integer, primary_key=True)
     staff_id = db.Column(db.Integer, db.ForeignKey('staff.id'), nullable=False)
@@ -82,7 +82,7 @@ class StaffCustomer(db.Model, SerializerMixin):
 
 class Loan(db.Model,SerializerMixin): 
     __tablename__ = 'loans'
-    serialize_rules = ('-customer.loans', '-repayments.loan')
+    serialize_rules = ('-customer.loans', '-repayments.loan',)
 
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
@@ -97,7 +97,7 @@ class Loan(db.Model,SerializerMixin):
 
 class Repayment(db.Model, SerializerMixin): 
     __tablename__ = 'repayments'
-    serialize_rules = ('-loan.repayments')
+    serialize_rules = ('-loan.repayments',)
 
     id = db.Column(db.Integer, primary_key=True)
     loan_id = db.Column(db.Integer, db.ForeignKey('loans.id'), nullable=False)
@@ -120,7 +120,7 @@ class SavingsTransaction(db.Model, SerializerMixin):
 
 class AuditLog(db.Model, SerializerMixin):
     __tablename__ = 'audit_logs'
-    serialize_rules = ('-user.audit_logs')
+    serialize_rules = ('-user.audit_logs',)
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
