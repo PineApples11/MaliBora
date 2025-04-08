@@ -12,7 +12,6 @@ app = Flask(__name__)
 CORS(app)
 api = Api(app)
 
-
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.json.compact = False
@@ -26,6 +25,7 @@ migrate = Migrate(app, db)
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
     serialize_rules = ('-customer.user','-audit_logs.user',)
+
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
@@ -41,7 +41,6 @@ class Customer(db.Model,SerializerMixin):
     serialize_rules = ('-savings_transactions.customer', '-staff_customers.customer',
                         '-user.customer', '-loans.customer',)
     
-
     id = db.Column(db.Integer, primary_key=True)
     linked_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     full_name = db.Column(db.String(80), nullable=False)
@@ -54,7 +53,6 @@ class Customer(db.Model,SerializerMixin):
     loans = db.relationship('Loan', back_populates='customer')
     savings_transactions = db.relationship('SavingsTransaction', back_populates='customer')
     staff_customers = db.relationship('StaffCustomer', back_populates='customer')
-
 
 class Staff(db.Model, SerializerMixin):
     __tablename__ = 'staff'
@@ -72,6 +70,7 @@ class Staff(db.Model, SerializerMixin):
 class StaffCustomer(db.Model, SerializerMixin):
     __tablename__ = 'staff_customers'
     serialize_rules = ('-staff.staff_customers', '-customer.staff_customers',)
+
     id = db.Column(db.Integer, primary_key=True)
     staff_id = db.Column(db.Integer, db.ForeignKey('staff.id'), nullable=False)
     customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
@@ -84,7 +83,9 @@ class StaffCustomer(db.Model, SerializerMixin):
 class Loan(db.Model,SerializerMixin): 
     __tablename__ = 'loans'
     serialize_rules = ('-customer.loans', '-repayments.loan',)
+
     id = db.Column(db.Integer, primary_key=True)
+    customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
     amount = db.Column(db.Float, nullable=False)
     interest_rate = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(20), nullable=False)  # 'pending', 'approved', 'rejected'
@@ -94,10 +95,10 @@ class Loan(db.Model,SerializerMixin):
     customer = db.relationship('Customer', back_populates='loans')
     repayments = db.relationship('Repayment', back_populates='loan')
 
-
 class Repayment(db.Model, SerializerMixin): 
     __tablename__ = 'repayments'
     serialize_rules = ('-loan.repayments',)
+
     id = db.Column(db.Integer, primary_key=True)
     loan_id = db.Column(db.Integer, db.ForeignKey('loans.id'), nullable=False)
     amount = db.Column(db.Float, nullable=False)
@@ -108,6 +109,7 @@ class Repayment(db.Model, SerializerMixin):
 class SavingsTransaction(db.Model, SerializerMixin):
     __tablename__ = 'savings_transactions'
     serialize_rules = ('-customer.savings_transactions',)
+
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
     type = db.Column(db.String(20), nullable=False)  # 'deposit' or 'withdrawal'
@@ -119,11 +121,10 @@ class SavingsTransaction(db.Model, SerializerMixin):
 class AuditLog(db.Model, SerializerMixin):
     __tablename__ = 'audit_logs'
     serialize_rules = ('-user.audit_logs',)
+
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     action = db.Column(db.String(200), nullable=False)
     timestamp = db.Column(db.DateTime, default=db.func.current_timestamp())
 
-
     user = db.relationship('User', back_populates='audit_logs')
-
