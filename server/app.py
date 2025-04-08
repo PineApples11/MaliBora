@@ -4,22 +4,18 @@
 # Remote library imports
 
 
-
+from werkzeug.security import generate_password_hash
 from flask import request, make_response, session
-from flask_restful import Resource
+from flask_restful import Resource # type: ignore
 from werkzeug.exceptions import NotFound
 from flask import request
-from flask_restful import Resource
 # from decorators import login_required, role_required
-
-# from models import app,db,api
-
-from models import app,db,api,Staff, StaffCustomer, User, Customer, SavingsTransaction, AuditLog, Loan, Repayment
+from models import app,db,api,Staff, StaffCustomer, User, Customer, SavingsTransaction, AuditLog, Loan, Repayment 
 
 
 @app.route('/')
 def index():
-    return '<h1>Project Server</h1>'
+    return '<h1>Microfinance Managment System (Server Endpoint)</h1>'
 
 
 @app.errorhandler(NotFound)
@@ -36,6 +32,7 @@ class Register(Resource):
         data = request.get_json()
         username = data.get("username")
         password = data.get("password")
+        email = data.get("email")
         role =  data.get("role")
 
         if not username and not password:
@@ -45,8 +42,9 @@ class Register(Resource):
         if existing_user:
             return make_response({"message": "User already exists"}, 400)
         
-        new_user = User(username = username)
-        new_user(password) # idea: encrypt password
+        hashed_password =generate_password_hash(password)
+        new_user = User(username=username, email=email, password=hashed_password, role=role)
+        # idea: encrypt password
         db.session.add(new_user)
         db.session.commit()
 

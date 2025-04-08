@@ -1,5 +1,4 @@
 from sqlalchemy_serializer import SerializerMixin
-# from sqlalchemy.ext.associationproxy import association_proxy
 from flask import Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
@@ -29,7 +28,7 @@ class User(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(50), nullable=False)
+    password = db.Column(db.String(20), nullable=False)
     role = db.Column(db.String(20), nullable=False)  # 'admin', 'staff', 'borrower'
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
