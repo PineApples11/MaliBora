@@ -6,6 +6,7 @@ from werkzeug.exceptions import NotFound
 from flask import request
 from flask_restful import Resource
 from datetime import datetime
+from decorators import login_required, role_required
 
 @app.route('/')
 def index():
@@ -106,10 +107,12 @@ class AdminResource(Resource):
             created_at = datetime.strptime(data['created_at'], "%Y-%m-%d %H:%M:%S")
         except:
             raise ValueError("wrong dates")        
-    
+
+        password = data.get('password_hash', admin.password_hash)
+        admin.set_password(password)
+
         admin.username = data.get('username', admin.username)
         admin.email = data.get('email', admin.email)
-        admin.password = data.get('password', admin.password)
         admin.created_at = created_at
 
         db.session.commit()

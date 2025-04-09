@@ -33,9 +33,8 @@ if __name__ == '__main__':
             admin = Admin(
                 username=fake.name(),
                 email=fake.email(),
-                password=fake.password(),
-                # role=rc(["admin", "staff", "borrower"])
             )
+            admin.set_password(fake.password())
             db.session.add(admin)
             admins.append(admin)
 
@@ -52,6 +51,7 @@ if __name__ == '__main__':
                 phone=fake.phone_number(),
                 savings_balance=round(randint(100, 5000), 2),
             )
+            customer.set_password(fake.password())
             db.session.add(customer)
             customers.append(customer)
 
@@ -108,9 +108,9 @@ if __name__ == '__main__':
         for i in range(2):
 
             staff_member = Staff(full_name=fake.name(),
-                                 email=fake.email(), password=fake.password(), created_at=datetime.now(), admin_id=rc(admins).id
+                                 email=fake.email(), created_at=datetime.now(), admin_id=rc(admins).id
                                  )
-
+            staff_member.set_password(fake.password())
             db.session.add(staff_member)
             staff.append(staff_member)
 
