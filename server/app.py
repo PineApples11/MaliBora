@@ -10,7 +10,7 @@ from flask_restful import Resource # type: ignore
 from werkzeug.exceptions import NotFound
 from flask import request , make_response
 # from decorators import login_required, role_required
-from models import app,db,api,Staff, StaffCustomer, User, Customer, SavingsTransaction, AuditLog, Loan, Repayment 
+from models import app,db,api,Staff, StaffCustomer, Admin, Customer, SavingsTransaction, AuditLog, Loan, Repayment 
 
 
 @app.route('/')
@@ -25,7 +25,7 @@ def handle_error(e):
 
 class Register(Resource):
     def get(self):
-        users = User.query.all()
+        users = Admin.query.all()
         return make_response([user.to_dict() for user in users], 200)
 
     def post(self):
@@ -36,20 +36,20 @@ class Register(Resource):
         role =  data.get("role")
 
         if not email or not password:
-            return make_response({"message": "Username and password required"}, 400)
+            return make_response({"message": "Email and password required"}, 400)
         
-        existing_user = User.query.filter_by(email = email).first()        
+        existing_user = Admin.query.filter_by(email = email).first()        
         if existing_user:
-            return make_response({"message": "User already exists"}, 400)
+            return make_response({"message": "Admin already exists"}, 400)
         
          # idea: encrypt password
         hashed_password =generate_password_hash(password)
-        new_user = User(username=username, email=email, password=hashed_password, role=role)
+        new_user = Admin(username=username, email=email, password=hashed_password, role=role)
        
         db.session.add(new_user)
         db.session.commit()
 
-        return make_response({"message": "User created successfully",}, 201)
+        return make_response({"message": "Admin created successfully",}, 201)
     
 api.add_resource(Register, "/register")
         
@@ -66,7 +66,7 @@ class Login(Resource):
             return jsonify({"message": "Both email and passwords are required"}), 400
         
         
-        user = User.query.filter_by(email = email).first()
+        user = Admin.query.filter_by(email = email).first()
         if not user or not check_password_hash(user.password , password):
             return jsonify({"message": "Invalid credentials"}), 401
         
@@ -83,7 +83,7 @@ class Logout(Resource):
 class CheckSession(Resource):
 
     def get(self):
-        user = User.query.filter(User.id == session.get('user_id')).first()
+        user = Admin.query.filter(Admin.id == session.get('user_id')).first()
         if user:
             return user.to_dict()
         else:
@@ -95,13 +95,13 @@ class UserResource(Resource):
 
     def get(self, id=None):
         if id == None:
-            users = User.query.all()
+            users = Admin.query.all()
             return make_response([user.to_dict() for user in users],201)
         
-        user = User.query.filter_by(id=id).first()
+        user = Admin.query.filter_by(id=id).first()
 
         if not user:
-            return make_response({"error":"User not found"}, 404)
+            return make_response({"error":"Admin not found"}, 404)
         
         return make_response(user.to_dict(), 201)
    
@@ -111,10 +111,10 @@ class UserResource(Resource):
         if not data:
             return make_response({"error":"Invalid request"}, 400)
         
-        user = User.query.get(id)
+        user = Admin.query.get(id)
 
         if not user:
-            return make_response({"error": "User not found"}, 404)
+            return make_response({"error": "Admin not found"}, 404)
     
         user.username = data.get('username', user.name)
         user.email = data.get('email', user.email)
@@ -376,7 +376,7 @@ class AuditLogResource(Resource):
 
 app.register_error_handler(404, handle_error)
 
-api.add_resource(UserResource, "/users")
+api.add_resource(UserResource, "/admins")
 api.add_resource(StaffResource, "/staff")
 api.add_resource(CustomerResource, "/customers")
 api.add_resource(StaffCustomerResource, "/staff-customers")
