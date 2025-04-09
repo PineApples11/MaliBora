@@ -105,7 +105,7 @@ if __name__ == '__main__':
 
         # Create Staff
         staff = []
-        for i in range(2):
+        for i in range(10):
 
             staff_member = Staff(full_name=fake.name(),
                                  email=fake.email(), created_at=datetime.now(), admin_id=rc(admins).id
