@@ -4,6 +4,8 @@ from flask_cors import CORS # type: ignore
 from flask_migrate import Migrate # type: ignore
 from flask_restful import Api # type: ignore
 from flask_sqlalchemy import SQLAlchemy # type: ignore
+from sqlalchemy.orm import validates
+import re
 # from sqlalchemy import MetaData
 
 # from config import db
@@ -36,6 +38,36 @@ class User(db.Model, SerializerMixin):
     customer = db.relationship('Customer', back_populates='user', uselist=False)
     audit_logs = db.relationship('AuditLog', back_populates='user')
 
+    @validates('email') 
+    def validate_email(self, key, email):
+        if '@' not in email:
+            raise AssertionError('Email is not valid')
+        return email
+    
+    @validates('username')
+    def validate_username(self, key, username):
+        if len(username) < 3:
+            raise AssertionError('Username must be at least 3 characters long')
+        return username
+    @validates('password')
+    def validate_password(self, key, password):
+        if len(password) < 5:
+            raise AssertionError('Password must be at least 6 characters long')
+        if not re.search(r'[A-Z]', password):
+            raise AssertionError('Password must contain at least one uppercase letter')
+        if not re.search(r'[a-z]', password):
+            raise AssertionError('Password must contain at least one lowercase letter')
+        if not re.search(r'[0-9]', password):
+            raise AssertionError('Password must contain at least one digit')
+        if not re.search(r'[@$!%*?&]', password):
+            raise AssertionError('Password must contain at least one special character')
+        if re.search(r'\s', password):
+            raise AssertionError('Password must not contain any spaces')
+        return password
+    
+
+
+
 class Customer(db.Model,SerializerMixin):
     __tablename__ = 'customers'
     serialize_rules = ('-savings_transactions.customer', '-staff_customers.customer',
@@ -54,6 +86,32 @@ class Customer(db.Model,SerializerMixin):
     savings_transactions = db.relationship('SavingsTransaction', back_populates='customer')
     staff_customers = db.relationship('StaffCustomer', back_populates='customer')
 
+    @validates('phone')
+    def validate_phone(self, key, phone):
+        if not phone.isdigit():
+            raise AssertionError('Phone number must be numeric')
+        if len(phone) > 15: 
+            raise AssertionError('Phone number must be at most 15 digits long')
+        if len(phone) < 10:
+            raise AssertionError('Phone number must be at least 10 digits long')
+        return phone
+    @validates('national_id')
+    def validate_national_id(self, key, national_id):
+        if not national_id.isdigit():
+            raise AssertionError('National ID must be numeric')
+        if len(national_id) > 11:
+            raise AssertionError('National ID must be at most 11 digits long')
+        if len(national_id) < 5:
+            raise AssertionError('National ID must be at least 5 characters long')
+        return national_id
+    @validates('full_name')
+    def validate_full_name(self, key, full_name):
+        if len(full_name) < 3:
+            raise AssertionError('Full name must be at least 3 characters long')
+        return full_name
+    
+
+
 class Staff(db.Model, SerializerMixin):
     __tablename__ = 'staff'
     serialize_rules = ('-staff_customers.staff',)
@@ -67,6 +125,26 @@ class Staff(db.Model, SerializerMixin):
 
     staff_customers = db.relationship('StaffCustomer', back_populates='staff')
 
+    @validates('email')
+    def validate_email(self, key, email):
+        if '@' not in email:
+            raise AssertionError('Email is not valid')
+        return email @validates('password')
+    def validate_password(self, key, password):
+        if len(password) < 5:
+            raise AssertionError('Password must be at least 6 characters long')
+        if not re.search(r'[A-Z]', password):
+            raise AssertionError('Password must contain at least one uppercase letter')
+        if not re.search(r'[a-z]', password):
+            raise AssertionError('Password must contain at least one lowercase letter')
+        if not re.search(r'[0-9]', password):
+            raise AssertionError('Password must contain at least one digit')
+        if not re.search(r'[@$!%*?&]', password):
+            raise AssertionError('Password must contain at least one special character')
+        if re.search(r'\s', password):
+            raise AssertionError('Password must not contain any spaces')
+        return password
+    
 class StaffCustomer(db.Model, SerializerMixin):
     __tablename__ = 'staff_customers'
     serialize_rules = ('-staff.staff_customers', '-customer.staff_customers',)

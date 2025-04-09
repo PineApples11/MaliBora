@@ -8,7 +8,7 @@ from models import User, Customer, Loan, Repayment, SavingsTransaction, Staff, S
 
 if __name__ == '__main__':
     with app.app_context():
-        print("🌱 Starting seed...")
+        print(" Starting seed...")
 
         # Clear existing data
         db.session.query(Repayment).delete()
@@ -34,7 +34,7 @@ if __name__ == '__main__':
             db.session.add(user)
             users.append(user)
 
-        db.session.commit()  # 🔑 Commit users so their IDs exist
+        db.session.commit()  #  Commit users so their IDs exist
 
         # Create Customers
         customers = []
@@ -132,5 +132,5 @@ if __name__ == '__main__':
         db.session.commit()
 
 
-        print("✅ Done seeding!")
+        print("Done seeding!")
 
