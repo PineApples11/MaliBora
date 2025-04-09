@@ -10,11 +10,12 @@ from flask_restful import Resource
 from werkzeug.exceptions import NotFound
 from flask import request
 from flask_restful import Resource
+from datetime import datetime
 # from decorators import login_required, role_required
 
 # from models import app,db,api
 
-from models import app,db,api,Staff, StaffCustomer, User, Customer, SavingsTransaction, AuditLog, Loan, Repayment
+from models import app,db,api,Staff, StaffCustomer, Admin, Customer, SavingsTransaction, AuditLog, Loan, Repayment
 
 
 @app.route('/')
@@ -26,11 +27,11 @@ def index():
 def handle_error(e):
     return make_response("Not found :The requested resource does not exist.", 404)
 
-
+#idea handle register/login based on roles
 class Register(Resource):
     def get(self):
-        users = User.query.all()
-        return make_response([user.to_dict() for user in users], 201)
+        admins = Admin.query.all()
+        return make_response([admin.to_dict() for admin in admins], 201)
 
     def post(self):
         data = request.get_json()
@@ -41,11 +42,11 @@ class Register(Resource):
         if not username and not password:
             return make_response({"message": "Username and password required"}, 400)
         
-        existing_user = User.query.filter_by(username = username).first()        
-        if existing_user:
-            return make_response({"message": "User already exists"}, 400)
+        existing_admin = Admin.query.filter_by(username = username).first()        
+        if existing_admin:
+            return make_response({"message": "Admin already exists"}, 400)
         
-        new_user = User(username = username)
+        new_user = Admin(username = username)
         new_user(password) # idea: encrypt password
         db.session.add(new_user)
         db.session.commit()
@@ -60,7 +61,7 @@ class Login(Resource):
         username = data.get("username")
         password = data.get("password")
 
-        user = User.query.filter_by(username = username).first()
+        user = Admin.query.filter_by(username = username).first()
         
         #idea: encrypt password
         # if not user or not user.check_password(password):
@@ -79,7 +80,7 @@ class Logout(Resource):
 class CheckSession(Resource):
 
     def get(self):
-        user = User.query.filter(User.id == session.get('user_id')).first()
+        user = Admin.query.filter(Admin.id == session.get('user_id')).first()
         if user:
             return user.to_dict()
         else:
@@ -87,19 +88,19 @@ class CheckSession(Resource):
         
 
 
-class UserResource(Resource):
+class AdminResource(Resource):
 
     def get(self, id=None):
         if id == None:
-            users = User.query.all()
-            return make_response([user.to_dict() for user in users],201)
+            admins = Admin.query.all()
+            return make_response([admin.to_dict() for admin in admins],201)
         
-        user = User.query.filter_by(id=id).first()
+        admin = Admin.query.filter_by(id=id).first()
 
-        if not user:
-            return make_response({"error":"User not found"}, 404)
+        if not admin:
+            return make_response({"error":"Admin not found"}, 404)
         
-        return make_response(user.to_dict(), 201)
+        return make_response(admin.to_dict(), 201)
    
     def put(self,id):
         data = request.get_json()
@@ -107,20 +108,24 @@ class UserResource(Resource):
         if not data:
             return make_response({"error":"Invalid request"}, 400)
         
-        user = User.query.get(id)
+        admin = Admin.query.get(id)
 
-        if not user:
+        if not admin:
             return make_response({"error": "User not found"}, 404)
+        
+        try:
+            created_at = datetime.strptime(data['created_at'], "%Y-%m-%d %H:%M:%S")
+        except:
+            raise ValueError("wrong dates")        
     
-        user.username = data.get('username', user.name)
-        user.email = data.get('email', user.email)
-        user.password = data.get('password', user.password)
-        user.created_at = data.get('created_at', user.created_at)
-        user.updated_at= data.get('updated_at', user.updated_at)
+        admin.username = data.get('username', admin.username)
+        admin.email = data.get('email', admin.email)
+        admin.password = data.get('password', admin.password)
+        admin.created_at = created_at
 
         db.session.commit()
 
-        return make_response({user.to_dict()}, 200)
+        return make_response({admin.to_dict()}, 200)
 
 class StaffResource(Resource):
 
@@ -147,12 +152,18 @@ class StaffResource(Resource):
 
         if not staff:
             return make_response({"error": "Staff not found"}, 404)
+        
+        try:
+            created_at = datetime.strptime(data['created_at'], "%Y-%m-%d %H:%M:%S")
+        except:
+            raise ValueError("wrong dates")        
     
-        staff.username = data.get('username', staff.name)
+        staff.full_name = data.get('username', staff.name)
         staff.email = data.get('email', staff.email)
         staff.password = data.get('password', staff.password)
-        staff.created_at = data.get('created_at', staff.created_at)
-        staff.updated_at= data.get('updated_at', staff.updated_at)
+        staff.created_at = created_at
+        staff.admin_id = data.get('admin_id', staff.admin_id)
+
 
         db.session.commit()
 
@@ -181,13 +192,18 @@ class CustomerResource(Resource):
 
         if not customer:
             return make_response({"error": "Customer not found"}, 404)
+        
+        try:
+            created_at = datetime.strptime(data['created_at'], "%Y-%m-%d %H:%M:%S")
+        except:
+            raise ValueError("wrong dates")
     
-        customer.name = data.get('name', customer.name)
-        customer.email = data.get('email', customer.email)
+        customer.full_name = data.get('name', customer.full_name)
+        customer.national_id = data.get('name', customer.national_id)
         customer.phone = data.get('phone', customer.phone)
-        customer.address = data.get('address', customer.address)
-        customer.created_at = data.get('created_at', customer.created_at)
-        customer.updated_at= data.get('updated_at', customer.updated_at)
+        customer.savings_balance= data.get('savings_balance', customer.savings_balance)
+        customer.created_at = created_at
+        customer.admin_id = data.get('admin_id', customer.admin_id)
 
         db.session.commit()
 
@@ -198,15 +214,26 @@ class CustomerResource(Resource):
     def post(self):
         data = request.get_json()
 
+        admin_id = data['admin_id']
+        exists = Admin.query.filter_by(id=admin_id).first()
+        if not exists:
+            return make_response({"error": "Admin id does not exist"}, 404)
+        
+        try:
+            created_at = datetime.strptime(data['created_at'], "%Y-%m-%d %H:%M:%S")
+        except:
+            raise ValueError("wrong dates")
+
         try:
             new_customer = Customer(
-               linked_user_id = data['linked_user_id'],
-               fullname = data['fullname'],
+               admin_id = data['admin_id'],
+               full_name = data['full_name'],
                national_id = data['national_id'],
                phone = data['phone'],
                savings_balance = data['savings_balance'],
-               created_at = data['created_at'] 
+               created_at = created_at
             )
+            print(new_customer)
 
             db.session.add(new_customer)
             db.session.commit()
@@ -254,13 +281,19 @@ class LoanResource(Resource):
 
         if not loan:
             return make_response({"error": "Loan not found"}, 404)
+        
+        try:
+            issue_date = datetime.strptime(data['issue_date'], "%Y-%m-%d %H:%M:%S")
+            due_date = datetime.strptime(data['due_date'], "%Y-%m-%d %H:%M:%S")
+        except:
+            raise ValueError("wrong dates")
     
         loan.customer_id = data.get('customer_id', loan.customer_id)
         loan.amount = data.get('amount', loan.amount)
         loan.interest_rate= data.get('interest_rate', loan.interest_rate)
         loan.status = data.get('status', loan.status)
-        loan.issue_date = data.get('issue_date', loan.issue_date)
-        loan.due_date= data.get('due_date', loan.due_date)
+        loan.issue_date = issue_date
+        loan.due_date= due_date
 
         db.session.commit()
 
@@ -272,14 +305,23 @@ class LoanResource(Resource):
         data = request.get_json()
 
         try:
+            issue_date = datetime.strptime(data['issue_date'], "%Y-%m-%d %H:%M:%S")
+            due_date = datetime.strptime(data['due_date'], "%Y-%m-%d %H:%M:%S")
+        except:
+            raise ValueError("wrong dates")        
+
+        print(data)
+
+        try:
             new_loan = Loan(
                 customer_id = data['customer_id'],
                 amount = data['amount'],
                 interest_rate = data['interest_rate'],
                 status = data['status'],
-                issue_date = data['issue_date'],
-                due_date = data['due_data']
+                issued_date = issue_date,
+                due_date = due_date
             )
+            print(new_loan)
 
             db.session.add(new_loan)
             db.session.commit()
@@ -307,10 +349,15 @@ class RepaymentResource(Resource):
         data = request.get_json()
 
         try:
+            date_paid = datetime.strptime(data['date_paid'], "%Y-%m-%d %H:%M:%S")
+        except:
+            raise ValueError("wrong dates")        
+
+        try:
             new_rep = Repayment(
-                loan_id = data['loan_id'],
+                customer_id = data['customer_id'],
                 amount = data['amount'],
-                date_paid = data['date_paid']
+                date_paid = date_paid
             )
 
             db.session.add(new_rep)
@@ -339,12 +386,16 @@ class SavingsTransactionResource(Resource):
         data = request.get_json()
 
         try:
+            transaction_date = datetime.strptime(data['transaction_date'], "%Y-%m-%d %H:%M:%S")
+        except:
+            raise ValueError("wrong dates")
+
+        try:
             new_st = SavingsTransaction(
                 customer_id = data['customer_id'],
-                deposit = data['deposit'],
-                withdrawal = data['withdrawal'],
+                type = data['type'],
                 amount = data['amount'],
-                transaction_date = data['transaction_date']
+                transaction_date = transaction_date
             )
 
             db.session.add(new_st)
@@ -371,14 +422,14 @@ class AuditLogResource(Resource):
 
 
 app.register_error_handler(404, handle_error)
-api.add_resource(UserResource, "/users")
+api.add_resource(AdminResource, "/admin")
 api.add_resource(StaffResource, "/staff")
-api.add_resource(CustomerResource, "/customers")
-api.add_resource(StaffCustomerResource, "/staff-customers")
-api.add_resource(LoanResource, "/loans")
-api.add_resource(RepaymentResource, "/repayments")
-api.add_resource(SavingsTransactionResource, "/savings-transactions")
-api.add_resource(AuditLogResource, "/audit-logs")
+api.add_resource(CustomerResource, "/customer")
+api.add_resource(StaffCustomerResource, "/staff-customer")
+api.add_resource(LoanResource, "/loan")
+api.add_resource(RepaymentResource, "/repayment")
+api.add_resource(SavingsTransactionResource, "/savings-transaction")
+api.add_resource(AuditLogResource, "/audit-log")
 api.add_resource(Logout, "/logout")
 api.add_resource(CheckSession, '/check_session')
 api.add_resource(Login, "/login")
