@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
-from faker import Faker
+
 from random import randint, choice as rc
 from datetime import datetime, timedelta
 
 from app import app, db
 from models import Admin, Customer, Loan, Repayment, SavingsTransaction, Staff, StaffCustomer, AuditLog
-
-fake = Faker()
 
 if __name__ == '__main__':
     with app.app_context():
@@ -28,13 +26,9 @@ if __name__ == '__main__':
         # Create Users
         admins = []
         for i in range(5):
-
-            fake_name = fake.name()
-            fake_email = fake.email()
-
             admin = Admin(
-                username=f"{fake_name}",
-                email=f"{fake_email}",
+                username=f"user{i}",
+                email=f"user{i}@example.com",
                 password="password123",
                 # role=rc(["admin", "staff", "borrower"])
             )
@@ -46,13 +40,10 @@ if __name__ == '__main__':
 
         # Create Customers
         customers = []
-        for i in range(25):
-
-            fake_name = fake.name()
-
+        for i in range(5):
             customer = Customer(
                 admin_id=rc(admins).id,
-                full_name=f"{fake_name}",
+                full_name=f"Customer {i}",
                 national_id=f"ID{i}",
                 phone=f"123456789{i}",
                 savings_balance=round(randint(100, 5000), 2),
@@ -65,7 +56,7 @@ if __name__ == '__main__':
 
         # Create Loans
         loans = []
-        for i in range(25):
+        for i in range(5):
             customer = rc(customers)
             loan = Loan(
                 customer_id=customer.id,
@@ -83,7 +74,7 @@ if __name__ == '__main__':
 
         # Create Repayments
         for customer in customers:
-            for i in range(25):
+            for i in range(5):
                 repayment = Repayment(
                     customer_id=customer.id,
                     amount=round(loan.amount / 2, 2),
@@ -110,13 +101,10 @@ if __name__ == '__main__':
 
         # Create Staff
         staff = []
-        for i in range(10):
+        for i in range(2):
 
-            fake_name = fake.name()
-            fake_email = fake.email()
-
-            staff_member = Staff(full_name=f"{fake_name}",
-                                 email=f'{fake_email}', password='xxxx', created_at=datetime.now(), admin_id=rc(admins).id
+            staff_member = Staff(full_name=f"Staff {i}",
+                                 email=f'{i}@gmail.com', password='xxxx', created_at=datetime.now(), admin_id=rc(admins).id
                                  )
 
             db.session.add(staff_member)
