@@ -1,9 +1,4 @@
-#!/usr/bin/env python3
-# Standard library imports
-
-# Remote library imports
-
-
+from models import db,api,Staff, StaffCustomer, Admin, Customer, SavingsTransaction, AuditLog, Loan, Repayment, app
 
 from flask import request, make_response, session
 from flask_restful import Resource
@@ -11,12 +6,6 @@ from werkzeug.exceptions import NotFound
 from flask import request
 from flask_restful import Resource
 from datetime import datetime
-# from decorators import login_required, role_required
-
-# from models import app,db,api
-
-from models import app,db,api,Staff, StaffCustomer, Admin, Customer, SavingsTransaction, AuditLog, Loan, Repayment
-
 
 @app.route('/')
 def index():
@@ -140,7 +129,7 @@ class StaffResource(Resource):
         if not staff:
             return make_response({"error":"Staff not found"}, 404)
         
-        return make_response(staff.to_dict(only=("email")), 201)
+        return make_response(staff.to_dict(), 201)
    
     def put(self,id):
         data = request.get_json()
@@ -180,7 +169,7 @@ class CustomerResource(Resource):
         if not customer:
             return make_response({"error":"Customer not found"}, 404)
         
-        return make_response(customer.to_dict(only=('id', 'linked_user_id', 'full_name')), 201)
+        return make_response(customer.to_dict(), 201)
     
     def put(self,id):
         data = request.get_json()
@@ -409,7 +398,7 @@ class SavingsTransactionResource(Resource):
 
 class AuditLogResource(Resource):
     def get(self, id=None):
-        if id == None:
+        if id is None:
             audit_logs = AuditLog.query.all()
             return make_response([al.to_dict() for al in audit_logs],201)
         
@@ -422,14 +411,14 @@ class AuditLogResource(Resource):
 
 
 app.register_error_handler(404, handle_error)
-api.add_resource(AdminResource, "/admin")
-api.add_resource(StaffResource, "/staff")
-api.add_resource(CustomerResource, "/customer")
-api.add_resource(StaffCustomerResource, "/staff-customer")
-api.add_resource(LoanResource, "/loan")
-api.add_resource(RepaymentResource, "/repayment")
-api.add_resource(SavingsTransactionResource, "/savings-transaction")
-api.add_resource(AuditLogResource, "/audit-log")
+api.add_resource(AdminResource, "/admin", "/admin/<int:id>")
+api.add_resource(StaffResource, "/staff", "/staff/<int:id>")
+api.add_resource(CustomerResource, "/customer", "/customer/<int:id>")
+api.add_resource(StaffCustomerResource, "/staff-customer", "/staff-customer/<int:id>")
+api.add_resource(LoanResource, "/loan", "/loan/<int:id>")
+api.add_resource(RepaymentResource, "/repayment", "/repayment/<int:id>")
+api.add_resource(SavingsTransactionResource, "/savings-transaction", "/savings-transaction/<int:id>")
+api.add_resource(AuditLogResource, "/audit-log", "/audit-log/<int:id>")
 api.add_resource(Logout, "/logout")
 api.add_resource(CheckSession, '/check_session')
 api.add_resource(Login, "/login")
@@ -438,4 +427,7 @@ api.add_resource(Login, "/login")
 
 
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+    
     app.run(port=5555, debug=True)

@@ -6,6 +6,10 @@ from datetime import datetime, timedelta
 from app import app, db
 from models import Admin, Customer, Loan, Repayment, SavingsTransaction, Staff, StaffCustomer, AuditLog
 
+from faker import Faker
+
+fake = Faker()
+
 if __name__ == '__main__':
     with app.app_context():
         print("🌱 Starting seed...")
@@ -27,9 +31,9 @@ if __name__ == '__main__':
         admins = []
         for i in range(5):
             admin = Admin(
-                username=f"user{i}",
-                email=f"user{i}@example.com",
-                password="password123",
+                username=fake.name(),
+                email=fake.email(),
+                password=fake.password(),
                 # role=rc(["admin", "staff", "borrower"])
             )
             db.session.add(admin)
@@ -40,12 +44,12 @@ if __name__ == '__main__':
 
         # Create Customers
         customers = []
-        for i in range(5):
+        for i in range(30):
             customer = Customer(
                 admin_id=rc(admins).id,
-                full_name=f"Customer {i}",
+                full_name=fake.name(),
                 national_id=f"ID{i}",
-                phone=f"123456789{i}",
+                phone=fake.phone_number(),
                 savings_balance=round(randint(100, 5000), 2),
             )
             db.session.add(customer)
@@ -56,7 +60,7 @@ if __name__ == '__main__':
 
         # Create Loans
         loans = []
-        for i in range(5):
+        for i in range(20):
             customer = rc(customers)
             loan = Loan(
                 customer_id=customer.id,
@@ -74,7 +78,7 @@ if __name__ == '__main__':
 
         # Create Repayments
         for customer in customers:
-            for i in range(5):
+            for i in range(2):
                 repayment = Repayment(
                     customer_id=customer.id,
                     amount=round(loan.amount / 2, 2),
@@ -103,8 +107,8 @@ if __name__ == '__main__':
         staff = []
         for i in range(2):
 
-            staff_member = Staff(full_name=f"Staff {i}",
-                                 email=f'{i}@gmail.com', password='xxxx', created_at=datetime.now(), admin_id=rc(admins).id
+            staff_member = Staff(full_name=fake.name(),
+                                 email=fake.email(), password=fake.password(), created_at=datetime.now(), admin_id=rc(admins).id
                                  )
 
             db.session.add(staff_member)

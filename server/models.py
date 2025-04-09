@@ -1,31 +1,28 @@
 from sqlalchemy_serializer import SerializerMixin
-# from sqlalchemy.ext.associationproxy import association_proxy
 from flask import Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import validates
-# from sqlalchemy import MetaData
 
-# from config import db
+
 app = Flask(__name__)
-CORS(app)
-api = Api(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.json.compact = False
 
-db = SQLAlchemy(app)
+db = SQLAlchemy()
+db.init_app(app)
 
+CORS(app)
+api = Api(app)
 migrate = Migrate(app, db)
-
-# Models go here!
 
 class Admin(db.Model, SerializerMixin):
     __tablename__ = 'admins'
-    serialize_rules = ('-staffs.admin','-customers.admin', '-audit_logs.admin',)
+    serialize_rules = ('-staffs','-customers', '-audit_logs.admin',)
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -55,7 +52,7 @@ class Admin(db.Model, SerializerMixin):
 
 class Customer(db.Model,SerializerMixin):
     __tablename__ = 'customers'
-    serialize_rules = ('-savings_transactions.customer', '-admin.customers', '-loans.customer', '-repayments.customer', '-staff_customers.customer',)
+    serialize_rules = ('-savings_transactions.customer', '-admin', '-loans.customer', '-repayments.customer', '-staff_customers.customer',)
     
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(80), nullable=False)
