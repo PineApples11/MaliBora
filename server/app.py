@@ -395,7 +395,7 @@ class SavingsTransactionResource(Resource):
                 customer_id = data['customer_id'],
                 type = data['type'],
                 amount = data['amount'],
-                transaction_date = data['transaction_date']
+                transaction_date = transaction_date
             )
 
             db.session.add(new_st)
