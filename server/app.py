@@ -4,11 +4,11 @@
 # Remote library imports
 
 
-from werkzeug.security import generate_password_hash
-from flask import request, make_response, session
+from werkzeug.security import generate_password_hash , check_password_hash
+from flask import jsonify, request, make_response, session
 from flask_restful import Resource # type: ignore
 from werkzeug.exceptions import NotFound
-from flask import request
+from flask import request , make_response
 # from decorators import login_required, role_required
 from models import app,db,api,Staff, StaffCustomer, User, Customer, SavingsTransaction, AuditLog, Loan, Repayment 
 
@@ -26,7 +26,7 @@ def handle_error(e):
 class Register(Resource):
     def get(self):
         users = User.query.all()
-        return make_response([user.to_dict() for user in users], 201)
+        return make_response([user.to_dict() for user in users], 200)
 
     def post(self):
         data = request.get_json()
@@ -35,16 +35,17 @@ class Register(Resource):
         email = data.get("email")
         role =  data.get("role")
 
-        if not username and not password:
+        if not email or not password:
             return make_response({"message": "Username and password required"}, 400)
         
-        existing_user = User.query.filter_by(username = username).first()        
+        existing_user = User.query.filter_by(email = email).first()        
         if existing_user:
             return make_response({"message": "User already exists"}, 400)
         
+         # idea: encrypt password
         hashed_password =generate_password_hash(password)
         new_user = User(username=username, email=email, password=hashed_password, role=role)
-        # idea: encrypt password
+       
         db.session.add(new_user)
         db.session.commit()
 
@@ -55,19 +56,24 @@ api.add_resource(Register, "/register")
 class Login(Resource):
     def post(self):
         data = request.get_json()
-        username = data.get("username")
-        password = data.get("password")
-
-        user = User.query.filter_by(username = username).first()
+        if not data:
+            return jsonify ({"message": "Missing JSON in request"}), 400
         
-        #idea: encrypt password
-        # if not user or not user.check_password(password):
-        #      return {"message": "Invalid credentials"}, 401
+        email = data.get('email')
+        password = data.get('password')
+
+        if not email or not password:
+            return jsonify({"message": "Both email and passwords are required"}), 400
+        
+        
+        user = User.query.filter_by(email = email).first()
+        if not user or not check_password_hash(user.password , password):
+            return jsonify({"message": "Invalid credentials"}), 401
         
         session["user_id"] = user.id
         session["role"] = user.role
 
-        return make_response ({"Message": "Login Successful"}, 201)
+        return jsonify ({"Message": "Login Successful....", "role":user.role}, 200)
 
 class Logout(Resource):
         def post(self):
@@ -369,6 +375,7 @@ class AuditLogResource(Resource):
 
 
 app.register_error_handler(404, handle_error)
+
 api.add_resource(UserResource, "/users")
 api.add_resource(StaffResource, "/staff")
 api.add_resource(CustomerResource, "/customers")

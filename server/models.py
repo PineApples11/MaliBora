@@ -1,13 +1,14 @@
-from sqlalchemy_serializer import SerializerMixin
+from sqlalchemy_serializer import SerializerMixin # type: ignore
 from flask import Flask
-from flask_cors import CORS
-from flask_migrate import Migrate
-from flask_restful import Api
-from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS # type: ignore
+from flask_migrate import Migrate # type: ignore
+from flask_restful import Api # type: ignore
+from flask_sqlalchemy import SQLAlchemy # type: ignore
 # from sqlalchemy import MetaData
 
 # from config import db
 app = Flask(__name__)
+app.secret_key = 'super secret key'
 CORS(app)
 api = Api(app)
 
