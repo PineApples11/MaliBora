@@ -4,7 +4,7 @@ from random import randint, choice as rc
 from datetime import datetime, timedelta
 
 from app import app, db
-from models import User, Customer, Loan, Repayment, SavingsTransaction, Staff, StaffCustomer, AuditLog
+from models import Admin, Customer, Loan, Repayment, SavingsTransaction, Staff, StaffCustomer, AuditLog
 
 if __name__ == '__main__':
     with app.app_context():
@@ -18,29 +18,31 @@ if __name__ == '__main__':
         db.session.query(Customer).delete()
         db.session.query(Staff).delete()
         db.session.query(AuditLog).delete()
-        db.session.query(User).delete()
+        db.session.query(Admin).delete()
 
         db.session.commit()
+        print("completes deleting")
 
         # Create Users
-        users = []
+        admins = []
         for i in range(5):
-            user = User(
+            admin = Admin(
                 username=f"user{i}",
                 email=f"user{i}@example.com",
                 password="password123",
-                role=rc(["admin", "staff", "borrower"])
+                # role=rc(["admin", "staff", "borrower"])
             )
-            db.session.add(user)
-            users.append(user)
+            db.session.add(admin)
+            admins.append(admin)
 
         db.session.commit()  # 🔑 Commit users so their IDs exist
+        print("completes adding admins")
 
         # Create Customers
         customers = []
         for i in range(5):
             customer = Customer(
-                linked_user_id=rc(users).id,
+                admin_id=rc(admins).id,
                 full_name=f"Customer {i}",
                 national_id=f"ID{i}",
                 phone=f"123456789{i}",
@@ -50,6 +52,7 @@ if __name__ == '__main__':
             customers.append(customer)
 
         db.session.commit()
+        print("completes adding customers")
 
         # Create Loans
         loans = []
@@ -67,18 +70,20 @@ if __name__ == '__main__':
             loans.append(loan)
 
         db.session.commit()
+        print("completes adding loans")
 
         # Create Repayments
-        for loan in loans:
+        for customer in customers:
             for i in range(5):
                 repayment = Repayment(
-                    loan_id=loan.id,
+                    customer_id=customer.id,
                     amount=round(loan.amount / 2, 2),
                     date_paid=datetime.now() - timedelta(days=randint(1, 30)),
                 )
                 db.session.add(repayment)
 
         db.session.commit()
+        print("completes adding repayments")
 
         # Create Savings Transactions
         for customer in customers:
@@ -92,19 +97,21 @@ if __name__ == '__main__':
                 db.session.add(transaction)
 
         db.session.commit()
+        print("completes adding saving transactions")
 
         # Create Staff
         staff = []
         for i in range(2):
 
             staff_member = Staff(full_name=f"Staff {i}",
-                                 email=f'{i}@gmail.com', password='xxxx', role='staff', created_at=datetime.now()
+                                 email=f'{i}@gmail.com', password='xxxx', created_at=datetime.now(), admin_id=rc(admins).id
                                  )
 
             db.session.add(staff_member)
             staff.append(staff_member)
 
         db.session.commit()
+        print("completes adding staff")
 
         # Create Staff-Customer Relationships
         for staff_member in staff:
@@ -118,19 +125,20 @@ if __name__ == '__main__':
                 db.session.add(staff_customer)
 
         db.session.commit()
+        print("completes adding staff customer")
 
         # Create Audit Logs
-        for user in users:
+        for admin in admins:
             for _ in range(2):
                 audit_log = AuditLog(
-                    user_id=user.id,
+                    admin_id=admin.id,
                     action=rc(['created loan', 'updated profile', 'deleted record']),
                     timestamp=datetime.now() - timedelta(days=randint(1, 30)),
                 )
                 db.session.add(audit_log)
 
         db.session.commit()
+        print("completes adding audit logs")
 
 
         print("✅ Done seeding!")
-
