@@ -344,7 +344,7 @@ class LoanResource(Resource):
             return make_response({"error": "Status is not pending, approved or rejected"}, 404)
         
         try:
-            issue_date = datetime.strptime(data['issue_date'], "%Y-%m-%d %H:%M:%S")
+            issue_date = datetime.strptime(data['issued_date'], "%Y-%m-%d %H:%M:%S")
             due_date = datetime.strptime(data['due_date'], "%Y-%m-%d %H:%M:%S")
         except:
             raise ValueError("wrong date format")
@@ -358,7 +358,7 @@ class LoanResource(Resource):
 
         db.session.commit()
 
-        return make_response({loan.to_dict()}, 200)
+        return make_response({"message": "Put works! Trust"}, 200)
     
     # @login_required
     # @role_required("borrower")
@@ -376,7 +376,7 @@ class LoanResource(Resource):
             return make_response({"error": "Customer id does not exist"}, 404)
 
         try:
-            issue_date = datetime.strptime(data['issue_date'], "%Y-%m-%d %H:%M:%S")
+            issue_date = datetime.strptime(data['issued_date'], "%Y-%m-%d %H:%M:%S")
             due_date = datetime.strptime(data['due_date'], "%Y-%m-%d %H:%M:%S")
         except:
             raise ValueError("wrong dates format")        
