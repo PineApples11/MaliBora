@@ -22,6 +22,3 @@ function App() {
 export default App
 
 
-// a list of customers with loans
-// list of customers who hhave repaid 
-//saving records to show deposits and withdrawals
