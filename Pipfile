@@ -11,8 +11,9 @@ flask-migrate = "*"
 sqlalchemy-serializer = "*"
 flask-restful = "*"
 flask-cors = "*"
-faker = "*"
 flask = "*"
+faker = "*"
+flask-bcrypt = "*"
 
 [requires]
 python_full_version = "3.8.13"
