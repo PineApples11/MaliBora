@@ -1,47 +1,50 @@
 import React, { useEffect, useState } from "react";
-import SummaryCard from "./summarycard";
+import SummaryCard from "./summarycard.jsx";
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
     totalCustomers: 0,
-    activeLoans: 0,
+    approvedLoans: 0,
     pendingLoans: 0,
     totalRepayments: 0,
     totalSavings: 0,
   });
 
-  const fetchStats = async () => {
-    try {
-      const [customersRes, loansRes, repaymentsRes, savingsRes] = await Promise.all([
-        fetch("http://127.0.0.1:5555/customers"),
-        fetch("http://127.0.0.1:5555/loans"),
-        fetch("http://127.0.0.1:5555/repayments"),
-        fetch("http://127.0.0.1:5555/savings-transactions"),
-      ]);
-
-      const customers = customersRes.ok ? await customersRes.json() : [];
-      const loans = loansRes.ok ? await loansRes.json() : [];
-      const repayments = repaymentsRes.ok ? await repaymentsRes.json() : [];
-      const savings = savingsRes.ok ? await savingsRes.json() : [];
-
-      console.log({ customers, loans, repayments, savings }); // Debug
-
-      setStats({
-        totalCustomers: customers.length,
-        activeLoans: loans.filter((loan) => loan.status === "approved").length,
-        pendingLoans: loans.filter((loan) => loan.status === "pending").length,
-        totalRepayments: repayments.length,
-        totalSavings: savings.reduce((sum, tx) => {
-          return tx.type === "deposit" ? sum + tx.amount : sum;
-        }, 0),
-      });
-    } catch (error) {
-      console.error("Failed to fetch dashboard stats", error);
-    }
-  };
-
   useEffect(() => {
-    fetchStats();
+    const fetchData = async () => {
+      try {
+        const [customersRes, loansRes, repaymentsRes, savingsRes] = await Promise.all([
+          fetch("http://127.0.0.1:5555/customer"),
+          fetch("http://127.0.0.1:5555/loan"),
+          fetch("http://127.0.0.1:5555/repayment"),
+          fetch("http://127.0.0.1:5555/savings-transaction"),
+        ]);
+
+        const customers = await customersRes.json();
+        const loans = await loansRes.json();
+        const repayments = await repaymentsRes.json();
+        const savings = await savingsRes.json();
+
+        const approvedLoans = loans.filter((loan) => loan.status === "approved").length;
+        const pendingLoans = loans.filter((loan) => loan.status === "pending").length;
+
+        const totalSavings = savings.reduce((sum, tx) => {
+          return tx.type === "deposit" ? sum + tx.amount : sum;
+        }, 0);
+
+        setStats({
+          totalCustomers: customers.length,
+          approvedLoans,
+          pendingLoans,
+          totalRepayments: repayments.length,
+          totalSavings,
+        });
+      } catch (err) {
+        console.error("Error fetching dashboard data:", err);
+      }
+    };
+
+    fetchData();
   }, []);
 
   return (
@@ -49,10 +52,13 @@ const Dashboard = () => {
       <h1 className="text-2xl font-bold">Staff Dashboard</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <SummaryCard title="Total Customers" value={stats.totalCustomers} />
-        <SummaryCard title="Active Loans" value={stats.activeLoans} />
+        <SummaryCard title="Approved Loans" value={stats.approvedLoans} />
         <SummaryCard title="Pending Loans" value={stats.pendingLoans} />
-        <SummaryCard title="Repayments Made" value={stats.totalRepayments} />
-        <SummaryCard title="Total Savings" value={`KSH ${stats.totalSavings}`} />
+        <SummaryCard title="Total Repayments" value={stats.totalRepayments} />
+        <SummaryCard
+          title="Total Savings (Deposits)"
+          value={`KSH ${stats.totalSavings.toLocaleString()}`}
+        />
       </div>
     </div>
   );

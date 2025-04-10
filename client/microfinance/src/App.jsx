@@ -2,6 +2,7 @@ import { useState } from 'react'
 import './App.css'
 import Login from './components/login'
 import Dashboard from './components/staff-pages/dashboard'
+import Customers from './components/staff-pages/customers'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -10,6 +11,7 @@ function App() {
     
       <div className='App'>
         <Dashboard />
+        <Customers />
 
       </div>
     
@@ -18,3 +20,8 @@ function App() {
 }
 
 export default App
+
+
+// a list of customers with loans
+// list of customers who hhave repaid 
+//saving records to show deposits and withdrawals

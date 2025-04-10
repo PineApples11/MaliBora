@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-from faker import Faker
+
 from random import randint, choice as rc
 from datetime import datetime, timedelta
 
 from app import app, db
 from models import Admin, Customer, Loan, Repayment, SavingsTransaction, Staff, StaffCustomer, AuditLog
+
+from faker import Faker
 
 fake = Faker()
 
@@ -28,16 +30,11 @@ if __name__ == '__main__':
         # Create Users
         admins = []
         for i in range(5):
-
-            fake_name = fake.name()
-            fake_email = fake.email()
-
             admin = Admin(
-                username=f"{fake_name}",
-                email=f"{fake_email}",
-                password="password123",
-                # role=rc(["admin", "staff", "borrower"])
+                username=fake.name(),
+                email=fake.email(),
             )
+            admin.set_password(fake.password())
             db.session.add(admin)
             admins.append(admin)
 
@@ -46,17 +43,15 @@ if __name__ == '__main__':
 
         # Create Customers
         customers = []
-        for i in range(25):
-
-            fake_name = fake.name()
-
+        for i in range(30):
             customer = Customer(
                 admin_id=rc(admins).id,
-                full_name=f"{fake_name}",
+                full_name=fake.name(),
                 national_id=f"ID{i}",
-                phone=f"123456789{i}",
+                phone=fake.phone_number(),
                 savings_balance=round(randint(100, 5000), 2),
             )
+            customer.set_password(fake.password())
             db.session.add(customer)
             customers.append(customer)
 
@@ -65,7 +60,7 @@ if __name__ == '__main__':
 
         # Create Loans
         loans = []
-        for i in range(25):
+        for i in range(20):
             customer = rc(customers)
             loan = Loan(
                 customer_id=customer.id,
@@ -83,7 +78,7 @@ if __name__ == '__main__':
 
         # Create Repayments
         for customer in customers:
-            for i in range(25):
+            for i in range(2):
                 repayment = Repayment(
                     customer_id=customer.id,
                     amount=round(loan.amount / 2, 2),
@@ -112,13 +107,10 @@ if __name__ == '__main__':
         staff = []
         for i in range(10):
 
-            fake_name = fake.name()
-            fake_email = fake.email()
-
-            staff_member = Staff(full_name=f"{fake_name}",
-                                 email=f'{fake_email}', password='xxxx', created_at=datetime.now(), admin_id=rc(admins).id
+            staff_member = Staff(full_name=fake.name(),
+                                 email=fake.email(), created_at=datetime.now(), admin_id=rc(admins).id
                                  )
-
+            staff_member.set_password(fake.password())
             db.session.add(staff_member)
             staff.append(staff_member)
 
@@ -154,4 +146,3 @@ if __name__ == '__main__':
 
 
         print("✅ Done seeding!")
-
