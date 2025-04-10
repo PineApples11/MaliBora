@@ -7,7 +7,9 @@ from flask import request
 from flask_restful import Resource
 from datetime import datetime
 from decorators import login_required, role_required
+from flask_cors import CORS
 
+CORS(app)
 @app.route('/')
 def index():
     return '<h1>Project Server</h1>'
@@ -376,7 +378,7 @@ class LoanResource(Resource):
             return make_response({"error": "Customer id does not exist"}, 404)
 
         try:
-            issue_date = datetime.strptime(data['issue_date'], "%Y-%m-%d %H:%M:%S")
+            issue_date = datetime.strptime(data['issued_date'], "%Y-%m-%d %H:%M:%S")
             due_date = datetime.strptime(data['due_date'], "%Y-%m-%d %H:%M:%S")
         except:
             raise ValueError("wrong dates format")        
