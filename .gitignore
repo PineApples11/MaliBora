@@ -6,6 +6,7 @@ __pycache__/
 # C extensions
 *.so
 
+.Pipfile
 # Distribution / packaging
 .Python
 build/
@@ -90,3 +91,4 @@ venv.bak/
 # Windows
 Thumbs.db
 ehthumbs.db
+node_modules

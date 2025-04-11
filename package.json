@@ -1,0 +1,20 @@
+{
+  "name": "malibora",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PineApples11/MaliBora.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PineApples11/MaliBora/issues"
+  },
+  "homepage": "https://github.com/PineApples11/MaliBora#readme"
+}
