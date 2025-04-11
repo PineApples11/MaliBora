@@ -46,6 +46,7 @@ class RegisterCustomer(Resource):
 
     def post(self):
         data = request.get_json()
+        print(data)
 
         admin_id = data['admin_id']
         exists = Admin.query.filter_by(id=admin_id).first()
@@ -68,13 +69,15 @@ class RegisterCustomer(Resource):
             )
             password = data["password_hash"]
             new_customer.set_password(password)
+            print(new_customer.to_dict())
 
             db.session.add(new_customer)
             db.session.commit()
 
             return make_response(new_customer.to_dict(), 201)
         
-        except:
+        except Exception as e:
+            print("Error:", e)
             return  make_response({"error":"Bad Request"}, 400)
     
 api.add_resource(RegisterCustomer, "/register-customer")
