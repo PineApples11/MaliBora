@@ -30,7 +30,6 @@ function App() {
         <Route path="/customer-loans" element={<CustomerLoanForm />} />
       </Routes>
     </Router>
-      
    
     </>
   )
