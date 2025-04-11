@@ -54,9 +54,15 @@ const SignUp = () => {
   const handleClick = () => {
     navigate('/login')
   }
+  const handelRoleChange = () => {
+    navigate('/choice')
+  }
   return (
-    <div>
-      <h2>Sign Up</h2>
+    <div className='log-container'>
+     <div className='sign-container-button'>
+        <h2>Sign Up</h2>
+        <button className='change_role' onClick={handelRoleChange}>Change Role</button>
+     </div>
       <div className="container" height="100px">
         <div className="screen_sign">
           <div className="screen__content">
@@ -124,6 +130,7 @@ const SignUp = () => {
                   type="password"
                   name="password"
                   className="login__input"
+                  id='sign_in_input'
                   placeholder="Password"
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
@@ -143,12 +150,9 @@ const SignUp = () => {
             </form>
 
             <div className="social-login">
-              <h3>Sign in via</h3>
+            <div className='sign'></div>
               <div className="social-icons">
-                <a href="#" className="social-login__icon fab fa-instagram"><img width='20px' src="https://cdn-icons-png.flaticon.com/128/2111/2111463.png" alt="ig" /></a>
-                <a href="#" className="social-login__icon fab fa-facebook"><img width='20px' src="https://cdn-icons-png.flaticon.com/128/733/733547.png" alt="fb" /></a>
-                <a href="#" className="social-login__icon fab fa-twitter"><img width='20px' src="https://cdn-icons-png.flaticon.com/128/3670/3670151.png" alt="x" /></a>
-              </div>
+              <h4>Sign in Form</h4></div>
             </div>
           </div>
           <div className="screen__background">

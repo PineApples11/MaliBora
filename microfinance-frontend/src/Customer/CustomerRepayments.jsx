@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 
-function CustomerTransactionForm() {
+function CustomerRepaymentsForm() {
   const navigate = useNavigate();
 
   const [customer, setCustomer] = useState(null);
@@ -29,18 +29,16 @@ function CustomerTransactionForm() {
 
   const [formData, setFormData] = useState({
     customer_id: 1,
-    type: 'deposit',
     amount: '',
-    transaction_date: getCurrentDateTime()
+    date_paid: getCurrentDateTime()
   });
 
   useEffect(() => {
     if (customer) {
       setFormData({
         customer_id: customer.id,
-        type: 'deposit',
         amount: '',
-        transaction_date: getCurrentDateTime()
+        date_paid: getCurrentDateTime()
       });
     }
   }, [customer]);
@@ -63,7 +61,7 @@ function CustomerTransactionForm() {
     setSuccessMessage('');
 
     try {
-      const response = await fetch("http://127.0.0.1:5555/savings-transaction", {
+      const response = await fetch("http://127.0.0.1:5555/repayment", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -73,15 +71,15 @@ function CustomerTransactionForm() {
 
       if (response.ok) {
         const data = await response.json();
-        setSuccessMessage('Transaction Successful!');
+        setSuccessMessage('Repayments Successful!');
       } else {
-        throw new Error('Failed to process transaction');
+        throw new Error('Failed to process repayments');
       }
-      alert("Transaction successful!")
+      alert("Repayments successful!")
       navigate("/customer-homepage")
     } catch (e) {
-      setError('Failed to submit transaction. Please try again later.');
-      console.error('Error submitting transaction:', e);
+      setError('Failed to submit repayments. Please try again later.');
+      console.error('Error submitting repayments:', e);
     }
   }
   const handleGoBack = () => {
@@ -90,7 +88,7 @@ function CustomerTransactionForm() {
 
   return (
     <div className='log-container'>
-  <h2>Transaction Form</h2>
+  <h2>Repayment Form</h2>
   <div className="container">
     <div className="screen_sign">
       <div className="screen__content">
@@ -111,26 +109,12 @@ function CustomerTransactionForm() {
             />
           </div>
 
-          <div className="login__field">
-            <i className="login__icon fas fa-exchange-alt"></i>
-            <select
-              name="type"
-              className="login__input"
-              value={formData.type}
-              onChange={handleChange}
-              style={{ paddingRight: '30px' }}
-            >
-              <option value="deposit">Deposit</option>
-              <option value="withdrawal">Withdrawal</option>
-            </select>
-          </div>
-
           <button
             type="submit"
             className="button login__submit"
           >
             <span className="button__text">
-              Submit {formData.type === 'deposit' ? 'Deposit' : 'Withdrawal'}
+              Submit
             </span>
             <i className="button__icon fas fa-chevron-right"></i>
           </button>
@@ -149,7 +133,7 @@ function CustomerTransactionForm() {
           <div className="social-login">
             <div className='sign'></div>
               <div className="social-icons">
-              <h4>Transaction Form</h4></div>
+              <h4>Repayment Form</h4></div>
             </div>
         </div>
 
@@ -166,4 +150,4 @@ function CustomerTransactionForm() {
   );
 }
 
-export default CustomerTransactionForm;
+export default CustomerRepaymentsForm;

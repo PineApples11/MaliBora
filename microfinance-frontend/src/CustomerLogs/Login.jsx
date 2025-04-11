@@ -64,10 +64,10 @@ const Login = () => {
   }
 
   return (
-    <div>
+    <div className='log-container'>
     <h2>Login</h2>
     <div className="container">
-      <div className="screen">
+      <div className="screen_sign">
         <div className="screen__content">
           <form onSubmit={formik.handleSubmit} className="login">
   
@@ -114,13 +114,10 @@ const Login = () => {
           </form>
   
           <div className="social-login">
-            <h3>log in via</h3>
-            <div className="social-icons">
-                <a href="#" className="social-login__icon fab fa-instagram"><img width='20px' src="https://cdn-icons-png.flaticon.com/128/2111/2111463.png" alt="ig" /></a>
-                <a href="#" className="social-login__icon fab fa-facebook"><img width='20px' src="https://cdn-icons-png.flaticon.com/128/733/733547.png" alt="fb" /></a>
-                <a href="#" className="social-login__icon fab fa-twitter"><img width='20px' src="https://cdn-icons-png.flaticon.com/128/3670/3670151.png" alt="x" /></a>
-               </div>
-          </div>
+            <div className='sign'></div>
+              <div className="social-icons">
+              <h4>Log in Form</h4></div>
+            </div>
         </div>
         <div className="screen__background">
           <span className="screen__background__shape screen__background__shape4"></span>

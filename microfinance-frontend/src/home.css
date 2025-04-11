@@ -1,0 +1,72 @@
+@import "https://unpkg.com/open-props"; 
+@import "https://unpkg.com/open-props/normalize.min.css"; 
+
+body {
+  display: flex;
+  background: linear-gradient(90deg, #C7C5F4, #776BCC);
+}
+
+header {
+  display: grid;
+  align-items: center;
+  grid-template-columns: 1fr 1fr;
+  background: var(--surface-1);
+  height: 100vh;
+  background: linear-gradient(90deg, #C7C5F4, #776BCC);	
+}
+
+.hero {
+  padding: var(--size-10);
+  display: grid;
+  gap: var(--size-5);
+}
+
+.hero-message {
+  display: grid;
+  grid-template-columns: max-content;
+  color: var(--text-1);
+  line-height: var(--font-lineheight-0);
+}
+
+.hero-message > div:last-child {
+   color: #4C489D;
+}
+
+.under-hero {
+  color:  #4C489D;
+  font-size: var(--font-size-4);
+  margin-block-end: var(--size-3);
+}
+
+.button-list {
+  display: flex;
+  gap: var(--size-3);
+}
+
+button {
+  background: white;
+  color:  #4C489D;;
+  font-size: var(--font-size-3);
+  padding-inline: var(--size-8);
+  padding-block: var(--size-3);
+  border-radius: var(--radius-2);
+  box-shadow: var(--shadow-2);
+  transition: 0.25s;
+}
+button:hover {
+   background: #4C489D;
+   color: white;
+   font-weight: bolder;
+   transform: scale(1.05);
+}
+
+
+
+.promo-art {
+  align-self: stretch;
+}
+
+.promo-art > img {
+  block-size: 100%;
+  object-fit: cover;	
+}

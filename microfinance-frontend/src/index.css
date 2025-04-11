@@ -1,4 +1,4 @@
-/* :root {
+/* /* :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -66,6 +66,8 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 } */
+
+/* for customer and forms  */
 @import url('https://fonts.googleapis.com/css?family=Raleway:400,700');
 
 * {
@@ -79,7 +81,7 @@ body {
 	background: linear-gradient(90deg, #C7C5F4, #776BCC);		
 }
 
-.container {
+.log-container .container {
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -89,7 +91,7 @@ body {
 .screen {		
 	background: linear-gradient(90deg, #5D54A4, #7C78B8);		
 	position: relative;	
-	height: 650px;
+	height: 850px;
 	width: 400px;	
 	box-shadow: 0px 0px 24px #5C5696;
 }
@@ -186,6 +188,10 @@ body {
 	font-weight: 700;
 	width: 75%;
 	transition: .2s;
+	color: #776BCC;
+}
+#sign_in_input {
+	color: black;
 }
 
 .login__input:active,
@@ -194,7 +200,17 @@ body {
 	outline: none;
 	border-bottom-color: #6A679E;
 }
-
+.sign-container-button {
+	display: flex;
+	justify-content: space-between;
+}
+.sign-container-button button {
+	float: right;
+	padding: 10px;
+	margin-left: 200px;
+	padding-left: 20px;
+	padding-right: 20px;
+}
 .login__submit {
 	background: #fff;
 	font-size: 14px;
@@ -251,4 +267,16 @@ body {
 
 .social-login__icon:hover {
 	transform: scale(1.5);	
+} 
+.social-login h3 {
+	margin-right: 10px;
+}
+.log-container{
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+.sign {
+	margin-top: 50px;
 }

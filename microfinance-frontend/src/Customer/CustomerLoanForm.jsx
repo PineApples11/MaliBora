@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 
 function CustomerLoanForm() {
     const navigate = useNavigate();
@@ -17,17 +17,40 @@ function CustomerLoanForm() {
     return formattedDateTime;
 }
 
+const [customer, setCustomer] = useState(null);
+
+useEffect(() => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (user) {
+    setCustomer(user);
+  }
+}, []);
+
   const [formData, setFormData] = useState({
     amount: '',
-    customer_id: 1,
+    customer_id: '',
     interest_rate: 15,
     status: 'pending',
     issued_date: getCurrentDateTime(),
     due_date: getCurrentDateTime(),
   });
+  
+  useEffect(() => {
+    if (customer) {
+      setFormData({
+        amount: '',
+        customer_id: customer.id,
+        interest_rate: 15,
+        status: 'pending',
+        issued_date: getCurrentDateTime(),
+        due_date: getCurrentDateTime(),
+      });
+    }
+  }, [customer]);
 
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
+
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -69,10 +92,10 @@ function CustomerLoanForm() {
   }
 
   return (
-<div>
-  <h2>Customer Loan Form</h2>
+<div className='log-container'>
+  <h2>Loan Form</h2>
   <div className="container">
-    <div className="screen">
+    <div className="screen_sign">
       <div className="screen__content">
         <form onSubmit={handleSubmit} className="login">
 
@@ -100,10 +123,6 @@ function CustomerLoanForm() {
               className="login__input"
               value={formData.interest_rate}
               readOnly
-              style={{
-                backgroundColor: '#f0f0f0',
-                cursor: 'not-allowed',
-              }}
             />
           </div>
 
@@ -121,7 +140,12 @@ function CustomerLoanForm() {
 
         {error && <p style={{ color: 'red', marginTop: '10px' }}>Error: {error}</p>}
         {successMessage && <p style={{ color: 'green', marginTop: '10px' }}>{successMessage}</p>}
+        <div className="social-login">
+            <h3>Loan Form</h3>
       </div>
+      </div>
+
+
 
       <div className="screen__background">
         <span className="screen__background__shape screen__background__shape4"></span>
