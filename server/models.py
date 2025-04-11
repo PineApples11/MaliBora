@@ -15,11 +15,12 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.json.compact = False
+app.secret_key = 'super-secret-key' 
 
 db = SQLAlchemy()
 db.init_app(app)
 
-CORS(app)
+CORS(app, supports_credentials=True, origins=["http://localhost:5173", "http://127.0.0.1:5173"])
 api = Api(app)
 migrate = Migrate(app, db)
 

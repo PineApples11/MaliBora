@@ -1,13 +1,26 @@
+import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from "react"
 
 function CustomerDisplay() {
-  const [customer, setCustomer] = useState([])
+  const navigate = useNavigate();
+
+  const [customer, setCustomer] = useState(null);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:5555/customer/1")
-      .then(res => res.json())
-      .then(customer => setCustomer(customer))
-  },[])
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user) {
+      setCustomer(user);
+    }
+  }, []);
+
+  if (!customer) return <p>Loading customer...</p>;
+
+  const handleLoan = () => {
+    navigate('/customer-loans')
+  }
+  const handleRepayments = () => {
+    navigate('/customer-repayments')
+  }
 
     return (
       <>
@@ -19,7 +32,10 @@ function CustomerDisplay() {
         <p>created at : {customer.created_at}</p>
         <p>admin id : {customer.admin_id}</p>
 
-        <Loan customer_id={customer.id}/>
+        <button type="button" onClick={handleLoan} >Take a Loan</button>
+        <button onClick={handleRepayments}>Make Repayments </button>
+
+        {/* <Loan customer_id={customer.id}/> */}
       </>
     )
   }

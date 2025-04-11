@@ -89,9 +89,17 @@ body {
 .screen {		
 	background: linear-gradient(90deg, #5D54A4, #7C78B8);		
 	position: relative;	
-	height: 600px;
-	width: 360px;	
+	height: 650px;
+	width: 400px;	
 	box-shadow: 0px 0px 24px #5C5696;
+}
+.screen_sign {		
+	background: linear-gradient(90deg, #5D54A4, #7C78B8);		
+	position: relative;	
+	height: 855px;
+	width: 400px;	
+	box-shadow: 0px 0px 24px #5C5696;
+	margin-bottom: 50px;
 }
 
 .screen__content {
