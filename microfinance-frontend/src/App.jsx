@@ -11,6 +11,7 @@ import CustomerRepaymentsForm from './Customer/CustomerRepayments'
 // import { useState } from 'react'
 
 import './App.css'
+
 import CustomerLoanform from './CustomerLoanForm.jsx';
 import CustomerSavingsForm from './CustomerSavingsForm';
 
