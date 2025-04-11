@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
         # Create Customers
         customers = []
-        for i in range(30):
+        for i in range(25):
             customer = Customer(
                 admin_id=rc(admins).id,
                 full_name=fake.name(),
@@ -80,7 +80,7 @@ if __name__ == '__main__':
         for customer in customers:
             for i in range(2):
                 repayment = Repayment(
-                    customer_id=customer.id,
+                    customer_id=loan.customer_id,
                     amount=round(randint(100, int(loan.amount)), 2),
                     date_paid=datetime.now() - timedelta(days=randint(1, 30)),
                 )

@@ -1,16 +1,15 @@
 from models import db,api,Staff, StaffCustomer, Admin, Customer, SavingsTransaction, AuditLog, Loan, Repayment, app
 
 from flask import request, make_response, session
-from flask_cors import CORS
 from flask_restful import Resource
 from werkzeug.exceptions import NotFound
 from flask import request
 from flask_restful import Resource
 from datetime import datetime
 from decorators import login_required, role_required
+from flask_cors import CORS
 
 CORS(app, supports_credentials=True, origins=["http://localhost:5173", "http://127.0.0.1:5173"])
-
 
 @app.route('/')
 def index():

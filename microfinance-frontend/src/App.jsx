@@ -8,6 +8,12 @@ import CustomerLoanForm from './Customer/CustomerLoanForm'
 import Home from './Home'
 import Choice from './choice/Choice'
 import CustomerRepaymentsForm from './Customer/CustomerRepayments'
+// import { useState } from 'react'
+
+import './App.css'
+import CustomerLoanform from './CustomerLoanForm.jsx';
+import CustomerSavingsForm from './CustomerSavingsForm';
+
 
 function App() {
   return (
@@ -24,6 +30,15 @@ function App() {
         <Route path="/customer-loans" element={<CustomerLoanForm />} />
       </Routes>
     </Router>
+      <h1>MaliBora</h1>
+      <div className="card">
+        
+        <CustomerLoanform />
+        <CustomerSavingsForm />
+      
+     
+      </div>
+   
     </>
   )
 }
