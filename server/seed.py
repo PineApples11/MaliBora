@@ -81,7 +81,7 @@ if __name__ == '__main__':
             for i in range(2):
                 repayment = Repayment(
                     customer_id=customer.id,
-                    amount=round(loan.amount / 2, 2),
+                    amount=round(randint(100, int(loan.amount)), 2),
                     date_paid=datetime.now() - timedelta(days=randint(1, 30)),
                 )
                 db.session.add(repayment)
