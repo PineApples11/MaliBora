@@ -10,9 +10,10 @@ function App() {
 
   return (
     <>
-      <h1>MaliBora</h1>
+      
       <div className="card">
-        
+      <h1>MaliBora</h1>
+      
         <CustomerLoanform />
         <CustomerSavingsForm />
       
