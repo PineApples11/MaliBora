@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import SummaryCard from "./summarycard.jsx";
+import "./dashboard.css";
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -48,18 +49,21 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Staff Dashboard</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <SummaryCard title="Total Customers" value={stats.totalCustomers} />
-        <SummaryCard title="Approved Loans" value={stats.approvedLoans} />
-        <SummaryCard title="Pending Loans" value={stats.pendingLoans} />
-        <SummaryCard title="Total Repayments" value={stats.totalRepayments} />
+    <div className="wrap">
+    <div className="dashboard-page">
+      <h1 className="dashboard-title">Welcome to the Staff Dashboard</h1>
+      <div className="card-grid">
+        <SummaryCard title="Total Customers" value={stats.totalCustomers} link="/customers" />
+        <SummaryCard title="Approved Loans" value={stats.approvedLoans} link="/loans" />
+        <SummaryCard title="Pending Loans" value={stats.pendingLoans} link="/loans" />
+        <SummaryCard title="Total Repayments" value={stats.totalRepayments} link="/repayments" />
         <SummaryCard
           title="Total Savings (Deposits)"
           value={`KSH ${stats.totalSavings.toLocaleString()}`}
+          link="/savings"
         />
       </div>
+    </div>
     </div>
   );
 };

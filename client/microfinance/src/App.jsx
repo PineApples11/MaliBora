@@ -1,24 +1,14 @@
-import { useState } from 'react'
-import './App.css'
-import Login from './components/login'
-import Dashboard from './components/staff-pages/dashboard'
-import Customers from './components/staff-pages/customers'
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Staff from "./staff";
 
-function App() {
-  const [count, setCount] = useState(0)
-
+const App = () => {
   return (
-    
-      <div className='App'>
-        <Dashboard />
-        <Customers />
+    <Router>
+      <Routes>
+        <Route path="/staff/*" element={<Staff />} />
+      </Routes>
+    </Router>
+  );
+};
 
-      </div>
-    
-    
-  )
-}
-
-export default App
-
-
+export default App;

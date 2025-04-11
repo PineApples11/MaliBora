@@ -77,11 +77,11 @@ if __name__ == '__main__':
         print("completes adding loans")
 
         # Create Repayments
-        for customer in customers:
-            for i in range(2):
+        for loan in loans:
+            for _ in range(2):
                 repayment = Repayment(
-                    customer_id=customer.id,
-                    amount=round(loan.amount / 2, 2),
+                    customer_id=loan.customer_id,
+                    amount=round(randint(100, int(loan.amount)), 2),
                     date_paid=datetime.now() - timedelta(days=randint(1, 30)),
                 )
                 db.session.add(repayment)
