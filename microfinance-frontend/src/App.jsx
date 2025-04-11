@@ -29,16 +29,7 @@ function App() {
         <Route path="/customer-transactions" element={<CustomerTransactionForm />} />
         <Route path="/customer-loans" element={<CustomerLoanForm />} />
       </Routes>
-    </Router>
-      <h1>MaliBora</h1>
-      <div className="card">
-        
-        <CustomerLoanform />
-        <CustomerSavingsForm />
-      
-     
-      </div>
-   
+    </Router>   
     </>
   )
 }
