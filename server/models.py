@@ -1,3 +1,4 @@
+from sqlalchemy_serializer import SerializerMixin
 from flask import Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
@@ -18,17 +19,22 @@ db.init_app(app)
 
 CORS(app)
 api = Api(app)
+CORS(app)
+api = Api(app)
 migrate = Migrate(app, db)
 bcrypt = Bcrypt(app)
 
 
 class Admin(db.Model, SerializerMixin):
     __tablename__ = 'admins'
+    serialize_rules = ('-staffs','-customers', '-audit_logs.admin','-password_hash',)
     serialize_rules = ('-staffs', '-customers', '-audit_logs.admin', '-password_hash',)
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
+    password_hash = db.Column(db.String(50), nullable=False)
+    role = db.Column(db.String(), default="admin") 
     password_hash = db.Column(db.String(50), nullable=False)
     role = db.Column(db.String(), default="admin")
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
@@ -97,6 +103,7 @@ class Staff(db.Model, SerializerMixin):
     role = db.Column(db.String(), default="staff")
     full_name = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
+    password_hash = db.Column(db.String(50), nullable=False)
     password_hash = db.Column(db.String(50), nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     admin_id = db.Column(db.Integer, db.ForeignKey('admins.id'), nullable=False)
@@ -244,6 +251,13 @@ class AuditLog(db.Model, SerializerMixin):
     admin_id = db.Column(db.Integer, db.ForeignKey('admins.id'), nullable=False)
 
     admin = db.relationship('Admin', back_populates='audit_logs')
+
+    @validates('admin_id')
+    def validates_admin_id(self, key, val):
+        admins = [admin.id for admin in Admin.query.all()]
+        if val not in admins:
+            raise ValueError("Admin Id does not exist")
+        return val
 
     @validates('admin_id')
     def validates_admin_id(self, key, val):
