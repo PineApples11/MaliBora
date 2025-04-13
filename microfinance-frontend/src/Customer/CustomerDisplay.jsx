@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
+import "./customer.css";
 
 function CustomerDisplay() {
   const navigate = useNavigate();
@@ -81,66 +82,76 @@ function CustomerDisplay() {
     navigate('/login');
   };
 
-   if (!customer) return 
-   <>
+   if (!customer) return (
+    <div className="customer-container">
       <p>You are Logged Out</p>
-      <button type="button" onClick={handleLogout} >Login</button>
-    </>; 
-    return (
-      <>
-        <h1>{customer.full_name} Profile</h1>
-        <p>id : {customer.id}</p>
-        <p>full_name : {customer.full_name}</p>
-        <p>national_id : {customer.national_id}</p>
-        <p>savings balance : {customer.savings_balance}</p>
-        <p>created at : {customer.created_at}</p>
-        <p>admin id : {customer.admin_id}</p>
+      <button className="primary-btn" type="button" onClick={handleLogout}>Login</button>
+    </div>
+   ); 
+   
+   return (
+    <div className="customer-container">
+      <div className="profile-header">
+        <h1>{customer.full_name}'s Profile</h1>
+        <div className="profile-details">
+          <p><strong>ID:</strong> {customer.id}</p>
+          <p><strong>National ID:</strong> {customer.national_id}</p>
+          <p><strong>Savings Balance:</strong> KES {customer.savings_balance}</p>
+          <p><strong>Member Since:</strong> {new Date(customer.created_at).toLocaleDateString()}</p>
+        </div>
+        
+        <div className="button-group">
+          <button className="primary-btn" type="button" onClick={handleLoan}>Take a Loan</button>
+          <button className="primary-btn" onClick={handleTransaction}>View Transactions</button>
+          <button className="primary-btn" onClick={handleRepayments}>View Repayments</button>
+          <button className="secondary-btn" type="button" onClick={handleLogout}>Logout</button>
+        </div>
+      </div>
 
-        <button type="button" onClick={handleLogout} >Logout</button>
-        <button type="button" onClick={handleLoan} >Take a Loan</button>
-        <button onClick={handleTransaction}>Transactions </button>
-        <button onClick={handleRepayments}>Repayments</button>
-
-        {loans && (
-          <div>
-            <h2>Your Loans</h2>
-            {(() => {
-              const customerLoans = loans.filter(loan => loan.customer_id === customer.id);
-
-              return customerLoans.length > 0 ? (
-                <ul>
-                  {customerLoans.map(loan => (
-                    <li key={loan.id}>
-                      Amount: {loan.amount} | Status: {loan.status} | Interest rate: {loan.interest_rate}% | Issued Date: {loan.issued_date} | Due Date: {loan.due_date}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p>No loans found.</p>
-              );
-            })()}
-          </div>
-        )}
-
-
-      {transactions && (
-        <div>
-          <h2>Your Transactions</h2>
+      {loans && (
+        <div className="data-section">
+          <h2>Your Loans</h2>
           {(() => {
-            const customerTransactions = transactions.filter(
-              transaction => transaction.customer_id === customer.id
-            );
-
-            return customerTransactions.length > 0 ? (
-              <ul>
-                {customerTransactions.map(transaction => (
-                  <li key={transaction.id}>
-                    Amount: {transaction.amount} | Type: {transaction.type} | Transaction Date: {transaction.transaction_date}
+            const customerLoans = loans.filter(loan => loan.customer_id === customer.id);
+            return customerLoans.length > 0 ? (
+              <ul className="data-list">
+                {customerLoans.map(loan => (
+                  <li key={loan.id}>
+                    <strong>Amount:</strong> KES {loan.amount} | 
+                    <strong>Status:</strong> {loan.status} | 
+                    <strong>Interest:</strong> {loan.interest_rate}% | 
+                    <strong>Issued:</strong> {new Date(loan.issued_date).toLocaleDateString()} | 
+                    <strong>Due:</strong> {new Date(loan.due_date).toLocaleDateString()}
                   </li>
                 ))}
               </ul>
             ) : (
-              <p>No transactions found.</p>
+              <p className="no-data">No loans found.</p>
+            );
+          })()}
+        </div>
+      )}
+
+
+      {transactions && (
+        <div className="data-section">
+          <h2>Recent Transactions</h2>
+          {(() => {
+            const customerTransactions = transactions.filter(
+              transaction => transaction.customer_id === customer.id
+            );
+            return customerTransactions.length > 0 ? (
+              <ul className="data-list">
+                {customerTransactions.map(transaction => (
+                  <li key={transaction.id}>
+                    <strong>Amount:</strong> KES {transaction.amount} | 
+                    <strong>Type:</strong> {transaction.type} | 
+                    <strong>Date:</strong> {new Date(transaction.transaction_date).toLocaleDateString()}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="no-data">No transactions found.</p>
             );
           })()}
         </div>
@@ -148,27 +159,28 @@ function CustomerDisplay() {
 
 
       {repayments && (
-            <div>
-              <h2>Your Repayments</h2>
-              {(() => {
-                  const customerRepayments = repayments.filter(
-                    r => r.customer_id === customer.id
-                  );
-                  return customerRepayments.length > 0 ? (
-                    <ul>
-                      {customerRepayments.map(repayment => (
-                        <li key={repayment.id}>
-                          Amount: {repayment.amount} | Date Paid: {repayment.date_paid}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p>No repayments found.</p>
-                  );
-                })()}
-            </div>
-        )}
-      </>
+        <div className="data-section">
+          <h2>Your Repayments</h2>
+          {(() => {
+            const customerRepayments = repayments.filter(
+              r => r.customer_id === customer.id
+            );
+            return customerRepayments.length > 0 ? (
+              <ul className="data-list">
+                {customerRepayments.map(repayment => (
+                  <li key={repayment.id}>
+                    <strong>Amount:</strong> KES {repayment.amount} | 
+                    <strong>Date Paid:</strong> {new Date(repayment.date_paid).toLocaleDateString()}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="no-data">No repayments found.</p>
+            );
+          })()}
+        </div>
+      )}
+    </div>
     )
   }
   
