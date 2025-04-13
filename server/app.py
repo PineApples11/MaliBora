@@ -9,7 +9,13 @@ from datetime import datetime
 from decorators import login_required, role_required
 from flask_cors import CORS
 
-CORS(app, supports_credentials=True, origins=["http://localhost:5173", "http://127.0.0.1:5173"])
+CORS(app, supports_credentials=True, origins=[
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174"
+])
+
 
 @app.route('/')
 def index():
@@ -123,17 +129,18 @@ class Login(Resource):
         data = request.get_json()
         print(data)
 
-        username = data.get("full_name")
+        full_name = data.get("full_name")
+        username = data.get("username")  # in case it's admin using "username"
         password = data.get("password")  
         role = data.get("role")
 
+        # Determine correct identifier based on role
         if role == "admin":
-            user = Admin.query.filter_by(username=username).first()
+            user = Admin.query.filter_by(username=username or full_name).first()
         elif role == "staff":
-            user = Staff.query.filter_by(full_name=username).first()
+            user = Staff.query.filter_by(full_name=full_name).first()
         elif role == "customer":
-            print("responds")
-            user = Customer.query.filter_by(full_name=username).first()
+            user = Customer.query.filter_by(full_name=full_name).first()
         else:
             return make_response({"error": "Invalid role"}, 401)
 
@@ -144,6 +151,7 @@ class Login(Resource):
         session["role"] = role
 
         return make_response({"Message": "Login Successful"}, 201)
+
 
 
 class Logout(Resource):
