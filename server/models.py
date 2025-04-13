@@ -103,7 +103,6 @@ class Staff(db.Model, SerializerMixin):
     full_name = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password_hash = db.Column(db.String(50), nullable=False)
-    password_hash = db.Column(db.String(50), nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     admin_id = db.Column(db.Integer, db.ForeignKey('admins.id'), nullable=False)
 

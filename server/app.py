@@ -255,6 +255,17 @@ class StaffResource(Resource):
         db.session.commit()
 
         return make_response({staff.to_dict()}, 200)
+    
+    def delete(self, id):
+        staff = Staff.query.filter_by(id=id).first()
+
+        if not staff:
+            return make_response({"error": "Staff not found"}, 404)
+
+        db.session.delete(staff)
+        db.session.commit()
+
+        return make_response({"message": f"Staff member deleted successfully"}, 200)
 
 class CustomerResource(Resource):
     def get(self, id=None):
@@ -302,6 +313,17 @@ class CustomerResource(Resource):
         db.session.commit()
 
         return make_response({customer.to_dict()}, 200)
+    
+    def delete(self, id):
+        customer = Customer.query.filter_by(id=id).first()
+
+        if not customer:
+            return make_response({"error": "Customer not found"}, 404)
+
+        db.session.delete(customer)
+        db.session.commit()
+
+        return make_response({"message": f"Customer deleted successfully"}, 200)
 
 
 class StaffCustomerResource(Resource):
