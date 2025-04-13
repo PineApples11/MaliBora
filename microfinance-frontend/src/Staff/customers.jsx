@@ -95,7 +95,7 @@ const Customers = () => {
                     {expandedCustomerId === cust.id && (
                       <tr className="expanded-row">
                         <td colSpan="5">
-                          <div className="customer-details">
+                          <div className="details-box">
                             <p>
                               <strong>Customer ID:</strong> {cust.id}
                             </p>
@@ -115,10 +115,7 @@ const Customers = () => {
                                     <li key={loan.id}>
                                       KSH {loan.amount.toLocaleString()} -{" "}
                                       {loan.status} (Due:{" "}
-                                      {new Date(
-                                        loan.due_date
-                                      ).toLocaleDateString()}
-                                      )
+                                      {new Date(loan.due_date).toLocaleDateString()})
                                     </li>
                                   ))}
                                 </ul>
