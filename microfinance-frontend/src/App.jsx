@@ -1,18 +1,25 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-import CustomerDisplay from './Customer/CustomerDisplay';
-import SignUp from './CustomerLogs/Signup';
-import Login from './CustomerLogs/Login';
-import CustomerTransactionForm from './Customer/CustomerTransactionForm';
-import CustomerLoanForm from './Customer/CustomerLoanForm';
-import Home from './Home';
-import Choice from './choice/Choice';
-import CustomerRepaymentsForm from './Customer/CustomerRepayments';
-import './App.css';
+import CustomerDisplay from './Customer/CustomerDisplay'
+import SignUp from './CustomerLogs/Signup'
+import Login from './CustomerLogs/Login'
+import CustomerTransactionForm from './Customer/CustomerTransactionForm'
+import CustomerLoanForm from './Customer/CustomerLoanForm'
+import Home from './Home'
+import Choice from './choice/Choice'
+import CustomerRepaymentsForm from './Customer/CustomerRepayments'
+import Staff from './Staff/staff.jsx'
+// import { useState } from 'react'
 
-import Staff from './staff.jsx';
+import './App.css'
 import Admin from './Admin/Admin.jsx';
+
+import CustomerLoanform from './CustomerLoanForm.jsx';
+import CustomerSavingsForm from './CustomerSavingsForm';
+
+
+
 
 function App() {
   return (

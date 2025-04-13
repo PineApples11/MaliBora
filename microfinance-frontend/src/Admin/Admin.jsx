@@ -3,7 +3,8 @@ import { Routes, Route, NavLink } from "react-router-dom";
 
 import StaffList from "./StaffList";
 import CustomerList from "./CustomerList"
-import LoanRequests from "./LoanRequests";
+import LoanRequests from "./LoanRequest";
+
 
 const Admin = () => {
   return (
@@ -16,10 +17,7 @@ const Admin = () => {
   <NavLink to="/admin/loan-requests">Loan Requests</NavLink> |{" "}
   <NavLink to="/">Logout</NavLink>
 </nav>
-
-
       <hr />
-
       <Routes>
         <Route path="staff-list" element={<StaffList />} />
         <Route path="customers" element={<CustomerList />} />

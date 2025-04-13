@@ -20,8 +20,6 @@ db.init_app(app)
 
 CORS(app, supports_credentials=True, origins=["http://localhost:5173", "http://127.0.0.1:5173"])
 api = Api(app)
-CORS(app)
-api = Api(app)
 migrate = Migrate(app, db)
 bcrypt = Bcrypt(app)
 
@@ -93,7 +91,7 @@ class Customer(db.Model, SerializerMixin):
         return bcrypt.check_password_hash(self.password_hash, password)
 
     def __repr__(self):
-        return f"<Customer {self.full_name}>"
+        return f"<Customer {self.password_hash}>"
 
 
 class Staff(db.Model, SerializerMixin):
@@ -104,7 +102,6 @@ class Staff(db.Model, SerializerMixin):
     role = db.Column(db.String(), default="staff")
     full_name = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
-    password_hash = db.Column(db.String(50), nullable=False)
     password_hash = db.Column(db.String(50), nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     admin_id = db.Column(db.Integer, db.ForeignKey('admins.id'), nullable=False)
@@ -161,7 +158,6 @@ class StaffCustomer(db.Model, SerializerMixin):
 
     def __repr__(self):
         return f"<StaffCustomer staff={self.staff_id}, customer={self.customer_id}>"
-
 
 class Loan(db.Model, SerializerMixin):
     __tablename__ = 'loans'
