@@ -39,6 +39,23 @@ const Customers = () => {
     setExpandedCustomerId((prevId) => (prevId === id ? null : id));
   };
 
+  const handleDeleteCustomer = async (id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this customer?");
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(`http://127.0.0.1:5555/customer/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error("Failed to delete customer");
+
+      setCustomers((prev) => prev.filter((cust) => cust.id !== id));
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  };
+
   const filteredCustomers = customers.filter((cust) =>
     cust.full_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -86,8 +103,18 @@ const Customers = () => {
                       <td>+254 {cust.phone}</td>
                       <td>{customerLoans.length}</td>
                       <td className="actions">
-                        <button onClick={() => handleToggleDetails(cust.id)}>
+                        <button
+                          onClick={() => handleToggleDetails(cust.id)}
+                          className="text-blue-600 hover:underline"
+                        >
                           {expandedCustomerId === cust.id ? "Hide" : "View"}
+                        </button>{" "}
+                        |{" "}
+                        <button
+                          onClick={() => handleDeleteCustomer(cust.id)}
+                          className="text-red-600 hover:underline"
+                        >
+                          Delete
                         </button>
                       </td>
                     </tr>
@@ -110,7 +137,7 @@ const Customers = () => {
                             <p>
                               <strong>Loans:</strong>{" "}
                               {customerLoans.length > 0 ? (
-                                <ul>
+                                <ul className="list-disc list-inside">
                                   {customerLoans.map((loan) => (
                                     <li key={loan.id}>
                                       KSH {loan.amount.toLocaleString()} -{" "}

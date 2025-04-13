@@ -70,7 +70,6 @@ const Loans = () => {
                 <th>Amount</th>
                 <th>Status</th>
                 <th>Due Date</th>
-                <th>Issued Date</th>
               </tr>
             </thead>
             <tbody>
@@ -80,7 +79,6 @@ const Loans = () => {
                   <td>KSH {loan.amount.toLocaleString()}</td>
                   <td>{loan.status}</td>
                   <td>{new Date(loan.due_date).toLocaleDateString()}</td>
-                  <td>{new Date(loan.created_at).toLocaleDateString()}</td>
                 </tr>
               ))}
             </tbody>
