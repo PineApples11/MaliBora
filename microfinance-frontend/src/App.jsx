@@ -14,8 +14,6 @@ import Staff from './Staff/staff.jsx'
 import './App.css'
 import Admin from './Admin/Admin.jsx';
 
-import CustomerLoanform from './CustomerLoanForm.jsx';
-import CustomerSavingsForm from './CustomerSavingsForm';
 
 
 function App() {
