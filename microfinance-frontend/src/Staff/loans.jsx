@@ -39,6 +39,35 @@ const Loans = () => {
     return customer ? customer.full_name : "Unknown";
   };
 
+  const handleStatusChange = async (loanId, newStatus) => {
+    const loan = loans.find((l) => l.id === loanId);
+    if (!loan) return;
+
+    try {
+      const res = await fetch(`http://127.0.0.1:5555/loan/${loanId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...loan,
+          status: newStatus,
+          issued_date: loan.issued_date || new Date().toISOString().slice(0, 19).replace("T", " "),
+          due_date: loan.due_date || new Date().toISOString().slice(0, 19).replace("T", " ")
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to update loan status");
+
+      const updatedLoans = loans.map((l) =>
+        l.id === loanId ? { ...l, status: newStatus } : l
+      );
+      setLoans(updatedLoans);
+    } catch (err) {
+      console.error("Error updating loan status:", err);
+    }
+  };
+
   const filteredLoans = loans.filter((loan) => {
     const customerName = getCustomerName(loan.customer_id).toLowerCase();
     return customerName.includes(searchTerm.toLowerCase());
@@ -70,7 +99,7 @@ const Loans = () => {
                 <th>Amount</th>
                 <th>Status</th>
                 <th>Due Date</th>
-                <th>Issued Date</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -80,7 +109,26 @@ const Loans = () => {
                   <td>KSH {loan.amount.toLocaleString()}</td>
                   <td>{loan.status}</td>
                   <td>{new Date(loan.due_date).toLocaleDateString()}</td>
-                  <td>{new Date(loan.created_at).toLocaleDateString()}</td>
+                  <td>
+                    {loan.status === "pending" ? (
+                      <>
+                        <button
+                          className="approve-btn"
+                          onClick={() => handleStatusChange(loan.id, "approved")}
+                        >
+                          Approve
+                        </button>
+                        <button
+                          className="reject-btn"
+                          onClick={() => handleStatusChange(loan.id, "rejected")}
+                        >
+                          Reject
+                        </button>
+                      </>
+                    ) : (
+                      <span className="no-actions">-</span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

@@ -4,7 +4,10 @@
     /* border: 1px solid red; */
     width: 1500px;
     text-align: center;
-    margin-left: 10%; 
+    margin-top: 10%;
+ 
+    align-items: center;
+    /* margin-left: 10%;  */
   }
   
   .dashboard-title {
