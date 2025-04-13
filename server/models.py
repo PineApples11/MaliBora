@@ -1,270 +1,201 @@
-from sqlalchemy_serializer import SerializerMixin
-from flask import Flask
-from flask_cors import CORS
-from flask_migrate import Migrate
-from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
-from flask_bcrypt import Bcrypt
-from sqlalchemy.orm import validates
-from sqlalchemy_serializer import SerializerMixin
-
-app = Flask(__name__)
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.json.compact = False
-app.secret_key = 'super-secret-key' 
+from flask_login import UserMixin
+from datetime import datetime
 
 db = SQLAlchemy()
-db.init_app(app)
 
-CORS(app, supports_credentials=True, origins=["http://localhost:5173", "http://127.0.0.1:5173"])
-api = Api(app)
-CORS(app)
-api = Api(app)
-migrate = Migrate(app, db)
-bcrypt = Bcrypt(app)
+# Association Models
 
-
-class Admin(db.Model, SerializerMixin):
-    __tablename__ = 'admins'
-    serialize_rules = ('-staffs','-customers', '-audit_logs.admin','-password_hash',)
-    serialize_rules = ('-staffs', '-customers', '-audit_logs.admin', '-password_hash',)
-
+class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    password_hash = db.Column(db.String(50), nullable=False)
-    role = db.Column(db.String(), default="admin") 
-    password_hash = db.Column(db.String(50), nullable=False)
-    role = db.Column(db.String(), default="admin")
-    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False)
+    role = db.Column(db.String(10), nullable=False)  # 'customer', 'staff', 'admin'
 
-    staffs = db.relationship('Staff', back_populates='admin', cascade="all, delete-orphan")
-    customers = db.relationship('Customer', back_populates='admin', cascade="all, delete-orphan")
-    audit_logs = db.relationship('AuditLog', back_populates='admin', cascade="all, delete-orphan")
-
-    @validates('email')
-    def validates_email(self, key, address):
-        if '@' not in address:
-            raise ValueError("Invalid email address")
-        return address
+    customer = db.relationship('Customer', back_populates='user', uselist=False)
+    admin = db.relationship('Admin', back_populates='user', uselist=False)
 
     def set_password(self, password):
-        self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
+        self.password_hash = password
 
     def check_password(self, password):
-        return bcrypt.check_password_hash(self.password_hash, password)
+        return self.password_hash == password
 
-    def __repr__(self):
-        return f"<Admin {self.username}>"
+    def get_id(self):
+        return str(self.id)
 
+# Role-based profiles
 
-class Customer(db.Model, SerializerMixin):
-    __tablename__ = 'customers'
-    serialize_rules = ('-savings_transactions.customer', '-admin', '-loans.customer', '-repayments.customer', '-staff_customers.customer', '-password_hash',)
-
+class Customer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    role = db.Column(db.String(), default="customer")
-    password_hash = db.Column(db.String(50), nullable=False)
-    full_name = db.Column(db.String(80), nullable=False)
-    national_id = db.Column(db.String(50), unique=True, nullable=False)
-    phone = db.Column(db.String(15), unique=True, nullable=False)
-    savings_balance = db.Column(db.Float, default=0.0)
-    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
-    admin_id = db.Column(db.Integer, db.ForeignKey('admins.id'), nullable=False)
-
-    admin = db.relationship('Admin', back_populates='customers')
-    loans = db.relationship('Loan', back_populates='customer', cascade="all, delete-orphan")
-    repayments = db.relationship('Repayment', back_populates='customer', cascade="all, delete-orphan")
-    savings_transactions = db.relationship('SavingsTransaction', back_populates='customer', cascade="all, delete-orphan")
-    staff_customers = db.relationship('StaffCustomer', back_populates='customer', cascade="all, delete-orphan")
-
-    @validates('admin_id')
-    def validates_admin_id(self, key, val):
-        if not Admin.query.get(val):
-            raise ValueError("Admin ID does not exist")
-        return val
-
-    def set_password(self, password):
-        self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
-
-    def check_password(self, password):
-        return bcrypt.check_password_hash(self.password_hash, password)
-
-    def __repr__(self):
-        return f"<Customer {self.full_name}>"
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    
+    savings_account = db.relationship('SavingsAccount', uselist=False, back_populates='customer')
+    loans = db.relationship('Loan', back_populates='customer', lazy=True)
+    user = db.relationship('User', back_populates='customer')
+    transactions=db.relationship('Transaction',back_populates='customer' ,uselist=True)
 
 
-class Staff(db.Model, SerializerMixin):
-    __tablename__ = 'staff'
-    serialize_rules = ('-staff_customers.staff', '-admin.staffs', '-password_hash',)
 
+
+
+class Admin(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    role = db.Column(db.String(), default="staff")
-    full_name = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    password_hash = db.Column(db.String(50), nullable=False)
-    password_hash = db.Column(db.String(50), nullable=False)
-    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
-    admin_id = db.Column(db.Integer, db.ForeignKey('admins.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    admin = db.relationship('Admin', back_populates='staffs')
-    staff_customers = db.relationship('StaffCustomer', back_populates='staff', cascade="all, delete-orphan")
+    user = db.relationship('User', back_populates='admin')
+    loan_approvals = db.relationship('LoanApproval', back_populates='admin')
+# Savings Account
 
-    @validates('email')
-    def validates_email(self, key, address):
-        if '@' not in address:
-            raise ValueError("Invalid email address")
-        return address
-
-    @validates('admin_id')
-    def validates_admin_id(self, key, val):
-        if not Admin.query.get(val):
-            raise ValueError("Admin ID does not exist")
-        return val
-
-    def set_password(self, password):
-        self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
-
-    def check_password(self, password):
-        return bcrypt.check_password_hash(self.password_hash, password)
-
-    def __repr__(self):
-        return f"<Staff {self.full_name}>"
-
-
-class StaffCustomer(db.Model, SerializerMixin):
-    __tablename__ = 'staff_customers'
-    serialize_rules = ('-staff.staff_customers', '-customer.staff_customers',)
-
+class SavingsAccount(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    staff_id = db.Column(db.Integer, db.ForeignKey('staff.id'), nullable=False)
-    customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
-    assigned_at = db.Column(db.DateTime, default=db.func.current_timestamp())
-    notes = db.Column(db.String(200), nullable=True)
+    balance = db.Column(db.Float, nullable=False, default=0.0)
+    customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), unique=True)
 
-    staff = db.relationship('Staff', back_populates='staff_customers')
-    customer = db.relationship('Customer', back_populates='staff_customers')
+    customer = db.relationship('Customer', back_populates='savings_account')
 
-    @validates('staff_id')
-    def validates_staff_id(self, key, val):
-        if not Staff.query.get(val):
-            raise ValueError("Staff ID does not exist")
-        return val
+    def deposit(self, amount, reference=None):
+        if amount <= 0:
+            raise ValueError("Deposit amount must be positive.")
+        
+        # Create a new deposit transaction
+        transaction = Transaction(
+            amount=amount,
+            transaction_type='deposit',
+            customer=self.customer,
+            reference=reference
+        )
+        
+        self.balance += amount
+        db.session.add(transaction)
+        db.session.commit()
+        return transaction
 
-    @validates('customer_id')
-    def validates_customer_id(self, key, val):
-        if not Customer.query.get(val):
-            raise ValueError("Customer ID does not exist")
-        return val
+    # In SavingsAccount class
+    def withdraw(self, amount, reference=None):
+        if amount <= 0:
+            raise ValueError("Withdrawal amount must be positive.")
+        transaction = Transaction(
+            amount=amount,
+            transaction_type='withdrawal',
+            status='pending',  # Set status to pending
+            customer=self.customer,
+            reference=reference
+        )
+    
+        db.session.add(transaction)
+        db.session.commit()
+        return transaction
 
-    def __repr__(self):
-        return f"<StaffCustomer staff={self.staff_id}, customer={self.customer_id}>"
 
+# Loans
 
-class Loan(db.Model, SerializerMixin):
-    __tablename__ = 'loans'
-    serialize_rules = ('-customer.loans',)
-
+class Loan(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
     amount = db.Column(db.Float, nullable=False)
     interest_rate = db.Column(db.Float, nullable=False)
-    status = db.Column(db.String(20), nullable=False)
-    issued_date = db.Column(db.DateTime, default=db.func.current_timestamp())
-    due_date = db.Column(db.DateTime, nullable=False)
-
-    customer = db.relationship('Customer', back_populates='loans')
-
-    @validates('customer_id')
-    def validates_customer_id(self, key, val):
-        if not Customer.query.get(val):
-            raise ValueError("Customer ID does not exist")
-        return val
-
-    @validates('status')
-    def validates_status(self, key, val):
-        if val not in ["pending", "approved", "rejected"]:
-            raise ValueError("Invalid status: must be 'pending', 'approved', or 'rejected'")
-        return val
-
-    def __repr__(self):
-        return f"<Loan id={self.id}, amount={self.amount}>"
+    loan_duration = db.Column(db.Integer, nullable=False)  # in months
+    status = db.Column(db.String(20), default='pending')  # pending, approved, rejected, repaid
+    customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'))
+    
+    customer = db.relationship('Customer', back_populates='loans', lazy=True)
+    repayments = db.relationship('Repayment', back_populates='loan', lazy=True)
+    approvals = db.relationship('LoanApproval', back_populates='loan', lazy=True)
+    def approve_loan(self,user):
+        if user.role !='admin':
+            raise PermissionError("Only admin can approve loans.")
+        self.status = 'approved'
+        approval = LoanApproval(admin=user.admin, loan=self, action='approved')
+        db.session.add(approval)
 
 
-class Repayment(db.Model, SerializerMixin):
-    __tablename__ = 'repayments'
-    serialize_rules = ('-customer.repayments',)
+    def reject_loan(self, user):
+        if user.role != 'admin':
+            raise PermissionError("Only admin can reject loans.")  # Correct error message
+        self.status = 'rejected'
+        approval = LoanApproval(admin=user.admin, loan=self, action='rejected')
+        db.session.add(approval)
 
+    def add_repayment(self, customer, amount, method=None, ref=None):
+        if self.customer_id != customer.id:
+            raise PermissionError("This customer does not own the loan.")
+        if self.status != 'approved':
+            raise ValueError("Cannot repay a loan that is not approved.")
+
+        repayment = Repayment(
+            loan_id=self.id,
+            customer=customer,
+            amount=amount,
+            payment_method=method,
+            reference=ref
+        )
+        db.session.add(repayment)
+
+        total_repaid = sum(r.amount for r in self.repayments) + amount
+        total_due = self.amount * (1 + self.interest_rate / 100)
+
+        if total_repaid >= total_due:
+            self.status = 'repaid'
+
+        db.session.commit()
+        return repayment
+
+# Loan settings (editable by Admin only)
+
+class LoanApproval(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
-    amount = db.Column(db.Float, nullable=False)
-    date_paid = db.Column(db.DateTime, default=db.func.current_timestamp())
+    admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=False)
+    loan_id = db.Column(db.Integer, db.ForeignKey('loan.id'), nullable=False)
+    action = db.Column(db.String(10), nullable=False)  # 'approved' or 'rejected'
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
+    admin = db.relationship('Admin', back_populates='loan_approvals')
+    loan = db.relationship('Loan', back_populates='approvals')
+
+
+class LoanSettings(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    default_interest_rate = db.Column(db.Float, nullable=False)
+
+
+
+
+class Repayment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    amount = db.Column(db.Float, nullable=False)
+    payment_date = db.Column(db.DateTime, default=datetime.utcnow)
+    loan_id = db.Column(db.Integer, db.ForeignKey('loan.id'), nullable=False)
+
+    loan=db.relationship('Loan',back_populates='repayments')
+
+    # Optional: who made the payment
+    customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'))
     customer = db.relationship('Customer', back_populates='repayments')
 
-    @validates('customer_id')
-    def validates_customer_id(self, key, val):
-        if not Customer.query.get(val):
-            raise ValueError("Customer ID does not exist")
-        return val
+    # Optional: transaction reference or method (bank, transfer, etc.)
+    payment_method = db.Column(db.String(50))
+    reference = db.Column(db.String(100))
 
-    def __repr__(self):
-        return f"<Repayment id={self.id}, amount={self.amount}>"
-
-
-class SavingsTransaction(db.Model, SerializerMixin):
-    __tablename__ = 'savings_transactions'
-    serialize_rules = ('-customer.savings_transactions',)
-
+class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
-    type = db.Column(db.String(20), nullable=False)  # 'deposit' or 'withdrawal'
     amount = db.Column(db.Float, nullable=False)
-    transaction_date = db.Column(db.DateTime, default=db.func.current_timestamp())
+    transaction_type = db.Column(db.String(50), nullable=False)  # 'deposit' or 'withdrawal'
+    status = db.Column(db.String(20), default='pending')  # 'pending', 'approved', 'rejected'
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Foreign key linking the transaction to a customer
+    customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'))
+    customer = db.relationship('Customer', back_populates='transactions', lazy=True)
+    
+    # Optional reference for the transaction (e.g., payment reference, withdrawal ID, etc.)
+    reference = db.Column(db.String(100))
 
-    customer = db.relationship('Customer', back_populates='savings_transactions')
-
-    @validates('customer_id')
-    def validates_customer_id(self, key, val):
-        if not Customer.query.get(val):
-            raise ValueError("Customer ID does not exist")
-        return val
-
-    @validates('type')
-    def validates_type(self, key, val):
-        if val not in ["deposit", "withdrawal"]:
-            raise ValueError("Invalid type: must be 'deposit' or 'withdrawal'")
-        return val
-
-    def __repr__(self):
-        return f"<SavingsTransaction id={self.id}, amount={self.amount}>"
-
-
-class AuditLog(db.Model, SerializerMixin):
-    __tablename__ = 'audit_logs'
-    serialize_rules = ('-admin.audit_logs',)
-
-    id = db.Column(db.Integer, primary_key=True)
-    action = db.Column(db.String(200), nullable=False)
-    timestamp = db.Column(db.DateTime, default=db.func.current_timestamp())
-    admin_id = db.Column(db.Integer, db.ForeignKey('admins.id'), nullable=False)
-
-    admin = db.relationship('Admin', back_populates='audit_logs')
-
-    @validates('admin_id')
-    def validates_admin_id(self, key, val):
-        admins = [admin.id for admin in Admin.query.all()]
-        if val not in admins:
-            raise ValueError("Admin Id does not exist")
-        return val
-
-    @validates('admin_id')
-    def validates_admin_id(self, key, val):
-        if not Admin.query.get(val):
-            raise ValueError("Admin ID does not exist")
-        return val
+    def approve(self):
+        self.status = 'approved'
+    
+    def reject(self):
+        self.status = 'rejected'
 
     def __repr__(self):
-        return f"<AuditLog id={self.id}, action={self.action}>"
+        return f'<Transaction {self.id}, {self.transaction_type}, {self.amount}, {self.status}>'
