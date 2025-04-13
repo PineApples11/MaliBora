@@ -1,10 +1,10 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import Dashboard from "./components/staff/dashboard";
-import Customers from "./components/staff/customers";
-import Loans from "./components/staff/loans";
-import Repayments from "./components/staff/repayments";
-import Savings from "./components/staff/savings";
-import Navbar from "./components/staff/navbar";
+import Dashboard from "./dashboard";
+import Customers from "./customers";
+import Loans from "./Loans.jsx";
+import Repayments from "./repayments";
+import Savings from "./savings";
+import Navbar from "./Navbar.jsx";
 
 const Staff = () => {
   return (

@@ -519,6 +519,7 @@ class CurrentCustomer(Resource):
 class LoginCustomer(Resource):
     def post(self):
         data = request.get_json()
+        print(data)
         username = data.get("username")
         password = data.get("password")
         role = data.get("role")
@@ -531,7 +532,7 @@ class LoginCustomer(Resource):
             user = Customer.query.filter_by(full_name = username).first()
         else:
             return make_response({"error": "Invalid role"}, 401)
-
+        print(user)
 
         if not user or not user.check_password(password):
              return make_response({"error": "Invalid credentials"}, 401)

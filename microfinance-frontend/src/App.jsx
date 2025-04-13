@@ -14,6 +14,8 @@ import './App.css'
 
 import CustomerLoanform from './CustomerLoanForm.jsx';
 import CustomerSavingsForm from './CustomerSavingsForm';
+import Staff from './staff.jsx'
+
 
 
 function App() {
@@ -21,6 +23,7 @@ function App() {
     <>
     <Router>
       <Routes>
+         
         <Route path="/" element={<Home />} />
         <Route path="/choice" element={<Choice />} />
         <Route path="/signup" element={<SignUp />} />
@@ -29,6 +32,8 @@ function App() {
         <Route path="/customer-repayments" element={<CustomerRepaymentsForm />} />
         <Route path="/customer-transactions" element={<CustomerTransactionForm />} />
         <Route path="/customer-loans" element={<CustomerLoanForm />} />
+        <Route path="/staff/*" element={<Staff />} />
+
       </Routes>
     </Router>   
     </>

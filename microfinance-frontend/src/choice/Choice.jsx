@@ -7,6 +7,10 @@ function Choice() {
     const isCustomer = () => {
         navigate('/signup')
     }
+    const isStaff = () => {
+      navigate("/staff/*")
+    }
+
     return (
       <>
         <body>
@@ -18,7 +22,7 @@ function Choice() {
             </div>
             <div class="container">
                 <div class="btn"><a href="#">Admin</a></div>
-                <div class="btn"><a href="#" >Staff</a></div>
+                <div class="btn" onClick={isStaff}><a href="#" >Staff</a></div>
                     <div class="btn" onClick={isCustomer}><a href="#" >Customer</a></div>
             </div>
             <div className="MaliBora">

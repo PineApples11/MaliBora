@@ -1,9 +1,10 @@
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 
-const Login = () => {
-  const navigate = useNavigate();
+function Login() {
+  const navigate = useNavigate(); // ✅ now inside the component
 
   const formik = useFormik({
     initialValues: {
@@ -28,108 +29,60 @@ const Login = () => {
             role: 'customer',
           }),
         });
-    
+
         if (!response.ok) {
           throw new Error('Login failed');
         }
-    
+
         const result = await response.json();
         alert(result.Message);
-    
-        // Now fetch the logged-in customer's data
+
         const customerRes = await fetch("http://127.0.0.1:5555/customer", {
           credentials: 'include',
         });
-    
+
         const customers = await customerRes.json();
         const customer = customers.find(c => c.full_name === values.full_name);
-    
+
         if (!customer) {
           alert("Customer details not found.");
           return;
         }
-    
+
         localStorage.setItem("user", JSON.stringify(customer));
         navigate('/customer-homepage', { state: { user: customer } });
-    
+
       } catch (err) {
         console.error(err);
         alert('Login failed. Check credentials.');
       }
-    }    
+    }
   });
 
   const handleClick = () => {
-    navigate('/signup')
+    navigate('/signup');
   }
 
   return (
-    <div className='log-container'>
-    <h2>Login</h2>
-    <div className="container">
-      <div className="screen_sign">
-        <div className="screen__content">
-          <form onSubmit={formik.handleSubmit} className="login">
-  
-            <div className="login__field">
-              <i className="login__icon fas fa-user"></i>
-              <input
-                name="full_name"
-                type="text"
-                className="login__input"
-                placeholder="Username"
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                value={formik.values.full_name}
-              />
-              {formik.touched.full_name && formik.errors.full_name && (
-                <div>{formik.errors.full_name}</div>
-              )}
-            </div>
-  
-            <div className="login__field">
-              <i className="login__icon fas fa-lock"></i>
-              <input
-                name="password"
-                type="password"
-                className="login__input"
-                placeholder="Password"
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                value={formik.values.password}
-              />
-              {formik.touched.password && formik.errors.password && (
-                <div>{formik.errors.password}</div>
-              )}
-            </div>
-  
-            <button type="submit" className="button login__submit">
-              <span className="button__text">Log In</span>
-              <i className="button__icon fas fa-chevron-right"></i>
-            </button>
-            <button type='button' onClick={handleClick} className="button login__submit">
-              <span className="button__text">Sign up Instead</span>
-              <i className="button__icon fas fa-chevron-right"></i>
-            </button>
-          </form>
-  
-          <div className="social-login">
-            <div className='sign'></div>
-              <div className="social-icons">
-              <h4>Log in Form</h4></div>
-            </div>
-        </div>
-        <div className="screen__background">
-          <span className="screen__background__shape screen__background__shape4"></span>
-          <span className="screen__background__shape screen__background__shape3"></span>
-          <span className="screen__background__shape screen__background__shape2"></span>
-          <span className="screen__background__shape screen__background__shape1"></span>
-        </div>
-      </div>
-    </div>
-  </div>
-  
+    <form onSubmit={formik.handleSubmit}>
+      <input
+        type="text"
+        name="full_name"
+        onChange={formik.handleChange}
+        value={formik.values.full_name}
+        placeholder="Full Name"
+      />
+      <input
+        type="password"
+        name="password"
+        onChange={formik.handleChange}
+        value={formik.values.password}
+        placeholder="Password"
+      />
+      <button type="submit">Login</button>
+      <button type="button" onClick={handleClick}>Sign Up</button>
+    </form>
   );
-};
+}
 
 export default Login;
