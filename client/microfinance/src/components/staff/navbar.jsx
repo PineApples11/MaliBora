@@ -5,6 +5,10 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-title">MaliBora</div>
+      <div className="staffportal">
+        Staff Portal
+      </div>
+      
       <div className="navbar-links">
         <NavLink to="/staff/dashboard" className={({ isActive }) => (isActive ? "active" : "")}>
           Dashboard
@@ -21,6 +25,11 @@ const Navbar = () => {
         <NavLink to="/staff/savings" className={({ isActive }) => (isActive ? "active" : "")}>
           Savings
         </NavLink>
+        <div className="Log-out">
+          Log out
+        </div>
+
+
       </div>
     </nav>
   );
