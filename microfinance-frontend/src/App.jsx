@@ -8,6 +8,7 @@ import CustomerLoanForm from './Customer/CustomerLoanForm'
 import Home from './Home'
 import Choice from './choice/Choice'
 import CustomerRepaymentsForm from './Customer/CustomerRepayments'
+import Staff from './Staff/staff.jsx'
 // import { useState } from 'react'
 
 import './App.css'
@@ -29,6 +30,7 @@ function App() {
         <Route path="/customer-repayments" element={<CustomerRepaymentsForm />} />
         <Route path="/customer-transactions" element={<CustomerTransactionForm />} />
         <Route path="/customer-loans" element={<CustomerLoanForm />} />
+        <Route path="/staff/*" element={<Staff />} />
       </Routes>
     </Router>   
     </>
