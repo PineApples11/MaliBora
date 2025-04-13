@@ -9,7 +9,8 @@ from datetime import datetime
 from decorators import login_required, role_required
 from flask_cors import CORS
 
-CORS(app)
+CORS(app, supports_credentials=True, origins=["http://localhost:5173", "http://127.0.0.1:5173"])
+
 @app.route('/')
 def index():
     return '<h1>Project Server</h1>'
@@ -42,10 +43,10 @@ class RegisterAdmin(Resource):
 api.add_resource(RegisterAdmin, "/register-admin")
 
 class RegisterCustomer(Resource):
-    # @login_required
-    # @role_required("staff")
+
     def post(self):
         data = request.get_json()
+        print(data)
 
         admin_id = data['admin_id']
         exists = Admin.query.filter_by(id=admin_id).first()
@@ -68,13 +69,15 @@ class RegisterCustomer(Resource):
             )
             password = data["password_hash"]
             new_customer.set_password(password)
+            print(new_customer.to_dict())
 
             db.session.add(new_customer)
             db.session.commit()
 
             return make_response(new_customer.to_dict(), 201)
         
-        except:
+        except Exception as e:
+            print("Error:", e)
             return  make_response({"error":"Bad Request"}, 400)
     
 api.add_resource(RegisterCustomer, "/register-customer")
@@ -118,27 +121,30 @@ api.add_resource(RegisterStaff, "/register-staff")
 class Login(Resource):
     def post(self):
         data = request.get_json()
-        username = data.get("username")
-        password = data.get("password")
+        print(data)
+
+        username = data.get("full_name")
+        password = data.get("password")  
         role = data.get("role")
 
         if role == "admin":
-            user = Admin.query.filter_by(username = username).first()
+            user = Admin.query.filter_by(username=username).first()
         elif role == "staff":
-            user = Staff.query.filter_by(full_name = username).first()
+            user = Staff.query.filter_by(full_name=username).first()
         elif role == "customer":
-            user = Customer.query.filter_by(full_name = username).first()
+            print("responds")
+            user = Customer.query.filter_by(full_name=username).first()
         else:
             return make_response({"error": "Invalid role"}, 401)
 
-
         if not user or not user.check_password(password):
-             return make_response({"error": "Invalid credentials"}, 401)
-        
+            return make_response({"error": "Invalid credentials"}, 401)
+
         session["user_id"] = user.id
         session["role"] = role
 
-        return make_response ({"Message": "Login Successful"}, 201)
+        return make_response({"Message": "Login Successful"}, 201)
+
 
 class Logout(Resource):
         def post(self):
@@ -249,6 +255,17 @@ class StaffResource(Resource):
         db.session.commit()
 
         return make_response({staff.to_dict()}, 200)
+    
+    def delete(self, id):
+        staff = Staff.query.filter_by(id=id).first()
+
+        if not staff:
+            return make_response({"error": "Staff not found"}, 404)
+
+        db.session.delete(staff)
+        db.session.commit()
+
+        return make_response({"message": f"Staff member deleted successfully"}, 200)
 
 class CustomerResource(Resource):
     def get(self, id=None):
@@ -296,6 +313,17 @@ class CustomerResource(Resource):
         db.session.commit()
 
         return make_response({customer.to_dict()}, 200)
+    
+    def delete(self, id):
+        customer = Customer.query.filter_by(id=id).first()
+
+        if not customer:
+            return make_response({"error": "Customer not found"}, 404)
+
+        db.session.delete(customer)
+        db.session.commit()
+
+        return make_response({"message": f"Customer deleted successfully"}, 200)
 
 
 class StaffCustomerResource(Resource):
@@ -346,7 +374,7 @@ class LoanResource(Resource):
             return make_response({"error": "Status is not pending, approved or rejected"}, 404)
         
         try:
-            issue_date = datetime.strptime(data['issue_date'], "%Y-%m-%d %H:%M:%S")
+            issue_date = datetime.strptime(data['issued_date'], "%Y-%m-%d %H:%M:%S")
             due_date = datetime.strptime(data['due_date'], "%Y-%m-%d %H:%M:%S")
         except:
             raise ValueError("wrong date format")
@@ -360,7 +388,7 @@ class LoanResource(Resource):
 
         db.session.commit()
 
-        return make_response({loan.to_dict()}, 200)
+        return make_response({"message": "Put works! Trust"}, 200)
     
     # @login_required
     # @role_required("borrower")
@@ -501,6 +529,43 @@ class AuditLogResource(Resource):
         
         return make_response(al.to_dict(), 201)
 
+class CurrentCustomer(Resource):
+    def get(self):
+        if session.get("role") != "customer":
+            return make_response({"error": "Unauthorized"}, 401)
+
+        user_id = session.get("user_id")
+        customer = Customer.query.get(user_id)
+        if not customer:
+            return make_response({"error": "Customer not found"}, 404)
+
+        return make_response(customer.to_dict(), 200)
+
+class LoginCustomer(Resource):
+    def post(self):
+        data = request.get_json()
+        username = data.get("username")
+        password = data.get("password")
+        role = data.get("role")
+
+        if role == "admin":
+            user = Admin.query.filter_by(username = username).first()
+        elif role == "staff":
+            user = Staff.query.filter_by(full_name = username).first()
+        elif role == "customer":
+            user = Customer.query.filter_by(full_name = username).first()
+        else:
+            return make_response({"error": "Invalid role"}, 401)
+
+
+        if not user or not user.check_password(password):
+             return make_response({"error": "Invalid credentials"}, 401)
+        
+        session["user_id"] = user.id
+        session["role"] = role
+
+        return make_response ({"Message": "Login Successful"}, 201)
+
 
 app.register_error_handler(404, handle_error)
 api.add_resource(AdminResource, "/admin", "/admin/<int:id>")
@@ -514,6 +579,9 @@ api.add_resource(AuditLogResource, "/audit-log", "/audit-log/<int:id>")
 api.add_resource(Logout, "/logout")
 api.add_resource(CheckSession, '/check_session')
 api.add_resource(Login, "/login")
+api.add_resource(LoginCustomer, "/login-customer")
+api.add_resource(CurrentCustomer, "/current-customer")
+
 
 
 

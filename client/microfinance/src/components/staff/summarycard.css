@@ -1,0 +1,38 @@
+.summary-card {
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+  }
+
+ 
+  
+  .summary-card h2 {
+    font-size: 30px;
+    font-weight: 1000;
+    margin: 0;
+    color: #6d57be;
+  }
+  
+  .summary-card p {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0;
+    color: #6d57be;
+
+  }
+  
+  .summary-card a {
+    font-size: 14px;
+    color: #2563eb;
+    text-decoration: none;
+  }
+  
+  .summary-card a:hover {
+    text-decoration: underline;
+  }
+  

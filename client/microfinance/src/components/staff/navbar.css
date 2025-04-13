@@ -1,0 +1,51 @@
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    
+    
+    z-index: 1000;
+    background-color: #6d57be; 
+    color: white;
+    
+    display: flex;
+    justify-content: space-evenly;
+    /* text-align: center; */
+    /* align-items: center; */
+    padding: 12px 24px;
+    /* padding-left: 10%; */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  }
+  
+  .navbar-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white
+  }
+  
+  .navbar-links {
+    display: flex;
+    gap: 16px;
+  }
+  
+  .navbar-links a {
+    text-decoration: none;
+    color: black;
+    padding: 8px 14px;
+    border-radius: 4px;
+    font-weight: bold;
+
+  }
+  
+
+  .navbar-links a:hover {
+    background-color: #a5a5a5;
+  }
+  
+
+.staffportal{
+  text-decoration: none;
+  color: black;
+  padding: 8px 14px;
+  border-radius: 4px;
+  font-weight: bold;}

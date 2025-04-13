@@ -90,3 +90,4 @@ venv.bak/
 # Windows
 Thumbs.db
 ehthumbs.db
+node_modules

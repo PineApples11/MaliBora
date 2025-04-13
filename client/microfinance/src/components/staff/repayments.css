@@ -1,0 +1,74 @@
+.repayments-page {
+  color: #f0f0f0;
+  width: 1700px;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  padding-top: 10%;
+  padding-left: 5%;
+  position: sticky;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.search-box {
+  margin-bottom: 20px;
+}
+
+.search-input {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.error-text {
+  color: red;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.repayments-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.repayments-table th,
+.repayments-table td {
+  padding: 12px;
+  border: 1px solid #ccc;
+  text-align: left;
+}
+
+.repayments-table th {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.repayments-table tr:nth-child(even) {
+  background-color: #2b2b2b;
+}
+
+.repayments-table tr:hover {
+  background-color: #3c3c3c;
+}
+
+.repayments-table .actions button {
+  color: #3498db;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.repayments-table .actions button:hover {
+  text-decoration: underline;
+}
