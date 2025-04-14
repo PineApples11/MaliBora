@@ -11,7 +11,7 @@ function Choice() {
         navigate('/signup')
     }
     const isStaff = () => {
-      navigate("/staff/*")
+      navigate("/staff/dashboard")
     }
     return (
       <>
