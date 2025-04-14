@@ -1,9 +1,18 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import "./navbar.css";
 
 const Navbar = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    navigate("/");
+  };
+
   return (
     <nav className="navbar">
+
+<span className="nav-label">Staff Portal</span>
+
       <div className="navbar-title">MaliBora</div>
       <div className="navbar-links">
         <NavLink to="/staff/dashboard" className={({ isActive }) => (isActive ? "active" : "")}>
@@ -21,6 +30,9 @@ const Navbar = () => {
         <NavLink to="/staff/savings" className={({ isActive }) => (isActive ? "active" : "")}>
           Savings
         </NavLink>
+        <a onClick={handleLogout} className="logout-link">
+          Logout
+        </a>
       </div>
     </nav>
   );

@@ -71,3 +71,28 @@
   .loan-table .actions button:hover {
     text-decoration: underline;
   }
+
+
+  .approve-btn,
+.reject-btn {
+  padding: 6px 10px;
+  margin-right: 6px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.approve-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.reject-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.no-actions {
+  color: #888;
+}

@@ -51,7 +51,7 @@ const Dashboard = () => {
   return (
     <div className="wrap">
     <div className="dashboard-page">
-      <h1 className="dashboard-title">Welcome to the Staff Dashboard</h1>
+      {/* <h1 className="dashboard-title">Welcome to the Staff Dashboard</h1> */}
       <div className="card-grid">
         <SummaryCard title="Total Customers" value={stats.totalCustomers} link="/customers" />
         <SummaryCard title="Approved Loans" value={stats.approvedLoans} link="/loans" />
