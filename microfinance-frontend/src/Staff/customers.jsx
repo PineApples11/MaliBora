@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import "./customers.css";
+import Loading from "../Loading/Loading";
 
 const Customers = () => {
   const [customers, setCustomers] = useState([]);
+  const [active, setActive] = useState(false);
   const [loans, setLoans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -26,6 +28,7 @@ const Customers = () => {
         setCustomers(customerData);
         setLoans(loansData);
         setLoading(false);
+        setActive(true);
       } catch (err) {
         setError(err.message);
         setLoading(false);
@@ -44,7 +47,12 @@ const Customers = () => {
   );
 
   return (
-    <div className="customers-page">
+    !active ? (
+      <div className="loader">
+        <Loading />
+      </div>
+    ) : (
+      <div className="customers-page">
       <h1 className="page-title">Customer Management</h1>
 
       <div className="search-box">
@@ -135,6 +143,7 @@ const Customers = () => {
         </div>
       )}
     </div>
+    )
   );
 };
 

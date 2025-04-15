@@ -5,10 +5,11 @@ import Loans from "./Loans.jsx";
 import Repayments from "./repayments";
 import Savings from "./savings";
 import Navbar from "./Navbar.jsx";
+import "./staff.css"
 
 const Staff = () => {
   return (
-    <>
+    <div className="staff">
       <Navbar />
       <Routes>
         <Route path="dashboard" element={<Dashboard />} />
@@ -18,7 +19,7 @@ const Staff = () => {
         <Route path="savings" element={<Savings />} />
         <Route path="/" element={<Navigate to="dashboard" />} />
       </Routes>
-    </>
+    </div>
   );
 };
 

@@ -6,15 +6,16 @@
 	box-sizing: border-box;
 	font-family: "Roboto", sans-serif;
 }
-body {
+.main-con {
 	position: relative;
 	display: flex;
+	flex-direction: column;
 	justify-content: center;
-	/* align-items: center; */
+	align-items: center;
 	min-height: 100vh;
     background: linear-gradient(90deg, #C7C5F4, #776BCC);
 }
-.MaliBora {
+h1 {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -40,7 +41,7 @@ body {
 }
 .container {
 	width: 1000px;
-    height: 60vh;
+    height: 50vh;
 	display: flex;
 	flex-wrap: wrap;
     align-items: center;
@@ -112,7 +113,7 @@ body {
 	transition: 0.5s;
 	transition-delay: 0.5;
 }
-.container .btn:hover::before /*lightup button*/ {
+.container .btn:hover::before {
 	bottom: 0;
 	height: 50%;
 	width: 80%;
@@ -132,27 +133,27 @@ body {
 	transition: 0.5s;
 	transition-delay: 0.5;
 }
-.container .btn:hover::after /*lightup button*/ {
+.container .btn:hover::after {
 	top: 0;
 	height: 50%;
 	width: 80%;
 	border-radius: 30px;
 }
-.container .btn:nth-child(1)::before, /*chnage 1*/
+.container .btn:nth-child(1)::before, 
 .container .btn:nth-child(1)::after {
 	background: #ff1f71;
 	box-shadow: 0 0 5px #ff1f71, 0 0 15px #ff1f71, 0 0 30px #ff1f71,
 		0 0 60px #ff1f71;
 }
-.container .btn:nth-child(2)::before, /* 2*/
+.container .btn:nth-child(2)::before, 
 .container .btn:nth-child(2)::after {
 	background: #2db2ff;
 	box-shadow: 0 0 5px #2db2ff, 0 0 15px #2db2ff, 0 0 30px #2db2ff,
 		0 0 60px #2db2ff;
 }
-.container .btn:nth-child(3)::before, /* 3*/
+.container .btn:nth-child(3)::before, 
 .container .btn:nth-child(3)::after {
 	background: #1eff45;
 	box-shadow: 0 0 5px #1eff45, 0 0 15px #1eff45, 0 0 30px #1eff45,
 		0 0 60px #1eff45;
-}
+} 

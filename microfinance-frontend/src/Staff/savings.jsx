@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import "./savings.css";
+import Loading from "../Loading/Loading";
 
 const Savings = () => {
   const [transactions, setTransactions] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [active, setActive] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
 
@@ -24,6 +26,7 @@ const Savings = () => {
         setTransactions(transactionsData);
         setCustomers(customersData);
         setLoading(false);
+        setActive(false)
       } catch (err) {
         setError(err.message);
         setLoading(false);
@@ -44,6 +47,11 @@ const Savings = () => {
   });
 
   return (
+    active ? (
+      <div className="loader">
+        <Loading/>
+      </div>
+    ) : (
     <div className="savings-page">
       <h1 className="page-title">Savings Transactions</h1>
 
@@ -85,7 +93,7 @@ const Savings = () => {
         </div>
       )}
     </div>
-  );
+  ))
 };
 
 export default Savings;

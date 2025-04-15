@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import "./loans.css";
+import Loading from "../Loading/Loading";
 
 const Loans = () => {
   const [loans, setLoans] = useState([]);
+  const [active, setActive] = useState(true);
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -25,6 +27,7 @@ const Loans = () => {
         setLoans(loansData);
         setCustomers(customersData);
         setLoading(false);
+        setActive(false)
       } catch (err) {
         setError(err.message);
         setLoading(false);
@@ -45,6 +48,11 @@ const Loans = () => {
   });
 
   return (
+    active ? (
+      <div className="loader">
+        <Loading />
+      </div>
+    ) : (
     <div className="loans-page">
       <h1 className="page-title">Loan Management</h1>
 
@@ -88,7 +96,7 @@ const Loans = () => {
         </div>
       )}
     </div>
-  );
+  ))
 };
 
 export default Loans;

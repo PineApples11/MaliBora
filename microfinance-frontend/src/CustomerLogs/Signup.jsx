@@ -2,6 +2,7 @@ import React from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
+import "./signup.css"
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -58,22 +59,19 @@ const SignUp = () => {
     navigate('/choice')
   }
   return (
-    <div className='log-container'>
-     <div className='sign-container-button'>
-        <h2>Sign Up</h2>
-        <button className='change_role' onClick={handelRoleChange}>Change Role</button>
-     </div>
+    <div className='sign-container'>
       <div className="container" height="100px">
+        <h2>Sign Up Form</h2>
         <div className="screen_sign">
           <div className="screen__content">
             <form onSubmit={formik.handleSubmit} className="login">
 
-              <div className="login__field">
-                <i className="login__icon fas fa-user"></i>
+              <div className="signin__field">
+                <i className="signin__icon fas fa-user"></i>
                 <input
                   type="text"
                   name="full_name"
-                  className="login__input"
+                  className="signin__input"
                   placeholder="Full Name"
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
@@ -96,12 +94,12 @@ const SignUp = () => {
                 {formik.touched.national_id && formik.errors.national_id ? <div>{formik.errors.national_id}</div> : null}
               </div>
 
-              <div className="login__field">
-                <i className="login__icon fas fa-phone"></i>
+              <div className="signin__field">
+                <i className="signin__icon fas fa-phone"></i>
                 <input
                   type="text"
                   name="phone"
-                  className="login__input"
+                  className="signin__input"
                   placeholder="Phone"
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
@@ -110,12 +108,12 @@ const SignUp = () => {
                 {formik.touched.phone && formik.errors.phone ? <div>{formik.errors.phone}</div> : null}
               </div>
 
-              <div className="login__field">
-                <i className="login__icon fas fa-wallet"></i>
+              <div className="signin__field">
+                <i className="signin__icon fas fa-wallet"></i>
                 <input
                   type="number"
                   name="savings_balance"
-                  className="login__input"
+                  className="signin__input"
                   placeholder="Initial Savings"
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
@@ -124,12 +122,12 @@ const SignUp = () => {
                 {formik.touched.savings_balance && formik.errors.savings_balance ? <div>{formik.errors.savings_balance}</div> : null}
               </div>
 
-              <div className="login__field">
-                <i className="login__icon fas fa-lock"></i>
+              <div className="signin__field">
+                <i className="signin__icon fas fa-lock"></i>
                 <input
                   type="password"
                   name="password"
-                  className="login__input"
+                  className="signin__input"
                   id='sign_in_input'
                   placeholder="Password"
                   onChange={formik.handleChange}
@@ -139,21 +137,17 @@ const SignUp = () => {
                 {formik.touched.password && formik.errors.password ? <div>{formik.errors.password}</div> : null}
               </div>
 
-              <button type="submit" className="button login__submit">
+              <button type="submit" className="button signin__submit">
                 <span className="button__text">Sign Up Now</span>
                 <i className="button__icon fas fa-chevron-right"></i>
               </button>
-              <button type='button' onClick={handleClick} className="button login__submit">
+              <button type='button' onClick={handleClick} className="button signin__submit">
                 <span className="button__text">Log in Instead</span>
                 <i className="button__icon fas fa-chevron-right"></i>
-            </button>
+              </button>
             </form>
 
-            <div className="social-login">
-            <div className='sign'></div>
-              <div className="social-icons">
-              <h4>Sign in Form</h4></div>
-            </div>
+          
           </div>
           <div className="screen__background">
             <span className="screen__background__shape screen__background__shape4"></span>
