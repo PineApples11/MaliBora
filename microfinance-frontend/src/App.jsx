@@ -11,7 +11,7 @@ import CustomerRepaymentsForm from './Customer/CustomerRepayments'
 import Staff from './Staff/staff.jsx'
 // import { useState } from 'react'
 
-import './App.css'
+// import './App.css'
 import Admin from './Admin/Admin.jsx';
 
 

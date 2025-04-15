@@ -1,3 +1,9 @@
+.loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
 .customers-page {
     /* padding: 1.5rem; */
     color: #f0f0f0;

@@ -22,9 +22,12 @@ header {
 }
 
 .hero-message {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   grid-template-columns: max-content;
   color: var(--text-1);
+  font-size: 5em;
   line-height: var(--font-lineheight-0);
 }
 

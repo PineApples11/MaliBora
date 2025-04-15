@@ -9,6 +9,7 @@ function CustomerDisplay() {
   const [loans, setLoans] = useState(null);
   const [transactions, setTransactions] = useState(null);
   const [repayments, setRepayments] = useState(null);
+  const [anyLoans, setAnyLoans] = useState(false);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -65,8 +66,19 @@ function CustomerDisplay() {
       });
   }, []);
 
-  
-  
+  useEffect(() => {
+    if (loans && customer) {
+      const hasApprovedLoan = loans.find(
+        loan => loan.customer_id === customer.id && loan.status === "approved"
+      )
+      if (hasApprovedLoan) {
+        setAnyLoans(true)
+      } else {
+        setAnyLoans(false)
+      }
+    }
+    
+  }, [loans, customer])
 
   const handleLoan = () => {
     navigate('/customer-loans')
@@ -102,8 +114,8 @@ function CustomerDisplay() {
         
         <div className="button-group">
           <button className="primary-btn" type="button" onClick={handleLoan}>Take a Loan</button>
-          <button className="primary-btn" onClick={handleTransaction}>View Transactions</button>
-          <button className="primary-btn" onClick={handleRepayments}>View Repayments</button>
+          <button className="primary-btn" onClick={handleTransaction}>Make a Transactions</button>
+          <button className="primary-btn" disabled={!anyLoans} onClick={handleRepayments} >Make Repayments</button>
           <button className="secondary-btn" type="button" onClick={handleLogout}>Logout</button>
         </div>
       </div>

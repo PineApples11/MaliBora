@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import "./repayments.css";
+import Loading from "../Loading/Loading";
 
 const Repayments = () => {
   const [repayments, setRepayments] = useState([]);
+  const [active, setActive] = useState(true);
   const [customers, setCustomers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
@@ -24,6 +26,7 @@ const Repayments = () => {
         setRepayments(repData);
         setCustomers(custData);
         setLoading(false);
+        setActive(false)
       } catch (err) {
         setError(err.message);
         setLoading(false);
@@ -43,6 +46,11 @@ const Repayments = () => {
   );
 
   return (
+    active ? (
+      <div className="loader">
+        <Loading />
+      </div>
+    ) : (
     <div className="repayments-page">
       <h1 className="page-title">Repayment Records</h1>
 
@@ -82,7 +90,7 @@ const Repayments = () => {
         </div>
       )}
     </div>
-  );
+  ))
 };
 
 export default Repayments;

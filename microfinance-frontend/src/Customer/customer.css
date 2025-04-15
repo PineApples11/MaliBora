@@ -76,6 +76,12 @@
   border-color: #646cff;
 }
 
+.primary-btn:disabled {
+  background-color: #535bf2;
+  color: #646cff;
+  cursor: not-allowed;
+}
+
 .secondary-btn {
   background-color: #6A679E;
   color: white;

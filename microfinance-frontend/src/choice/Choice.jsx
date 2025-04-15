@@ -15,7 +15,7 @@ function Choice() {
     }
     return (
       <>
-        <body>
+        <div className='main-con'>
             <div className="MaliBora">
                <h1>MALIBORA</h1>
             </div>
@@ -25,12 +25,12 @@ function Choice() {
             <div class="container">
                 <div class="btn" onClick={isAdmin}><a href="#">Admin</a></div>
                 <div class="btn" onClick={isStaff}><a href="#" >Staff</a></div>
-                    <div class="btn" onClick={isCustomer}><a href="#" >Customer</a></div>
+                <div class="btn" onClick={isCustomer}><a href="#" >Customer</a></div>
             </div>
             <div className="MaliBora">
                <button type="button"onClick={handleClick} >Back</button> 
             </div>	
-        </body>
+        </div>
 
       </>
     )
