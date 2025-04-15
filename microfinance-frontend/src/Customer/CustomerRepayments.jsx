@@ -1,10 +1,16 @@
 import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 
 function CustomerRepaymentsForm() {
   const navigate = useNavigate();
-
   const [customer, setCustomer] = useState(null);
+  const [formData, setFormData] = useState({
+    customer_id: 1,
+    amount: '',
+    date_paid: getCurrentDateTime()
+  });
+
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -12,6 +18,17 @@ function CustomerRepaymentsForm() {
       setCustomer(user);
     }
   }, []);
+
+  useEffect(() => {
+    if (customer) {
+      setFormData({
+        customer_id: customer.id,
+        amount: '',
+        date_paid: getCurrentDateTime()
+      });
+    }
+  }, [customer]);
+
 
   function getCurrentDateTime() {
     const now = new Date();
@@ -27,64 +44,34 @@ function CustomerRepaymentsForm() {
     return formattedDateTime;
   }
 
-  const [formData, setFormData] = useState({
-    customer_id: 1,
-    amount: '',
-    date_paid: getCurrentDateTime()
-  });
+ 
+  // const [error, setError] = useState(null);
+  // const [successMessage, setSuccessMessage] = useState('');
+  
 
-  useEffect(() => {
-    if (customer) {
-      setFormData({
-        customer_id: customer.id,
-        amount: '',
-        date_paid: getCurrentDateTime()
-      });
-    }
-  }, [customer]);
-
-  const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState('');
-
-  function handleChange(e) {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: name === 'amount' ? parseFloat(value) : value,
-    }));
-  }
-
+  
   async function handleSubmit(e) {
     e.preventDefault();
-
-    setError(null);
-    setSuccessMessage('');
-
     try {
       const response = await fetch("http://127.0.0.1:5555/repayment", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
       if (response.ok) {
-        const data = await response.json();
-        setSuccessMessage('Repayments Successful!');
+        toast.success("Payment received successfully!");
+        navigate("/customer-homepage");
       } else {
-        throw new Error('Failed to process repayments');
+        toast.error("Payment not received. Please try again.");
       }
-      alert("Repayments successful!")
-      navigate("/customer-homepage")
     } catch (e) {
-      setError('Failed to submit repayments. Please try again later.');
-      console.error('Error submitting repayments:', e);
+      console.error(e);
+      toast.error("Something went wrong. Try again.");
     }
   }
-  const handleGoBack = () => {
-    navigate('/customer-homepage')
-  }
+
+  const handleGoBack = () => navigate('/customer-homepage');
 
   return (
     <div className='log-container'>

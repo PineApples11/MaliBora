@@ -1,8 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import React, { useState,useEffect } from 'react';
+import { toast } from 'react-toastify';
 
 function CustomerLoanForm() {
     const navigate = useNavigate();
+    const [customer, setCustomer] = useState(null);
+
   function getCurrentDateTime() {
     const now = new Date();
 
@@ -17,7 +20,7 @@ function CustomerLoanForm() {
     return formattedDateTime;
 }
 
-const [customer, setCustomer] = useState(null);
+
 
 useEffect(() => {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -64,29 +67,30 @@ useEffect(() => {
     e.preventDefault();
     
 
-    setError(null);
-    setSuccessMessage('');
+    // setError(null);
+    // setSuccessMessage('');
 
     try {
-      const response =await fetch("http://127.0.0.1:5555/loan", {
+      const response = await fetch("http://127.0.0.1:5555/loan", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(formData)
-    })
-      .then(res => res.json())
-      .then(data => console.log(data))
-      .catch(error => console.log("Error:", error));
+    });
 
-    alert("Loan Successfully Made")
-    navigate('/customer-homepage')
-
-    } catch (e) {
-      setError('Failed to submit loan request. Please try again later.');
-      console.error('Error submitting loan request:', e);
+        if (response.ok) {
+        toast.success("Loan applied successfully. Awaiting approval.");
+        navigate('/customer-homepage');
+      } else {
+        toast.error("Loan application failed.");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong. Try again later.");
     }
   }
+  
   const handleGoBack = () => {
     navigate('/customer-homepage')
   }

@@ -53,21 +53,6 @@ const Dashboard = () => {
   }, []);
 
   return (
-<<<<<<< HEAD
-    <div className="wrap">
-    <div className="dashboard-page">
-      {/* <h1 className="dashboard-title">Welcome to the Staff Dashboard</h1> */}
-      <div className="card-grid">
-        <SummaryCard title="Total Customers" value={stats.totalCustomers} link="/customers" />
-        <SummaryCard title="Approved Loans" value={stats.approvedLoans} link="/loans" />
-        <SummaryCard title="Pending Loans" value={stats.pendingLoans} link="/loans" />
-        <SummaryCard title="Total Repayments" value={stats.totalRepayments} link="/repayments" />
-        <SummaryCard
-          title="Total Savings (Deposits)"
-          value={`KSH ${stats.totalSavings.toLocaleString()}`}
-          link="/savings"
-        />
-=======
     active ? (
      <div className="loader">
        <Loading />
@@ -88,7 +73,6 @@ const Dashboard = () => {
             />
           </div>
         </div>
->>>>>>> 596db710f1b441dc2431cfa5cbc6b852a752996c
       </div>
     )
   );

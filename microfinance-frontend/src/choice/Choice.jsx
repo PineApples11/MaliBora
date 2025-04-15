@@ -78,3 +78,4 @@ function Choice() {
 }
 
 export default Choice; */}
+export default Choice;

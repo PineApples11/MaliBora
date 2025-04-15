@@ -2,9 +2,8 @@ import React from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
-import "./signup.css"
-
-
+import { toast } from 'react-toastify';
+import "./signup.css";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -30,7 +29,7 @@ const SignUp = () => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            admin_id: 1, // you can change this later to dynamic admin
+            admin_id: 1,
             full_name: values.full_name,
             national_id: values.national_id,
             phone: values.phone,
@@ -42,24 +41,27 @@ const SignUp = () => {
 
         if (!res.ok) {
           const err = await res.json();
-          alert(err.error || 'Registration failed');
+          toast.error(err.error || 'Registration failed');
           return;
         }
 
-        alert("Registration successful! Please log in.");
+        toast.success("Registration successful! Please log in.");
         navigate('/login');
       } catch (err) {
         console.error('Signup error:', err);
-        alert("Something went wrong. Try again.");
+        toast.error("Something went wrong. Try again.");
       }
     },
   });
+
   const handleClick = () => {
-    navigate('/login')
-  }
+    navigate('/login');
+  };
+
   const handelRoleChange = () => {
-    navigate('/choice')
-  }
+    navigate('/choice');
+  };
+
   return (
     <div className='sign-container'>
       <div className="container" height="100px">
@@ -67,7 +69,6 @@ const SignUp = () => {
         <div className="screen_sign">
           <div className="screen__content">
             <form onSubmit={formik.handleSubmit} className="login">
-
               <div className="signin__field">
                 <i className="signin__icon fas fa-user"></i>
                 <input
@@ -79,7 +80,7 @@ const SignUp = () => {
                   onBlur={formik.handleBlur}
                   value={formik.values.full_name}
                 />
-                {formik.touched.full_name && formik.errors.full_name ? <div>{formik.errors.full_name}</div> : null}
+                {formik.touched.full_name && formik.errors.full_name && <div>{formik.errors.full_name}</div>}
               </div>
 
               <div className="login__field">
@@ -93,7 +94,7 @@ const SignUp = () => {
                   onBlur={formik.handleBlur}
                   value={formik.values.national_id}
                 />
-                {formik.touched.national_id && formik.errors.national_id ? <div>{formik.errors.national_id}</div> : null}
+                {formik.touched.national_id && formik.errors.national_id && <div>{formik.errors.national_id}</div>}
               </div>
 
               <div className="signin__field">
@@ -107,7 +108,7 @@ const SignUp = () => {
                   onBlur={formik.handleBlur}
                   value={formik.values.phone}
                 />
-                {formik.touched.phone && formik.errors.phone ? <div>{formik.errors.phone}</div> : null}
+                {formik.touched.phone && formik.errors.phone && <div>{formik.errors.phone}</div>}
               </div>
 
               <div className="signin__field">
@@ -121,7 +122,7 @@ const SignUp = () => {
                   onBlur={formik.handleBlur}
                   value={formik.values.savings_balance}
                 />
-                {formik.touched.savings_balance && formik.errors.savings_balance ? <div>{formik.errors.savings_balance}</div> : null}
+                {formik.touched.savings_balance && formik.errors.savings_balance && <div>{formik.errors.savings_balance}</div>}
               </div>
 
               <div className="signin__field">
@@ -136,7 +137,7 @@ const SignUp = () => {
                   onBlur={formik.handleBlur}
                   value={formik.values.password}
                 />
-                {formik.touched.password && formik.errors.password ? <div>{formik.errors.password}</div> : null}
+                {formik.touched.password && formik.errors.password && <div>{formik.errors.password}</div>}
               </div>
 
               <button type="submit" className="button signin__submit">
@@ -148,8 +149,6 @@ const SignUp = () => {
                 <i className="button__icon fas fa-chevron-right"></i>
               </button>
             </form>
-
-          
           </div>
           <div className="screen__background">
             <span className="screen__background__shape screen__background__shape4"></span>

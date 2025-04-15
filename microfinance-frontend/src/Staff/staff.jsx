@@ -5,12 +5,7 @@ import Loans from "./loans.jsx";
 import Repayments from "./repayments";
 import Savings from "./savings";
 import Navbar from "./Navbar.jsx";
-<<<<<<< HEAD
-import "./staff.css";
-
-=======
 import "./staff.css"
->>>>>>> 596db710f1b441dc2431cfa5cbc6b852a752996c
 
 const Staff = () => {
   return (
