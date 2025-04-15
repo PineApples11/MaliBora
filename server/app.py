@@ -9,17 +9,13 @@ from datetime import datetime
 from decorators import login_required, role_required
 from flask_cors import CORS
 
-<<<<<<< HEAD
-CORS(app, supports_credentials=True, origins=["http://localhost:5173","http://localhost:5175" ,"http://127.0.0.1:5173","http://127.0.0.1:5175"])
-=======
 CORS(app, supports_credentials=True, origins=[
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "http://localhost:5174",
-    "http://127.0.0.1:5174"
+    "http://localhost:5175",
+    "http://127.0.0.1:5175"
 ])
 
->>>>>>> 49b61567851c6e59759180f0a551d21ee1bc9353
 
 @app.route('/')
 def index():
