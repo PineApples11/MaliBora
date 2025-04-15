@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import SummaryCard from "./summarycard.jsx";
+import Loading from "../Loading/Loading.jsx"
 import "./dashboard.css";
 
 const Dashboard = () => {
@@ -10,6 +11,7 @@ const Dashboard = () => {
     totalRepayments: 0,
     totalSavings: 0,
   });
+  const [active, setActive] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -40,15 +42,18 @@ const Dashboard = () => {
           totalRepayments: repayments.length,
           totalSavings,
         });
+        setActive(false)
       } catch (err) {
         console.error("Error fetching dashboard data:", err);
       }
     };
 
+
     fetchData();
   }, []);
 
   return (
+<<<<<<< HEAD
     <div className="wrap">
     <div className="dashboard-page">
       {/* <h1 className="dashboard-title">Welcome to the Staff Dashboard</h1> */}
@@ -62,10 +67,32 @@ const Dashboard = () => {
           value={`KSH ${stats.totalSavings.toLocaleString()}`}
           link="/savings"
         />
+=======
+    active ? (
+     <div className="loader">
+       <Loading />
+     </div>
+    ) : (
+      <div className="wrap">
+        <div className="dashboard-page">
+          <h1 className="dashboard-title">Welcome to the Staff Dashboard</h1>
+          <div className="card-grid">
+            <SummaryCard title="Total Customers" value={stats.totalCustomers} link="/customers" />
+            <SummaryCard title="Approved Loans" value={stats.approvedLoans} link="/loans" />
+            <SummaryCard title="Pending Loans" value={stats.pendingLoans} link="/loans" />
+            <SummaryCard title="Total Repayments" value={stats.totalRepayments} link="/repayments" />
+            <SummaryCard
+              title="Total Savings (Deposits)"
+              value={`KSH ${stats.totalSavings.toLocaleString()}`}
+              link="/savings"
+            />
+          </div>
+        </div>
+>>>>>>> 596db710f1b441dc2431cfa5cbc6b852a752996c
       </div>
-    </div>
-    </div>
+    )
   );
+  
 };
 
 export default Dashboard;

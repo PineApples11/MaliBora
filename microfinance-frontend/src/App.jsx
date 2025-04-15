@@ -1,14 +1,17 @@
 import { Routes, Route } from 'react-router-dom';
 
-import CustomerDisplay from './Customer/CustomerDisplay';
-import SignUp from './CustomerLogs/Signup';
-import Login from './CustomerLogs/Login';
-import CustomerTransactionForm from './Customer/CustomerTransactionForm';
-import CustomerLoanForm from './Customer/CustomerLoanForm';
-import CustomerRepaymentsForm from './Customer/CustomerRepayments';
-import Home from './Home';
-import Choice from './choice/Choice';
-import Staff from './Staff/staff.jsx';
+import CustomerDisplay from './Customer/CustomerDisplay'
+import SignUp from './CustomerLogs/Signup'
+import Login from './CustomerLogs/Login'
+import CustomerTransactionForm from './Customer/CustomerTransactionForm'
+import CustomerLoanForm from './Customer/CustomerLoanForm'
+import Home from './Home'
+import Choice from './choice/Choice'
+import CustomerRepaymentsForm from './Customer/CustomerRepayments'
+import Staff from './Staff/staff.jsx'
+// import { useState } from 'react'
+
+// import './App.css'
 import Admin from './Admin/Admin.jsx';
 import StaffLogin from './Staff/stafflogin.jsx';
 

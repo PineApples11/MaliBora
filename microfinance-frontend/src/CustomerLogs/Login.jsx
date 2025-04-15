@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import './login.css'
 
 const Login = () => {
   const navigate = useNavigate();
@@ -65,9 +66,9 @@ const Login = () => {
 
   return (
     <div className='log-container'>
-    <h2>Login</h2>
     <div className="container">
-      <div className="screen_sign">
+      <h2>Login Form</h2>
+      <div className="screen_log">
         <div className="screen__content">
           <form onSubmit={formik.handleSubmit} className="login">
   
@@ -113,11 +114,6 @@ const Login = () => {
             </button>
           </form>
   
-          <div className="social-login">
-            <div className='sign'></div>
-              <div className="social-icons">
-              <h4>Log in Form</h4></div>
-            </div>
         </div>
         <div className="screen__background">
           <span className="screen__background__shape screen__background__shape4"></span>
