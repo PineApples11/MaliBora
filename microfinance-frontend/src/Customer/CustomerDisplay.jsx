@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from "react";
-import "./customer.css";
+import "./customerdisplay.css";
 
 function CustomerDisplay() {
   const navigate = useNavigate();
@@ -102,97 +102,225 @@ function CustomerDisplay() {
    ); 
    
    return (
-    <div className="customer-container">
-      <div className="profile-header">
-        <h1>{customer.full_name}'s Profile</h1>
-        <div className="profile-details">
-          <p><strong>ID:</strong> {customer.id}</p>
-          <p><strong>National ID:</strong> {customer.national_id}</p>
-          <p><strong>Savings Balance:</strong> KES {customer.savings_balance}</p>
-          <p><strong>Member Since:</strong> {new Date(customer.created_at).toLocaleDateString()}</p>
+      <div class="customer-display-body">
+      <div class="app">
+          <div className='xx'>
+            <div class="app-header-logo">
+              <div class="logo">
+                <h1 class="logo-title">
+                  <span>MALIBORA</span>
+                </h1>
+              </div>
+              <div class="log-tabs">
+                <a href="#" onClick={handleLogout}>
+                  Log Out
+                </a>
+                </div>
+            </div>
+            <div class="app-header-navigation">
+              <div class="tabs">
+                <a href="#" className='dash-active'>
+                  Dashboard
+                </a>
+                <a href="#" onClick={handleTransaction}>
+                  Desposit/Withdrawal
+                </a>
+                <a href="#" onClick={handleLoan}>
+                  Take a Loan
+                </a>
+                <a href="#" onClick={e => {
+                          if (!anyLoans) {
+                            e.preventDefault();
+                            return;
+                          }
+                          handleRepayments()
+                          }}>
+                  Make a Repayment
+                </a>
+                
+              </div>
+            </div>
+            <div class="app-header-actions">
+              <button class="user-profile">
+                <span>Customer name</span>
+                <span>
+                  <img src="https://assets.codepen.io/285131/almeria-avatar.jpeg" />
+                </span>
+              </button>
+            </div>
+	        </div>
+          <div class="app-body">
+	
+		<div class="app-body-main-content" >
+			<section class="service-section">
+				<h2>Your Loans</h2>
+				<div class="service-section-header">
+					
+				</div>
+				<div class="mobile-only">
+					<button class="flat-button">
+						Toggle search
+					</button>
+				</div>
+				
+        {loans && (
+  <div className="data-section">
+    {(() => {
+      const customerLoans = loans.filter(loan => loan.customer_id === customer.id);
+      return customerLoans.length > 0 ? (
+        <div className="loan-list">
+          {customerLoans.map(loan => (
+            <div key={loan.id} className="transfer">
+              <div className="transfer-logo">
+              {loan.status === "pending" ? (
+              <img src="https://cdn-icons-png.flaticon.com/128/16265/16265301.png" alt="Loan Pending" />
+            ) : loan.status === "approved" ? (
+              <img src="https://cdn-icons-png.flaticon.com/128/16208/16208195.png" alt="Loan Approved" />
+            ) : loan.status === "rejected" ? (
+              <img src="https://cdn-icons-png.flaticon.com/128/11373/11373685.png" alt="Loan Rejected" />
+            ) : null}
+              </div>
+              <dl className="transfer-details">
+                <div>
+                  <dt>{loan.status}</dt>
+                </div>
+                <div>
+                  <dt>{loan.interest_rate}%</dt>
+                  <dd>Interest rate</dd>
+                </div>
+                <div>
+                  <dt>{new Date(loan.issued_date).toLocaleDateString()}</dt>
+                  <dd>Issued date</dd>
+                </div>
+                <div>
+                  <dt>{new Date(loan.due_date).toLocaleDateString()}</dt>
+                  <dd>Due date</dd>
+                </div>
+              </dl>
+              <div className="transfer-number">
+                Kshs {loan.amount}
+              </div>
+            </div>
+          ))}
         </div>
-        
-        <div className="button-group">
-          <button className="primary-btn" type="button" onClick={handleLoan}>Take a Loan</button>
-          <button className="primary-btn" onClick={handleTransaction}>Make a Transactions</button>
-          <button className="primary-btn" disabled={!anyLoans} onClick={handleRepayments} >Make Repayments</button>
-          <button className="secondary-btn" type="button" onClick={handleLogout}>Logout</button>
-        </div>
+      ) : (
+        <p className="no-data">No loans found.</p>
+      );
+    })()}
+  </div>
+)}
+				
+				<div class="service-section-footer">
+					<p>Empowering dreams, one loan at a time.</p>
+					<p>@MaliBora </p>
+				</div>
+			</section>
+
+
+
+			<section class="transfer-section">
+				<div class="transfer-section-header">
+					<h2>Recent Transactions</h2>
+					<div class="filter-options">
+						<p>Smooth transactions. Stronger connections.</p>
+					</div>
+				</div>
+				<div class="transfers">
+        {transactions && (
+  <div className="data-section">
+    {(() => {
+              const customerTransactions = transactions.filter(
+                transaction => transaction.customer_id === customer.id
+              );
+              return customerTransactions.length > 0 ? (
+                <div className="transaction-list">
+                  {customerTransactions.map(transaction => (
+                    <div key={transaction.id} className="transfer">
+                      <div className="transfer-logo">
+                        {transaction.type === "deposit"? 
+                        (<img
+                          src="https://cdn-icons-png.flaticon.com/128/10998/10998135.png"
+                          alt="Transaction"
+                        />) : (
+                          <img
+                          src="https://cdn-icons-png.flaticon.com/128/13207/13207403.png"
+                          alt="Transaction"
+                        />
+                        )}
+                      </div>
+                      <dl className="transfer-details">
+                        <div>
+                          <dt>{transaction.type}</dt>
+                        </div>
+                        <div>
+                          <dt>{new Date(transaction.transaction_date).toLocaleDateString()}</dt>
+                          <dd>Date payment</dd>
+                        </div>
+                      </dl>
+                      <div className="transfer-number">
+                        Kshs {transaction.amount}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="no-data">No transactions found.</p>
+              );
+            })()}
+          </div>
+        )}
+					</div>		
+			</section>
+
+
+		</div>
+		<div class="app-body-sidebar">
+			<section class="payment-section">
+				<h2>Your Payments</h2>
+				<div class="payment-section-header">
+					
+				</div>
+				{repayments && (
+              <div className="data-section">
+                {(() => {
+                  const customerRepayments = repayments.filter(
+                    r => r.customer_id === customer.id
+                  );
+                  return customerRepayments.length > 0 ? (
+                    <div className="payments">
+                      {customerRepayments.map(repayment => (
+                        <div key={repayment.id} className="payment">
+                          <div className="card gray">
+                            <span>Repaid</span>
+                            <span>{new Date(repayment.date_paid).toLocaleDateString()}</span>
+                          </div>
+                          <div className="payment-details">
+                            <div>
+                              <span>KES {repayment.amount}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="no-data">No repayments found.</p>
+                  );
+                })()}
+              </div>
+            )}
+
+				
+				<div class="payment-section-footer">
+					<div class="service-section-footer">
+					<p>Clearing the way to your goals.</p>
+					<p>@MaliBora </p>
+				</div>
+				</div>
+			</section>
+		</div>
+	</div>
+</div>
       </div>
-
-      {loans && (
-        <div className="data-section">
-          <h2>Your Loans</h2>
-          {(() => {
-            const customerLoans = loans.filter(loan => loan.customer_id === customer.id);
-            return customerLoans.length > 0 ? (
-              <ul className="data-list">
-                {customerLoans.map(loan => (
-                  <li key={loan.id}>
-                    <strong>Amount:</strong> KES {loan.amount} | 
-                    <strong>Status:</strong> {loan.status} | 
-                    <strong>Interest:</strong> {loan.interest_rate}% | 
-                    <strong>Issued:</strong> {new Date(loan.issued_date).toLocaleDateString()} | 
-                    <strong>Due:</strong> {new Date(loan.due_date).toLocaleDateString()}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="no-data">No loans found.</p>
-            );
-          })()}
-        </div>
-      )}
-
-
-      {transactions && (
-        <div className="data-section">
-          <h2>Recent Transactions</h2>
-          {(() => {
-            const customerTransactions = transactions.filter(
-              transaction => transaction.customer_id === customer.id
-            );
-            return customerTransactions.length > 0 ? (
-              <ul className="data-list">
-                {customerTransactions.map(transaction => (
-                  <li key={transaction.id}>
-                    <strong>Amount:</strong> KES {transaction.amount} | 
-                    <strong>Type:</strong> {transaction.type} | 
-                    <strong>Date:</strong> {new Date(transaction.transaction_date).toLocaleDateString()}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="no-data">No transactions found.</p>
-            );
-          })()}
-        </div>
-      )}
-
-
-      {repayments && (
-        <div className="data-section">
-          <h2>Your Repayments</h2>
-          {(() => {
-            const customerRepayments = repayments.filter(
-              r => r.customer_id === customer.id
-            );
-            return customerRepayments.length > 0 ? (
-              <ul className="data-list">
-                {customerRepayments.map(repayment => (
-                  <li key={repayment.id}>
-                    <strong>Amount:</strong> KES {repayment.amount} | 
-                    <strong>Date Paid:</strong> {new Date(repayment.date_paid).toLocaleDateString()}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="no-data">No repayments found.</p>
-            );
-          })()}
-        </div>
-      )}
-    </div>
     )
   }
   
