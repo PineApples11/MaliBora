@@ -10,6 +10,9 @@ function CustomerDisplay() {
   const [transactions, setTransactions] = useState(null);
   const [repayments, setRepayments] = useState(null);
   const [anyLoans, setAnyLoans] = useState(false);
+  const [activeLoans, setActiveLoans] = useState(false);
+  const [activeTransactions, setActiveTransactions] = useState(false);
+  const [activeRepayments, setActiveRepayments] = useState(false);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -93,6 +96,15 @@ function CustomerDisplay() {
     localStorage.removeItem("user");
     navigate('/login');
   };
+  const showLoans = () => {
+    setActiveLoans(active => !active)
+  }
+  const showRepayments = () => {
+    setActiveRepayments(active => !active)
+  }
+  const showTransactions = () => {
+    setActiveTransactions(active => !active)
+  }
 
    if (!customer) return (
     <div className="customer-container">
@@ -111,11 +123,7 @@ function CustomerDisplay() {
                   <span>MALIBORA</span>
                 </h1>
               </div>
-              <div class="log-tabs">
-                <a href="#" onClick={handleLogout}>
-                  Log Out
-                </a>
-                </div>
+            
             </div>
             <div class="app-header-navigation">
               <div class="tabs">
@@ -147,13 +155,24 @@ function CustomerDisplay() {
                   <img src="https://assets.codepen.io/285131/almeria-avatar.jpeg" />
                 </span>
               </button>
+              <div class="log-tabs">
+                <a href="#" onClick={handleLogout}>
+                  Log Out
+                </a>
+                </div>
             </div>
 	        </div>
           <div class="app-body">
 	
 		<div class="app-body-main-content" >
 			<section class="service-section">
-				<h2>Your Loans</h2>
+      <div class="transfer-section-header">
+					<h2 onClick={showLoans}>Your Loans</h2>
+					<div class="filter-options">
+						<p>Empowering dreams, one loan at a time.</p>
+					</div>
+				</div>
+        
 				<div class="service-section-header">
 					
 				</div>
@@ -164,7 +183,7 @@ function CustomerDisplay() {
 				</div>
 				
         {loans && (
-  <div className="data-section">
+  <div className="data-section" style={{display : activeLoans ? "none" : "block"}}>
     {(() => {
       const customerLoans = loans.filter(loan => loan.customer_id === customer.id);
       return customerLoans.length > 0 ? (
@@ -209,25 +228,20 @@ function CustomerDisplay() {
     })()}
   </div>
 )}
-				
-				<div class="service-section-footer">
-					<p>Empowering dreams, one loan at a time.</p>
-					<p>@MaliBora </p>
-				</div>
 			</section>
 
 
 
 			<section class="transfer-section">
 				<div class="transfer-section-header">
-					<h2>Recent Transactions</h2>
+					<h2 onClick={showTransactions}>Recent Transactions</h2>
 					<div class="filter-options">
 						<p>Smooth transactions. Stronger connections.</p>
 					</div>
 				</div>
 				<div class="transfers">
         {transactions && (
-  <div className="data-section">
+  <div className="data-section" style={{display : activeTransactions ? "none" : "block"}}>
     {(() => {
               const customerTransactions = transactions.filter(
                 transaction => transaction.customer_id === customer.id
@@ -272,16 +286,18 @@ function CustomerDisplay() {
 					</div>		
 			</section>
 
-
-		</div>
-		<div class="app-body-sidebar">
-			<section class="payment-section">
-				<h2>Your Payments</h2>
+      <section class="payment-section">
+      <div class="transfer-section-header">
+					<h2 onClick={showRepayments}>Your Payments</h2>
+					<div class="filter-options">
+						<p>Clearing the way to your goals.</p>
+					</div>
+				</div>
 				<div class="payment-section-header">
 					
 				</div>
 				{repayments && (
-              <div className="data-section">
+              <div className="data-section" style={{display : activeRepayments ? "none" : "block"}}>
                 {(() => {
                   const customerRepayments = repayments.filter(
                     r => r.customer_id === customer.id
@@ -309,14 +325,12 @@ function CustomerDisplay() {
               </div>
             )}
 
-				
-				<div class="payment-section-footer">
-					<div class="service-section-footer">
-					<p>Clearing the way to your goals.</p>
-					<p>@MaliBora </p>
-				</div>
-				</div>
 			</section>
+
+
+		</div>
+		<div class="app-body-sidebar">
+	
 		</div>
 	</div>
 </div>

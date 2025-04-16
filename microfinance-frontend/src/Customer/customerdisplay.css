@@ -19,11 +19,11 @@
 	--c-gray-800: #1f1f1f;
 	--c-gray-700: #2e2e2e;
 	--c-gray-600: #313131;
-	--c-gray-500: #969593;
+	--c-gray-500: #776BCC;
 	--c-gray-400: #a6a6a6;
 	--c-gray-300: #bdbbb7;
 	--c-gray-200: #f1f1f1;
-	--c-gray-100: #ffffff;
+	--c-gray-100: #776BCC;
 
 	--c-green-500: #45ffbc;
 	--c-olive-500: #e3ffa8;
@@ -89,7 +89,7 @@ a {
 	min-height: 80vh;
 	width: 95%;
 	max-width: 1600px;
-	background-color:  #ffffff;
+	background-color:  #ffffff7e;
 	padding: 2vw 4vw 6vw;
 	display: flex;
 	flex-direction: column;
@@ -267,7 +267,7 @@ a {
 		&:hover,
 		&:focus {
 			color: #504089;
-			border-color: var(--c-text-primary);
+			border-color: #776BCC;
 		}
 	}
 }
@@ -277,6 +277,9 @@ a {
 	align-items: center;
 	border: 0;
 	background: transparent;
+	border-bottom: 1px solid #6d57be;
+	padding-left: 0.5em;
+	padding-right: 0.5em;
 	cursor: pointer;
 	color: var(--c-text-tertiary);
 	transition: 0.25s ease;
@@ -284,6 +287,7 @@ a {
 	&:hover,
 	&:focus {
 		color: var(--c-text-primary);
+		border-top:1px solid #6d57be;
 	}
 
 	span:first-child {
@@ -437,7 +441,7 @@ a {
 .service-section {
 	& > h2 {
 		font-size: 1.5rem;
-		margin-bottom: 1.25rem;
+		margin-bottom: 0.5em;
 	}
 }
 
@@ -445,6 +449,7 @@ a {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	padding-top: 1em;
 	& > * + * {
 		margin-left: 1.25rem;
 	}
@@ -529,6 +534,7 @@ a {
 
 .transfer-section {
 	margin-top: 2.5rem;
+	margin-bottom: 2.5rem;
 }
 
 .transfer-section-header {
@@ -539,6 +545,7 @@ a {
 	border-bottom: 1px solid var(--c-gray-600);
 	h2 {
 		font-size: 1.5rem;
+		cursor: pointer;
 	}
 }
 
@@ -711,8 +718,10 @@ a {
 }
 
 .payment-section {
+	margin-top: 1.5em;
 	& > h2 {
 		font-size: 1.5rem;
+		margin-top: 1em;
 	}
 }
 
@@ -866,14 +875,15 @@ button {
 	justify-content: space-between;
 	color: var(--c-text-tertiary);
     margin-top: 0.5em;
+    margin-left: 2em;
     padding-left: 1em;
     padding-right: 1em;
     border-radius: 5px;
 	border: 1px solid #50408993;
 
 	a {
-		padding-top: 1rem;
-		padding-bottom: 1rem;
+		padding-top: 0.5rem;
+		padding-bottom: 0.5rem;
 		text-decoration: none;
 		border-top: 2px solid transparent;
 		display: inline-flex;
