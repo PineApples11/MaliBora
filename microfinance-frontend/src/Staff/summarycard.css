@@ -1,0 +1,18 @@
+.summary-card {
+    margin: 2em;
+    background-color: #C7C5F4;
+    border-radius: 5px;
+    padding: 4em;
+    text-decoration: none;
+    transition: 0.25s;
+    text-decoration: none;
+    font-size: 1em;
+    color:  #4C489D;
+}
+.summary-card p {
+    font-size: 2em;
+}
+.summary-card:hover{
+    background-color: #6d57be;
+    color: #C7C5F4;
+}

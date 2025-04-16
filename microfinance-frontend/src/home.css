@@ -26,7 +26,8 @@ header {
   flex-direction: column;
   align-items: flex-start;
   grid-template-columns: max-content;
-  color: var(--text-1);
+  color: #ffff;
+  margin-left: 0.3em;
   font-size: 5em;
   line-height: var(--font-lineheight-0);
 }
@@ -37,26 +38,32 @@ header {
 
 .under-hero {
   color:  #4C489D;
-  font-size: var(--font-size-4);
+  font-size: 1.5em;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  margin-left: 1em;
   margin-block-end: var(--size-3);
 }
 
-.button-list {
+.button-list-home{
   display: flex;
   gap: var(--size-3);
 }
 
-button {
+.button-list-home button {
   background: white;
   color:  #4C489D;;
-  font-size: var(--font-size-3);
-  padding-inline: var(--size-8);
-  padding-block: var(--size-3);
-  border-radius: var(--radius-2);
-  box-shadow: var(--shadow-2);
+  font-size: 20px;
+  padding-inline: 3em;
+  padding-block: 1em;
+  margin-top: 2em;
+  margin-left: 1em;
+  border-radius: 5px;
+  border: none;
+  box-shadow: none;
   transition: 0.25s;
 }
-button:hover {
+.button-list-home button:hover {
    background: #4C489D;
    color: white;
    font-weight: bolder;

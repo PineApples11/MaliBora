@@ -57,6 +57,7 @@ const Dashboard = () => {
      <div className="loader">
        <Loading />
      </div>
+     
     ) : (
       <div className="wrap">
         <div className="dashboard-page">

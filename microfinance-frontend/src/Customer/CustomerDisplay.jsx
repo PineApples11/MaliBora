@@ -142,7 +142,7 @@ function CustomerDisplay() {
             </div>
             <div class="app-header-actions">
               <button class="user-profile">
-                <span>Customer name</span>
+                <span>{customer.full_name}</span>
                 <span>
                   <img src="https://assets.codepen.io/285131/almeria-avatar.jpeg" />
                 </span>

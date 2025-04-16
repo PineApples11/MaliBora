@@ -898,4 +898,8 @@ button {
 .app-body-main-content{
 width: 48em;
 }
+.transfer {
+	padding-bottom: 1em;
+	/* border-bottom: 1px solid #50408961; */
+}
   

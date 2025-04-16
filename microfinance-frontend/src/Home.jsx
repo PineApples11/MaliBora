@@ -13,8 +13,8 @@ function Home() {
                 <div>Welcome To</div>
                 <div>MaliBora</div>
               </h1>
-              <p class="under-hero">The smart way to access microloans, manage savings, and build credit—right from your phone. Fast, secure, and designed for your growth.</p>
-              <div class="button-list">
+              <p class="under-hero">The smart way to access microloans, manage savings, and build credit right from your phone. Fast, secure, and designed for your growth.</p>
+              <div class="button-list-home">
                 <button class="primary" type='button' onClick={handleClick}>Get started</button>
               </div>
         </section>
