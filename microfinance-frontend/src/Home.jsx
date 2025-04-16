@@ -6,7 +6,7 @@ function Home() {
         navigate('/choice')
     }
   return (
-    <>
+    <div className='home-body'>
        <header>
         <section class="hero">
               <h1 class="hero-message">
@@ -22,7 +22,7 @@ function Home() {
           <img src="https://i.pinimg.com/originals/bc/33/f3/bc33f3bc72f43ca1045b7c4f98dc760d.gif" height="800" width="800" alt="a random doodle"/>
         </picture>
 </header>
-    </>
+    </div>
   )
 }
 
