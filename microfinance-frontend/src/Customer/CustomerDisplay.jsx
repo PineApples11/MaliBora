@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect } from "react";
+import { useState, useEffect, Profiler } from "react";
 import "./customerdisplay.css";
+import Profile from './Profile';
 
 function CustomerDisplay() {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ function CustomerDisplay() {
   const [activeLoans, setActiveLoans] = useState(false);
   const [activeTransactions, setActiveTransactions] = useState(false);
   const [activeRepayments, setActiveRepayments] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -105,6 +107,9 @@ function CustomerDisplay() {
   const showTransactions = () => {
     setActiveTransactions(active => !active)
   }
+  const handleShowProfile = () => {
+    setShowProfile(active => !active)
+  }
 
    if (!customer) return (
     <div className="customer-container">
@@ -114,7 +119,11 @@ function CustomerDisplay() {
    ); 
    
    return (
-      <div class="customer-display-body">
+      <>
+       {showProfile? (
+        <Profile customer={customer} handleShowProfile={handleShowProfile}/>
+       ) : (
+        <div class="customer-display-body">
       <div class="app">
           <div className='xx'>
             <div class="app-header-logo">
@@ -148,7 +157,7 @@ function CustomerDisplay() {
                 
               </div>
             </div>
-            <div class="app-header-actions">
+            <div class="app-header-actions" onClick={handleShowProfile}>
               <button class="user-profile">
                 <span>{customer.full_name}</span>
                 <span>
@@ -175,11 +184,6 @@ function CustomerDisplay() {
         
 				<div class="service-section-header">
 					
-				</div>
-				<div class="mobile-only">
-					<button class="flat-button">
-						Toggle search
-					</button>
 				</div>
 				
         {loans && (
@@ -335,6 +339,8 @@ function CustomerDisplay() {
 	</div>
 </div>
       </div>
+       )}
+      </>
     )
   }
   

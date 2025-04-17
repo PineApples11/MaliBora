@@ -18,12 +18,12 @@
 	--c-gray-900: #000000;
 	--c-gray-800: #1f1f1f;
 	--c-gray-700: #2e2e2e;
-	--c-gray-600: #313131;
-	--c-gray-500: #776BCC;
+	--c-gray-600: #B3B8CD;;
+	--c-gray-500: #B3B8CD;
 	--c-gray-400: #a6a6a6;
 	--c-gray-300: #bdbbb7;
-	--c-gray-200: #f1f1f1;
-	--c-gray-100: #776BCC;
+	--c-gray-200: ;
+	--c-gray-100: #1F1A36;
 
 	--c-green-500: #45ffbc;
 	--c-olive-500: #e3ffa8;
@@ -45,10 +45,10 @@
 	padding-top: 3vw;
 	padding-bottom: 3vw;
 	justify-content: center;
-    color: #504089;
+    color: #B3B8CD;;
 }
 .customer-display-body h1 {
-    color: #504089;
+    color: #776BCC;
 }
 
 .app .app-header{
@@ -89,7 +89,7 @@ a {
 	min-height: 80vh;
 	width: 95%;
 	max-width: 1600px;
-	background-color:  #ffffff7e;
+	background-color: #4d3e90;
 	padding: 2vw 4vw 6vw;
 	display: flex;
 	flex-direction: column;
@@ -245,7 +245,7 @@ a {
 		&:hover,
 		&:focus {
 			transform: translateX(4px);
-			color: #504089;
+			color: #03BFCB;
 		}
 	}
 }
@@ -266,8 +266,9 @@ a {
 		&.active,
 		&:hover,
 		&:focus {
-			color: #504089;
-			border-color: #776BCC;
+			font-weight: 900;
+			border-top: 1px solid #B3B8CD;
+			color:  #03BFCB;;
 		}
 	}
 }
@@ -277,7 +278,7 @@ a {
 	align-items: center;
 	border: 0;
 	background: transparent;
-	border-bottom: 1px solid #6d57be;
+	border-bottom: 1px solid #B3B8CD;
 	padding-left: 0.5em;
 	padding-right: 0.5em;
 	cursor: pointer;
@@ -286,8 +287,14 @@ a {
 
 	&:hover,
 	&:focus {
-		color: var(--c-text-primary);
-		border-top:1px solid #6d57be;
+		font-weight:900;
+		border-top:1px solid #03BFCB;
+		border-bottom:1px solid #03BFCB;
+		padding-left: 0.8em;
+		padding-right: 0.8em;
+		padding-bottom: 0.2em;
+		padding-top: 0.2em;
+		color: #03BFCB;;
 	}
 
 	span:first-child {
@@ -338,7 +345,8 @@ a {
 
 	&:hover,
 	&:focus {
-		background-color: var(--c-gray-600);
+		background-color:#03BFCB;
+		color: #03BFCB;;
 	}
 }
 
@@ -367,6 +375,7 @@ a {
 
 	&:hover {
 		transform: translateY(-5px);
+		color: #03BFCB;;
 	}
 
 	
@@ -522,6 +531,7 @@ a {
 	&:hover,
 	&:focus {
 		background-color: var(--c-gray-600);
+		color: #03BFCB;;
 	}
 }
 
@@ -765,7 +775,7 @@ a {
 	&:focus,
 	&:hover,
 	&.active {
-		color: var(--c-gray-800);
+		color: #03BFCB;
 		background-color: var(--c-white);
 		border-color: var(--c-white);
 	}
@@ -821,7 +831,7 @@ a {
 	cursor: pointer;
 	&:focus,
 	&:hover {
-		color: var(--c-white);
+		color:#03BFCB;
 	}
 }
 
@@ -840,7 +850,7 @@ a {
 	}
 	&:focus,
 	&:hover {
-		color: var(--c-white);
+		color: #03BFCB;
 	}
 }
 
@@ -879,7 +889,7 @@ button {
     padding-left: 1em;
     padding-right: 1em;
     border-radius: 5px;
-	border: 1px solid #50408993;
+	border: 1px solid #B3B8CD;
 
 	a {
 		padding-top: 0.5rem;
@@ -891,19 +901,22 @@ button {
 		&.active,
 		&:hover,
 		&:focus {
-			color: #504089;
+			color: #03BFCB;
         
 		}
 	}
 }
 .log-tabs:hover {
-    border: 1px solid #504089;
+    border: 1px solid  #03BFCB;
     padding-left: 1em;
     padding-right: 1em;
     border-radius: 5px;
+	color:#03BFCB;
+	font-weight: 800;
 }
 .dash-active {
-    color:#504089;
+	font-size: large;
+	font-weight:bold;
 }
 .app-body-main-content{
 width: 48em;
@@ -912,4 +925,7 @@ width: 48em;
 	padding-bottom: 1em;
 	/* border-bottom: 1px solid #50408961; */
 }
-  
+.transfer-section-header h2:hover{
+	color:  #03BFCB;;
+}  
+
