@@ -12,7 +12,7 @@ header {
   grid-template-columns: 1fr 1fr;
   background: var(--surface-1);
   height: 100vh;
-  background: linear-gradient(90deg, #C7C5F4, #776BCC);	
+  background: #D1D5DB;	
 }
 
 .hero {
@@ -26,41 +26,47 @@ header {
   flex-direction: column;
   align-items: flex-start;
   grid-template-columns: max-content;
-  color: var(--text-1);
+  color: #333333;
+  margin-left: 0.3em;
   font-size: 5em;
   line-height: var(--font-lineheight-0);
 }
 
 .hero-message > div:last-child {
-   color: #4C489D;
+   color: #6B21A8;
 }
 
 .under-hero {
-  color:  #4C489D;
-  font-size: var(--font-size-4);
+  color:  #333333;
+  font-size: 1.5em;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  margin-left: 1em;
   margin-block-end: var(--size-3);
 }
 
-.button-list {
+.button-list-home{
   display: flex;
   gap: var(--size-3);
 }
 
-button {
-  background: white;
-  color:  #4C489D;;
-  font-size: var(--font-size-3);
-  padding-inline: var(--size-8);
-  padding-block: var(--size-3);
-  border-radius: var(--radius-2);
-  box-shadow: var(--shadow-2);
+.button-list-home button {
+  background: #6B21A8;
+  color:   #D1D5DB;
+  font-size: 20px;
+  padding-inline: 3em;
+  padding-block: 1em;
+  margin-top: 2em;
+  margin-left: 1em;
+  border-radius: 5px;
+  border: none;
+  box-shadow: none;
   transition: 0.25s;
 }
-button:hover {
-   background: #4C489D;
+.button-list-home button:hover {
+   background: #9C4EDE;
    color: white;
-   font-weight: bolder;
-   transform: scale(1.05);
+   transform: scale(1.01);
 }
 
 

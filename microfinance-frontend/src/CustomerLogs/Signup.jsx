@@ -60,7 +60,7 @@ const SignUp = () => {
   }
   return (
     <div className='sign-container'>
-      <div className="container" height="100px">
+      <div className="l-container" >
         <h2>Sign Up Form</h2>
         <div className="screen_sign">
           <div className="screen__content">

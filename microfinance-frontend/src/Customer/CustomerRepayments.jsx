@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
+import "./customerrepayments.css"
 
 function CustomerRepaymentsForm() {
   const navigate = useNavigate();
@@ -87,10 +88,10 @@ function CustomerRepaymentsForm() {
   }
 
   return (
-    <div className='log-container'>
+    <div className='repayments-main-container'>
   <h2>Repayment Form</h2>
-  <div className="container">
-    <div className="screen_sign">
+  <div className="repayments-container">
+    <div className="screen_repayments">
       <div className="screen__content">
         <form onSubmit={handleSubmit} className="login">
 

@@ -7,19 +7,16 @@
 	font-family: Raleway, sans-serif;
 }
 
-body {
-	background: linear-gradient(90deg, #C7C5F4, #776BCC);		
-}
-
-.sign-container .container {
+.sign-container .l-container {
 	display: flex;
 	align-items: center;
     flex-direction: column;
 	justify-content: center;
 	min-height: 100vh;
 }
-.sign-container .container h2 {
+.sign-container .l-container h2 {
    margin-bottom: 0.5em;
+   color: #4C489D;
 }
 
 .screen {		
@@ -171,6 +168,8 @@ body {
 .signin__submit:hover {
 	border-color: #6A679E;
 	outline: none;
+	color: #D4D3E8;
+	background-color: #4C489D;
 }
 
 .button__icon {
@@ -213,6 +212,7 @@ body {
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
+	background-color:  #D1D5DB;
 }
 .sign {
 	margin-top: 50px;

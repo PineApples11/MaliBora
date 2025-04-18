@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
+import "./transaction.css"
 
 function CustomerTransactionForm() {
   const navigate = useNavigate();
@@ -89,10 +90,10 @@ function CustomerTransactionForm() {
   }
 
   return (
-    <div className='log-container'>
+    <div className='trans-main-container'>
   <h2>Transaction Form</h2>
-  <div className="container">
-    <div className="screen_sign">
+  <div className="trans-container">
+    <div className="screen_trans">
       <div className="screen__content">
         <form onSubmit={handleSubmit} className="login">
 
@@ -146,11 +147,6 @@ function CustomerTransactionForm() {
         {successMessage && (
           <p style={{ color: 'green', marginTop: '10px' }}>{successMessage}</p>
         )}
-          <div className="social-login">
-            <div className='sign'></div>
-              <div className="social-icons">
-              <h4>Transaction Form</h4></div>
-            </div>
         </div>
 
       <div className="screen__background">

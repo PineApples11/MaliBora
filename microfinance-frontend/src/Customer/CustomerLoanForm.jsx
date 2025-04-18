@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import React, { useState,useEffect } from 'react';
+import "./customerloans.css"
 
 function CustomerLoanForm() {
     const navigate = useNavigate();
@@ -92,10 +93,10 @@ useEffect(() => {
   }
 
   return (
-<div className='log-container'>
+<div className='loan-main-container'>
   <h2>Loan Form</h2>
-  <div className="container">
-    <div className="screen_sign">
+  <div className="loan-container">
+    <div className="screen_loan">
       <div className="screen__content">
         <form onSubmit={handleSubmit} className="login">
 
@@ -140,9 +141,7 @@ useEffect(() => {
 
         {error && <p style={{ color: 'red', marginTop: '10px' }}>Error: {error}</p>}
         {successMessage && <p style={{ color: 'green', marginTop: '10px' }}>{successMessage}</p>}
-        <div className="social-login">
-            <h3>Loan Form</h3>
-      </div>
+        
       </div>
 
 

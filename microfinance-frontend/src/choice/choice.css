@@ -15,23 +15,29 @@
 	min-height: 100vh;
     background: linear-gradient(90deg, #C7C5F4, #776BCC);
 }
-h1 {
+.MaliBora h1 {
     display: flex;
     align-items: center;
     justify-content: center;
+	font-size: 4em;
     color: #776BCC;
     top: 0;
 }
 .MaliBora h3 {
     margin-top: 150px;
+	font-size: 2em;
     color: #C7C5F4;
 }
 .MaliBora button {
     background-color: #C7C5F4;
+	color: #776BCC;
     padding: 10px;
     padding-left: 20px;
     padding-right: 20px;
     transition: 0.25s;
+	border: none;
+	font-size: 1em;
+	border-radius: 5px;
 }
 .MaliBora button:hover {
     background-color: white;

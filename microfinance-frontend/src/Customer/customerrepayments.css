@@ -11,22 +11,26 @@ body {
 	background: linear-gradient(90deg, #C7C5F4, #776BCC);		
 }
 
-.log-container .l-container {
+.repayments-main-container {
 	display: flex;
 	align-items: center;
     flex-direction: column;
 	justify-content: center;
 	min-height: 100vh;
 }
-.log-container .l-container h2 {
+.repayments-main-container .repayments-container h2 {
    margin-bottom: 0.5em;
    color: #4C489D;
 }
-
-.screen {		
+.repayments-main-container h2 {
+    margin-bottom: 1.5em;
+    font-size: 2em;
+    color: #4C489D; 
+}
+.screen_repayments{		
 	background: linear-gradient(90deg, #5D54A4, #7C78B8);		
 	position: relative;	
-	height: 400px;
+	height: 500px;
 	width: 400px;	
 	box-shadow: 0px 0px 24px #5C5696;
 }
@@ -216,7 +220,6 @@ body {
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	background-color:  #D1D5DB;
 }
 .sign {
 	margin-top: 50px;

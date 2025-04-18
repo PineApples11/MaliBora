@@ -1,15 +1,17 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "./summarycard.css";
 
 const SummaryCard = ({ title, value, link }) => {
+  const navigate = useNavigate()
+  const handleClick = (link) => navigate(`${link}`)
   return (
     <div className="summary-card">
-      <h2>{title}</h2>
-      <p>{value}</p>
+      
       {link && (
-        <Link to={`/staff${link}`}>
-          Go to {title}
-        </Link>
+        <div onClick={() => handleClick(`/staff${link}`)}>
+          <h2>{title}</h2>
+          <p>{value}</p>
+        </div>
       )}
     </div>
   );

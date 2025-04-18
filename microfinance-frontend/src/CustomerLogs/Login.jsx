@@ -66,7 +66,7 @@ const Login = () => {
 
   return (
     <div className='log-container'>
-    <div className="container">
+    <div className="l-container">
       <h2>Login Form</h2>
       <div className="screen_log">
         <div className="screen__content">
