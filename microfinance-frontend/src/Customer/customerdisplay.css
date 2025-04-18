@@ -2,10 +2,7 @@
     top: 0;
     width: 100%;
     height: 10em;
-    
-    background-color: #6d57be; 
-    color: white;
-    
+    background-color: #D1D5DB;    
     display: flex;
     justify-content: space-evenly;
     align-items: center;
@@ -19,9 +16,9 @@
 	--c-gray-800: #1f1f1f;
 	--c-gray-700: #2e2e2e;
 	--c-gray-600: #B3B8CD;;
-	--c-gray-500: #B3B8CD;
-	--c-gray-400: #a6a6a6;
-	--c-gray-300: #bdbbb7;
+	--c-gray-500: #6B21A8;
+	--c-gray-400: ;
+	--c-gray-300: #14B8A6;
 	--c-gray-200: ;
 	--c-gray-100: #1F1A36;
 
@@ -39,21 +36,22 @@
 	line-height: 1.5;
 	min-height: 100vh;
 	font-family: "Be Vietnam Pro", sans-serif;
-    background: linear-gradient(90deg, #C7C5F4, #776BCC);	
-	color: var(--c-text-primary);
+    background: #D1D5DB;
 	display: flex;
-	padding-top: 3vw;
 	padding-bottom: 3vw;
 	justify-content: center;
-    color: #B3B8CD;;
+    color: #333333;
 }
 .customer-display-body h1 {
-    color: #776BCC;
+    color: white;
+	font-size: 2em;
+	margin-right: 5em;
+	margin-left: 1em;
 }
 
 .app .app-header{
     background-color: transparent;
-border: none;
+	border: none;
 }
 
 *,
@@ -88,14 +86,19 @@ a {
 .app {
 	min-height: 80vh;
 	width: 95%;
-	max-width: 1600px;
-	background-color: #4d3e90;
-	padding: 2vw 4vw 6vw;
+	width: 100%;
+	margin-top: 0;
 	display: flex;
 	flex-direction: column;
 }
 
-.xx{	display: grid;
+.xx{	
+	display: grid;
+	position: sticky;
+	margin-top: 0;
+	width: 100%;
+	top: 0;
+	background-color: #6B21A8;
 	grid-template-columns: minmax(min-content, 175px) minmax(max-content, 1fr) minmax(
 			max-content,
 			400px
@@ -106,7 +109,6 @@ a {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		border-bottom: 1px solid var(--c-gray-600);
 	}
 }
 
@@ -126,7 +128,6 @@ a {
 
 .app-header-actions-buttons {
 	display: flex;
-	border-left: 1px solid var(--c-gray-600);
 	margin-left: 2rem;
 	padding-left: 2rem;
 
@@ -184,11 +185,9 @@ a {
 	}
 
 	div {
-		border-top: 1px solid var(--c-gray-600);
 		margin-top: 1.5rem;
 		padding-top: 1rem;
 		font-size: 0.75rem;
-		color: var(--c-text-tertiary);
 	}
 }
 
@@ -253,8 +252,7 @@ a {
 .tabs {
 	display: flex;
 	justify-content: space-between;
-	color: var(--c-text-tertiary);
-	border-bottom: 1px solid var(--c-gray-600);
+	color: #D1D5DB;
 
 	a {
 		padding-top: 1rem;
@@ -263,12 +261,11 @@ a {
 		border-top: 2px solid transparent;
 		display: inline-flex;
 		transition: 0.25s ease;
+		font-weight: bolder;
 		&.active,
 		&:hover,
 		&:focus {
-			font-weight: 900;
-			border-top: 1px solid #B3B8CD;
-			color:  #03BFCB;;
+			color: #14B8A6;
 		}
 	}
 }
@@ -276,25 +273,21 @@ a {
 .user-profile {
 	display: flex;
 	align-items: center;
-	border: 0;
-	background: transparent;
-	border-bottom: 1px solid #B3B8CD;
-	padding-left: 0.5em;
-	padding-right: 0.5em;
+	border: 1px solid #9C4EDE;
+	border-radius: 5px;
+	background:transparent;
+	padding-left: 1em;
+	padding-right: 1em;
 	cursor: pointer;
-	color: var(--c-text-tertiary);
+	color: #D1D5DB;
 	transition: 0.25s ease;
+	margin-bottom: 0.5em;
+	margin-top: 0.5em;
 
 	&:hover,
 	&:focus {
-		font-weight:900;
-		border-top:1px solid #03BFCB;
-		border-bottom:1px solid #03BFCB;
-		padding-left: 0.8em;
-		padding-right: 0.8em;
-		padding-bottom: 0.2em;
-		padding-top: 0.2em;
-		color: #03BFCB;;
+		background-color: #9C4EDE;
+		color: white;
 	}
 
 	span:first-child {
@@ -555,6 +548,7 @@ a {
 	border-bottom: 1px solid var(--c-gray-600);
 	h2 {
 		font-size: 1.5rem;
+		transition: 0.25s ease;
 		cursor: pointer;
 	}
 }
@@ -850,7 +844,7 @@ a {
 	}
 	&:focus,
 	&:hover {
-		color: #03BFCB;
+		color: #14B8A6;
 	}
 }
 
@@ -883,13 +877,15 @@ button {
 .log-tabs {
 	display: flex;
 	justify-content: space-between;
-	color: var(--c-text-tertiary);
+	color: #D1D5DB;
     margin-top: 0.5em;
+    margin-bottom: 0.5em;
     margin-left: 2em;
     padding-left: 1em;
     padding-right: 1em;
     border-radius: 5px;
-	border: 1px solid #B3B8CD;
+	border: 1px solid #9C4EDE;
+	transition: 0.25s ease;
 
 	a {
 		padding-top: 0.5rem;
@@ -897,35 +893,33 @@ button {
 		text-decoration: none;
 		border-top: 2px solid transparent;
 		display: inline-flex;
-		transition: 0.25s ease;
-		&.active,
-		&:hover,
-		&:focus {
-			color: #03BFCB;
-        
-		}
 	}
 }
 .log-tabs:hover {
-    border: 1px solid  #03BFCB;
-    padding-left: 1em;
-    padding-right: 1em;
-    border-radius: 5px;
-	color:#03BFCB;
-	font-weight: 800;
+	background-color:#9C4EDE;
+	color: white;
 }
 .dash-active {
 	font-size: large;
 	font-weight:bold;
+	color: #14B8A6;
+}
+.app-header-navigation .tabs .dash-active:hover {
+	color: #14B8A6;
 }
 .app-body-main-content{
-width: 48em;
+width: 90%
 }
 .transfer {
 	padding-bottom: 1em;
 	/* border-bottom: 1px solid #50408961; */
 }
 .transfer-section-header h2:hover{
-	color:  #03BFCB;;
+	color:  #6B21A8;
 }  
+
+.transfer-number,.payment-details {
+	color: #6B21A8;
+}
+
 

@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, Profiler } from "react";
 import "./customerdisplay.css";
 import Profile from './Profile';
+import Footer from './Footer';
 
 function CustomerDisplay() {
   const navigate = useNavigate();
@@ -340,6 +341,7 @@ function CustomerDisplay() {
 </div>
       </div>
        )}
+       <Footer />
       </>
     )
   }
