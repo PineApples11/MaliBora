@@ -1,3 +1,4 @@
+import Footer from "./Footer"
 import "./profile.css"
 function Profile ({customer, handleShowProfile}) {
   
@@ -23,16 +24,7 @@ function Profile ({customer, handleShowProfile}) {
                 </div>
             </div>
 
-            <footer>
-                <p>
-                    Created with <i class="fa fa-heart"></i> by
-                    <a target="_blank" href="https://florin-pop.com">Florin Pop</a>
-                    - Read how I created this
-                    <a target="_blank" href="https://florin-pop.com/blog/2019/04/profile-card-design">here</a>
-                    - Design made by
-                    <a target="_blank" href="https://dribbble.com/shots/6276930-Profile-Card-UI-Design">Ildiesign</a>
-                </p>
-            </footer>
+            <Footer />
         </div>
     )
 }

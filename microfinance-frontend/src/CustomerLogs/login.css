@@ -216,6 +216,7 @@ body {
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
+	background-color:  #D1D5DB;
 }
 .sign {
 	margin-top: 50px;

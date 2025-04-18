@@ -7,10 +7,6 @@
 	font-family: Raleway, sans-serif;
 }
 
-body {
-	background: linear-gradient(90deg, #C7C5F4, #776BCC);		
-}
-
 .sign-container .l-container {
 	display: flex;
 	align-items: center;
@@ -216,6 +212,7 @@ body {
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
+	background-color:  #D1D5DB;
 }
 .sign {
 	margin-top: 50px;
