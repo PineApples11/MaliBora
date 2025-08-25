@@ -1,8 +1,8 @@
-import React from 'react';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import React from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import "./signup.css";
 
 const SignUp = () => {
@@ -10,60 +10,54 @@ const SignUp = () => {
 
   const formik = useFormik({
     initialValues: {
-      full_name: '',
-      national_id: '',
-      phone: '',
-      savings_balance: '',
-      password: '',
+      full_name: "",
+      national_id: "",
+      phone: "",
+      savings_balance: "",
+      password: "",
     },
     validationSchema: Yup.object({
-      full_name: Yup.string().required('Full name is required'),
-      national_id: Yup.string().required('National ID is required'),
-      phone: Yup.string().required('Phone number is required'),
-      savings_balance: Yup.number().min(0).required('Savings is required'),
-      password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
+      full_name: Yup.string().required("Full name is required"),
+      national_id: Yup.string().required("National ID is required"),
+      phone: Yup.string().required("Phone number is required"),
+      savings_balance: Yup.number().min(0).required("Savings is required"),
+      password: Yup.string()
+        .min(6, "Password must be at least 6 characters")
+        .required("Password is required"),
     }),
     onSubmit: async (values) => {
       try {
-        const res = await fetch('http://127.0.0.1:5555/register-customer', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        const res = await fetch("http://127.0.0.1:5555/register-customer", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            admin_id: 1,
+            admin_id: 1, // must exist in DB
             full_name: values.full_name,
             national_id: values.national_id,
             phone: values.phone,
             savings_balance: values.savings_balance,
-            created_at: new Date().toISOString().slice(0, 19).replace('T', ' '),
-            password_hash: values.password,
+            created_at: new Date().toISOString().slice(0, 19).replace("T", " "),
+            password_hash: values.password, // backend expects "password_hash"
           }),
         });
 
         if (!res.ok) {
           const err = await res.json();
-          toast.error(err.error || 'Registration failed');
+          toast.error(err.error || "Registration failed");
           return;
         }
 
         toast.success("Registration successful! Please log in.");
-        navigate('/login');
+        navigate("/login");
       } catch (err) {
-        console.error('Signup error:', err);
+        console.error("Signup error:", err);
         toast.error("Something went wrong. Try again.");
       }
     },
   });
 
-  const handleClick = () => {
-    navigate('/login');
-  };
-
-  const handelRoleChange = () => {
-    navigate('/choice');
-  };
-
   return (
-    <div className='sign-container'>
+    <div className="sign-container">
       <div className="container" height="100px">
         <h2>Sign Up Form</h2>
         <div className="screen_sign">
@@ -76,11 +70,14 @@ const SignUp = () => {
                   name="full_name"
                   className="signin__input"
                   placeholder="Full Name"
+                  autoComplete="name"
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   value={formik.values.full_name}
                 />
-                {formik.touched.full_name && formik.errors.full_name && <div>{formik.errors.full_name}</div>}
+                {formik.touched.full_name && formik.errors.full_name && (
+                  <div>{formik.errors.full_name}</div>
+                )}
               </div>
 
               <div className="login__field">
@@ -90,11 +87,14 @@ const SignUp = () => {
                   name="national_id"
                   className="login__input"
                   placeholder="National ID"
+                  autoComplete="off"
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   value={formik.values.national_id}
                 />
-                {formik.touched.national_id && formik.errors.national_id && <div>{formik.errors.national_id}</div>}
+                {formik.touched.national_id && formik.errors.national_id && (
+                  <div>{formik.errors.national_id}</div>
+                )}
               </div>
 
               <div className="signin__field">
@@ -104,11 +104,14 @@ const SignUp = () => {
                   name="phone"
                   className="signin__input"
                   placeholder="Phone"
+                  autoComplete="tel"
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   value={formik.values.phone}
                 />
-                {formik.touched.phone && formik.errors.phone && <div>{formik.errors.phone}</div>}
+                {formik.touched.phone && formik.errors.phone && (
+                  <div>{formik.errors.phone}</div>
+                )}
               </div>
 
               <div className="signin__field">
@@ -118,11 +121,15 @@ const SignUp = () => {
                   name="savings_balance"
                   className="signin__input"
                   placeholder="Initial Savings"
+                  autoComplete="off"
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   value={formik.values.savings_balance}
                 />
-                {formik.touched.savings_balance && formik.errors.savings_balance && <div>{formik.errors.savings_balance}</div>}
+                {formik.touched.savings_balance &&
+                  formik.errors.savings_balance && (
+                    <div>{formik.errors.savings_balance}</div>
+                  )}
               </div>
 
               <div className="signin__field">
@@ -131,20 +138,27 @@ const SignUp = () => {
                   type="password"
                   name="password"
                   className="signin__input"
-                  id='sign_in_input'
+                  id="sign_in_input"
                   placeholder="Password"
+                  autoComplete="new-password"
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   value={formik.values.password}
                 />
-                {formik.touched.password && formik.errors.password && <div>{formik.errors.password}</div>}
+                {formik.touched.password && formik.errors.password && (
+                  <div>{formik.errors.password}</div>
+                )}
               </div>
 
               <button type="submit" className="button signin__submit">
                 <span className="button__text">Sign Up Now</span>
                 <i className="button__icon fas fa-chevron-right"></i>
               </button>
-              <button type='button' onClick={handleClick} className="button signin__submit">
+              <button
+                type="button"
+                onClick={() => navigate("/login")}
+                className="button signin__submit"
+              >
                 <span className="button__text">Log in Instead</span>
                 <i className="button__icon fas fa-chevron-right"></i>
               </button>

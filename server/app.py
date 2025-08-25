@@ -18,69 +18,62 @@ def index():
 @app.errorhandler(NotFound)
 def handle_error(e):
     return make_response("Not found :The requested resource does not exist.", 404)
-
 class RegisterAdmin(Resource):
     def post(self):
         data = request.get_json()
+
         username = data.get("username")
+        email = data.get("email")
         password = data.get("password")
 
-        if not username and not password:
-            return make_response({"message": "Username and password required"}, 400)
-        
-        existing_admin = Admin.query.filter_by(username = username).first()        
+        if not username or not email or not password:
+            return make_response({"message": "Username, email, and password required"}, 400)
+
+        existing_admin = Admin.query.filter(
+            (Admin.username == username) | (Admin.email == email)
+        ).first()
         if existing_admin:
-            return make_response({"message": "Admin already exists"}, 400)
-        
-        new_user = Admin(username = username)
+            return make_response({"message": "Admin with this username or email already exists"}, 400)
+
+        new_user = Admin(username=username, email=email)
         new_user.set_password(password)
 
         db.session.add(new_user)
         db.session.commit()
 
-        return make_response({"message": "User created successfully",}, 201)
-    
-api.add_resource(RegisterAdmin, "/register-admin")
+        return make_response({"message": "Admin created successfully"}, 201)
+
+
+
 
 class RegisterCustomer(Resource):
-
     def post(self):
         data = request.get_json()
-        print(data)
 
-        admin_id = data['admin_id']
+        admin_id = data.get("admin_id")
         exists = Admin.query.filter_by(id=admin_id).first()
         if not exists:
             return make_response({"error": "Admin id does not exist"}, 404)
-        
-        try:
-            created_at = datetime.strptime(data['created_at'], "%Y-%m-%d %H:%M:%S")
-        except:
-            raise ValueError("wrong dates")
 
         try:
             new_customer = Customer(
-               admin_id = admin_id,
-               full_name = data['full_name'],
-               national_id = data['national_id'],
-               phone = data['phone'],
-               savings_balance = data['savings_balance'],
-               created_at = created_at
+                admin_id=admin_id,
+                full_name=data["full_name"],
+                national_id=data["national_id"],
+                phone=data["phone"],
+                savings_balance=data.get("savings_balance", 0.0)
             )
-            password = data["password_hash"]
+            password = data["password"]
             new_customer.set_password(password)
-            print(new_customer.to_dict())
 
             db.session.add(new_customer)
             db.session.commit()
 
             return make_response(new_customer.to_dict(), 201)
-        
+
         except Exception as e:
             print("Error:", e)
-            return  make_response({"error":"Bad Request"}, 400)
-    
-api.add_resource(RegisterCustomer, "/register-customer")
+            return make_response({"error": "Bad Request"}, 400)
 
 class RegisterStaff(Resource):
     #@login_required
@@ -582,7 +575,10 @@ api.add_resource(Logout, "/logout")
 api.add_resource(CheckSession, '/check_session')
 api.add_resource(Login, "/login")
 api.add_resource(LoginCustomer, "/login-customer")
+api.add_resource(RegisterCustomer, "/register-customer")
 api.add_resource(CurrentCustomer, "/current-customer")
+api.add_resource(RegisterAdmin, "/register-admin")
+
 
 
 
