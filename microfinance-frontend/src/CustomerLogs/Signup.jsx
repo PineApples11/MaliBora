@@ -37,7 +37,7 @@ const SignUp = () => {
             phone: values.phone,
             savings_balance: values.savings_balance,
             created_at: new Date().toISOString().slice(0, 19).replace("T", " "),
-            password_hash: values.password, // backend expects "password_hash"
+            password: values.password, // backend expects "password_hash"
           }),
         });
 

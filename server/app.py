@@ -49,22 +49,25 @@ class RegisterAdmin(Resource):
 class RegisterCustomer(Resource):
     def post(self):
         data = request.get_json()
+        print("Received Data:", data)
 
-        admin_id = data.get("admin_id")
+        admin_id = data['admin_id']
         exists = Admin.query.filter_by(id=admin_id).first()
         if not exists:
             return make_response({"error": "Admin id does not exist"}, 404)
 
         try:
             new_customer = Customer(
-                admin_id=admin_id,
-                full_name=data["full_name"],
-                national_id=data["national_id"],
-                phone=data["phone"],
-                savings_balance=data.get("savings_balance", 0.0)
+                admin_id = admin_id,
+                full_name = data['full_name'],
+                national_id = data['national_id'],
+                phone = data['phone'],
+                savings_balance = data['savings_balance'],
+                created_at = datetime.utcnow()   # 👈 default to now
             )
-            password = data["password"]
-            new_customer.set_password(password)
+
+            # Hash password properly
+            new_customer.set_password(data["password"])  
 
             db.session.add(new_customer)
             db.session.commit()
@@ -72,8 +75,9 @@ class RegisterCustomer(Resource):
             return make_response(new_customer.to_dict(), 201)
 
         except Exception as e:
-            print("Error:", e)
-            return make_response({"error": "Bad Request"}, 400)
+            print("Error:", e)  
+            return make_response({"error":"Bad Request"}, 400)
+
 
 class RegisterStaff(Resource):
     #@login_required
@@ -117,19 +121,22 @@ class Login(Resource):
         print(data)
 
         full_name = data.get("full_name")
-        username = data.get("username")  # in case it's admin using "username"
+        username = data.get("username")
         password = data.get("password")  
-        role = data.get("role")
 
-        # Determine correct identifier based on role
-        if role == "admin":
-            user = Admin.query.filter_by(username=username or full_name).first()
-        elif role == "staff":
+        # Try admin first
+        user = Admin.query.filter_by(username=username).first()
+        role = "admin"
+
+        if not user:
+            # Try staff
             user = Staff.query.filter_by(full_name=full_name).first()
-        elif role == "customer":
+            role = "staff"
+
+        if not user:
+            # Try customer
             user = Customer.query.filter_by(full_name=full_name).first()
-        else:
-            return make_response({"error": "Invalid role"}, 401)
+            role = "customer"
 
         if not user or not user.check_password(password):
             return make_response({"error": "Invalid credentials"}, 401)
@@ -137,7 +144,9 @@ class Login(Resource):
         session["user_id"] = user.id
         session["role"] = role
 
-        return make_response({"Message": "Login Successful"}, 201)
+        return make_response({"message": "Login Successful", "role": role}, 200)
+
+
 
 
 
@@ -536,30 +545,35 @@ class CurrentCustomer(Resource):
 
         return make_response(customer.to_dict(), 200)
 
-class LoginCustomer(Resource):
+
+class Login(Resource):
     def post(self):
         data = request.get_json()
-        username = data.get("username")
-        password = data.get("password")
-        role = data.get("role")
 
+        role = data.get("role")
+        username = data.get("username")
+        full_name = data.get("full_name")
+        password = data.get("password")
+
+        user = None
         if role == "admin":
-            user = Admin.query.filter_by(username = username).first()
+            user = Admin.query.filter_by(username=username).first()
         elif role == "staff":
-            user = Staff.query.filter_by(full_name = username).first()
+            user = Staff.query.filter_by(full_name=full_name).first()
         elif role == "customer":
-            user = Customer.query.filter_by(full_name = username).first()
+            user = Customer.query.filter_by(full_name=full_name).first()
         else:
             return make_response({"error": "Invalid role"}, 401)
 
-
         if not user or not user.check_password(password):
-             return make_response({"error": "Invalid credentials"}, 401)
-        
+            return make_response({"error": "Invalid credentials"}, 401)
+
         session["user_id"] = user.id
         session["role"] = role
 
-        return make_response ({"Message": "Login Successful"}, 201)
+        return make_response({"message": "Login Successful", "user": user.to_dict(), "role": role}, 200)
+
+
 
 
 app.register_error_handler(404, handle_error)
@@ -574,7 +588,7 @@ api.add_resource(AuditLogResource, "/audit-log", "/audit-log/<int:id>")
 api.add_resource(Logout, "/logout")
 api.add_resource(CheckSession, '/check_session')
 api.add_resource(Login, "/login")
-api.add_resource(LoginCustomer, "/login-customer")
+# api.add_resource(LoginCustomer, "/login-customer")
 api.add_resource(RegisterCustomer, "/register-customer")
 api.add_resource(CurrentCustomer, "/current-customer")
 api.add_resource(RegisterAdmin, "/register-admin")
