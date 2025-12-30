@@ -7,6 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from sqlalchemy.orm import validates
 from sqlalchemy_serializer import SerializerMixin
+from config import db, bcrypt, migrate, api
 
 app = Flask(__name__)
 
@@ -27,15 +28,13 @@ bcrypt = Bcrypt(app)
 class Admin(db.Model, SerializerMixin):
     __tablename__ = 'admins'
     serialize_rules = ('-staffs','-customers', '-audit_logs.admin','-password_hash',)
-    serialize_rules = ('-staffs', '-customers', '-audit_logs.admin', '-password_hash',)
+   
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password_hash = db.Column(db.String(50), nullable=False)
     role = db.Column(db.String(), default="admin") 
-    password_hash = db.Column(db.String(50), nullable=False)
-    role = db.Column(db.String(), default="admin")
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
     staffs = db.relationship('Staff', back_populates='admin', cascade="all, delete-orphan")
