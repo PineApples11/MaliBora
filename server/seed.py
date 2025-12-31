@@ -34,7 +34,9 @@ if __name__ == '__main__':
                 username=fake.name(),
                 email=fake.email(),
             )
-            admin.set_password(fake.password())
+            admin.set_password("Password123!")  # Use a known password for testing
+            # print(admin.username)
+            # print(admin.check_password("Password123!"))  
             db.session.add(admin)
             admins.append(admin)
 
@@ -51,7 +53,9 @@ if __name__ == '__main__':
                 phone=fake.phone_number(),
                 savings_balance=round(randint(100, 5000), 2),
             )
-            customer.set_password(fake.password())
+            customer.set_password("Customer123!")  # Use a known password for testing
+            print(customer.full_name)
+            print(customer.check_password("Customer123!"))
             db.session.add(customer)
             customers.append(customer)
 
@@ -77,8 +81,8 @@ if __name__ == '__main__':
         print("completes adding loans")
 
         # Create Repayments
-        for customer in customers:
-            for i in range(2):
+        for loan in loans:
+            for _ in range(2):
                 repayment = Repayment(
                     customer_id=loan.customer_id,
                     amount=round(randint(100, int(loan.amount)), 2),
@@ -110,7 +114,9 @@ if __name__ == '__main__':
             staff_member = Staff(full_name=fake.name(),
                                  email=fake.email(), created_at=datetime.now(), admin_id=rc(admins).id
                                  )
-            staff_member.set_password(fake.password())
+            staff_member.set_password("Staff123!")  # Use a known password for testing
+            # print(staff_member.full_name)
+            # print(staff_member.check_password("Staff123!"))
             db.session.add(staff_member)
             staff.append(staff_member)
 
