@@ -6,7 +6,6 @@ import Login from './CustomerLogs/Login'
 import CustomerTransactionForm from './Customer/CustomerTransactionForm'
 import CustomerLoanForm from './Customer/CustomerLoanForm'
 import Home from './Home'
-import Choice from './choice/Choice'
 import CustomerRepaymentsForm from './Customer/CustomerRepayments'
 import Staff from './Staff/staff.jsx'
 // import { useState } from 'react'
@@ -22,7 +21,6 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/choice" element={<Choice />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
         <Route path="/customer-homepage" element={<CustomerDisplay />} />

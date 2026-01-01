@@ -3,7 +3,7 @@ import "./home.css"
 function Home() {
     const navigate = useNavigate();
     const handleClick = () => {
-        navigate('/choice')
+        navigate('/signup');
     }
   return (
     <div className='home-body'>
