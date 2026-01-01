@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Api
 from flask_bcrypt import Bcrypt
@@ -18,16 +18,33 @@ def create_app():
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.secret_key = "super-secret-key"
 
+    app.config.update(
+    SESSION_COOKIE_NAME="session",
+    SESSION_COOKIE_HTTPONLY=True,      # keep as True
+    SESSION_COOKIE_SECURE=False,       # only True if HTTPS
+    SESSION_COOKIE_SAMESITE="Lax",    # MUST be None for cross-origin
+)
+
+
+
     # Init extensions
     db.init_app(app)
     api.init_app(app)
     bcrypt.init_app(app)
     migrate.init_app(app, db)
 
-    CORS(app, supports_credentials=True, origins=[
+    CORS(app,
+     supports_credentials=True,
+     origins=[
         "http://localhost:5173",
-        "http://127.0.0.1:5173"
-    ])
+        "http://127.0.0.1:5173",
+        "http://localhost:5175",
+        "http://127.0.0.1:5175"
+     ],
+     allow_headers=["Content-Type"],
+     methods=["GET","POST","OPTIONS"]
+)
+
 
     # Import resources
     from resources.auth import Login, Logout, CheckSession, CurrentCustomer
@@ -103,5 +120,20 @@ def create_app():
         ]
     }
 
+    @app.route("/list-staff")
+    def list_staff():
+        from models import Staff
+        return {"staff": [s.full_name for s in Staff.query.all()]}
 
+    @app.route("/me", methods=["GET"])
+    def me():
+        if "user_id" not in session:
+            return {"error": "Not authenticated"}, 401
+
+        return {
+            "id": session["user_id"],
+            "role": session["role"],
+            "full_name": session["full_name"]
+        }, 200
+     
     return app

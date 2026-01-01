@@ -24,6 +24,7 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
         <Route path="/customer-homepage" element={<CustomerDisplay />} />
+        <Route path="/staff-homepage" element={<CustomerDisplay />} />
         <Route path="/customer-repayments" element={<CustomerRepaymentsForm />} />
         <Route path="/customer-transactions" element={<CustomerTransactionForm />} />
         <Route path="/customer-loans" element={<CustomerLoanForm />} />

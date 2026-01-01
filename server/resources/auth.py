@@ -7,43 +7,47 @@ from decorators import login_required, role_required
 
 class Login(Resource):
     def post(self):
-        data = request.get_json()
+        # 1️⃣ Parse JSON safely
+        data = request.get_json() or {}
 
-        username = data.get("username", "").strip()
-        password = data.get("password", "")
-        role = data.get("role", "").lower()
+        username = (data.get("username") or "").strip()
+        password = data.get("password") or ""
+        role = (data.get("role") or "").lower()
 
-        print(f"💡 Login attempt - Role: {role}, Username: '{username}', Password: '{password}'")
+        # 2️⃣ Validate required fields
+        if not username or not password or role not in ["admin", "staff", "customer"]:
+            return make_response({"error": "Missing or invalid fields"}, 400)
 
+        print(f"💡 Login attempt - Role: {role}, Username: '{username}'")
+
+        # 3️⃣ Map role to model
         model_map = {
             "admin": Admin,
             "staff": Staff,
             "customer": Customer
         }
+        Model = model_map[role]
 
-        Model = model_map.get(role)
-        if not Model:
-            print("❌ Invalid role provided")
-            return make_response({"error": "Invalid role"}, 400)
-
-        # Lookup user
+        # 4️⃣ Lookup user in DB
         if role == "admin":
             user = Model.query.filter_by(username=username).first()
         else:
-            # Case-insensitive lookup for staff and customers
             user = Model.query.filter(func.lower(Model.full_name) == username.lower()).first()
 
-        print("User from DB:", user)
-        if user:
-            print("Password valid?", user.check_password(password))
-
-        if not user or not user.check_password(password):
+        if not user:
+            print("❌ User not found")
             return make_response({"error": "Invalid credentials"}, 401)
 
-        # Save session
+        if not user.check_password(password):
+            print("❌ Invalid password")
+            return make_response({"error": "Invalid credentials"}, 401)
+
+        # 5️⃣ Save session
         session["user_id"] = user.id
         session["role"] = role
+        session["full_name"] = user.full_name
 
+        print(f"✅ Login successful for {username} ({role})")
         return make_response({"message": "Login successful"}, 200)
 
 
@@ -65,12 +69,15 @@ class CheckSession(Resource):
             "staff": Staff,
             "customer": Customer
         }
-
         Model = model_map.get(role)
+
         if not Model:
             return make_response({"error": "Invalid session"}, 401)
 
         user = Model.query.get(user_id)
+        if not user:
+            return make_response({"error": "User not found"}, 404)
+
         return make_response(user.to_dict(), 200)
 
 
