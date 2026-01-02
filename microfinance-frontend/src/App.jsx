@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
-import CustomerDisplay from './Customer/CustomerDisplay'
+import CustomerDashboard from './Customer/CustomerDashboard.jsx'
 import SignUp from './CustomerLogs/Signup'
 import Login from './CustomerLogs/Login'
 import CustomerTransactionForm from './Customer/CustomerTransactionForm'
@@ -12,6 +12,7 @@ import Staff from './Staff/staff.jsx'
 
 // import './App.css'
 import Admin from './Admin/Admin.jsx';
+import Dashboard from './Staff/dashboard.jsx'
 
 
 
@@ -23,8 +24,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/customer-homepage" element={<CustomerDisplay />} />
-        <Route path="/staff-homepage" element={<CustomerDisplay />} />
+        <Route path="/customer-homepage" element={<CustomerDashboard />} />
+        <Route path="/staff-homepage" element={<CustomerDashboard />} />
         <Route path="/customer-repayments" element={<CustomerRepaymentsForm />} />
         <Route path="/customer-transactions" element={<CustomerTransactionForm />} />
         <Route path="/customer-loans" element={<CustomerLoanForm />} />
