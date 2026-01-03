@@ -28,11 +28,12 @@
 }
 
 .logo {
-  font-size: 1.75rem;
+ font-size: 1.75rem;
   font-weight: 700;
   color: #4b7bec;
   padding: 0 1.5rem;
   margin-bottom: 3rem;
+  line-height: 1.2;
 }
 
 .sidebar-nav {
@@ -110,28 +111,30 @@
 }
 
 .dashboard-header {
-  background-color: #fff;
-  padding: 0.25rem 0.25rem;
-  border-bottom: 1px solid #e2e8f0;
+ padding: 2rem 2.5rem 1rem 2.5rem; 
+  border-bottom: 1px solid #e2e8f002;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start; /* Aligns text to the top, not the middle of the box */
+  height: auto;
 }
 
 .header-left h1 {
-  font-size: 1.5rem;
+ font-size: 1.5rem;
   font-weight: 600;
   color: #0f172a;
-  margin-bottom: 0.15rem;
+  margin: 0; /* Remove any hidden browser margins */
+  line-height: 1.2;
 }
 
 .header-left p {
   font-size: 0.85rem;
   color: #64748b;
+  margin-top: 0.25rem;
 }
 
 .dashboard-main {
-  padding: 2rem 2.5rem;
+ padding: 1.5rem 2.5rem; 
   max-width: 1400px;
 }
 
