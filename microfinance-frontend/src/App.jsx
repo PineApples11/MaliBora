@@ -4,7 +4,7 @@ import CustomerDashboard from './Customer/CustomerDashboard.jsx'
 import SignUp from './CustomerLogs/Signup'
 import Login from './CustomerLogs/Login'
 import CustomerTransactionForm from './Customer/CustomerTransactionForm'
-import CustomerLoanForm from './Customer/CustomerLoanForm'
+
 import Home from './Home'
 import CustomerRepaymentsForm from './Customer/CustomerRepayments'
 import Staff from './Staff/staff.jsx'
@@ -12,7 +12,8 @@ import Staff from './Staff/staff.jsx'
 
 // import './App.css'
 import Admin from './Admin/Admin.jsx';
-import Dashboard from './Staff/dashboard.jsx'
+import CustomerLoansPage from './Customer/CustomerLoansPage.jsx'
+
 
 
 
@@ -28,7 +29,7 @@ function App() {
         <Route path="/staff-homepage" element={<CustomerDashboard />} />
         <Route path="/customer-repayments" element={<CustomerRepaymentsForm />} />
         <Route path="/customer-transactions" element={<CustomerTransactionForm />} />
-        <Route path="/customer-loans" element={<CustomerLoanForm />} />
+        <Route path="/loans" element={<CustomerLoansPage />} />
         <Route path="/staff/*" element={<Staff />} />
         <Route path="/admin/*" element={<Admin />} />
       </Routes>

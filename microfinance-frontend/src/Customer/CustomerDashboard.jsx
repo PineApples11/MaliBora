@@ -93,7 +93,7 @@ function CustomerDashboard() {
             Dashboard
           </button>
 
-          <button onClick={() => navigate("/customer-loans")}>
+          <button onClick={() => navigate("/loans")}>
             <CreditCard size={20} />
             Loans
           </button>
