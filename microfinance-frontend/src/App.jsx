@@ -15,6 +15,7 @@ import Admin from './Admin/Admin.jsx';
 import CustomerLoansPage from './Customer/CustomerLoansPage.jsx'
 import CustomerSavingsPage from './Customer/CustomerSavingsPage.jsx'
 import CustomerTransactionsPage from './Customer/CustomerTransactionsPage.jsx'
+import StaffDashboard from './Staff/StaffDashboard.jsx'
 
 
 
@@ -33,7 +34,7 @@ function App() {
         <Route path="/savings" element={<CustomerSavingsPage />} />
         <Route path="/transactions" element={<CustomerTransactionsPage />} />
 
-        <Route path="/staff-homepage" element={<CustomerDashboard />} />
+        <Route path="/staff-homepage" element={<StaffDashboard />} />
         {/* <Route path="/customer-repayments" element={<CustomerRepaymentsForm />} />
         <Route path="/customer-transactions" element={<CustomerTransactionForm />} /> */}
 

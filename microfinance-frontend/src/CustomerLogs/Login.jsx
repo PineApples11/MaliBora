@@ -30,7 +30,7 @@ const Login = () => {
           body: JSON.stringify({
             username: values.full_name.trim(), // trim spaces
             password: values.password,
-            role: 'customer', // must match backend model_map keys
+            role: 'staff', // must match backend model_map keys
           }),
         });
 
