@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { data, useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import './login.css';
@@ -49,7 +49,7 @@ const Login = () => {
         }
 
         const me = await meRes.json();
-        localStorage.setItem('me', JSON.stringify(me));
+        localStorage.setItem('user', JSON.stringify(me));
 
         // ✅ Role-based routing
         switch (me.role) {
