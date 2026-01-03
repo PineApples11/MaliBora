@@ -98,7 +98,7 @@ function CustomerDashboard() {
             Loans
           </button>
 
-          <button onClick={() => navigate("/customer-savings")}>
+          <button onClick={() => navigate("/savings")}>
             <PiggyBank size={20} />
             Savings
           </button>

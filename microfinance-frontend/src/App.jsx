@@ -13,6 +13,7 @@ import Staff from './Staff/staff.jsx'
 // import './App.css'
 import Admin from './Admin/Admin.jsx';
 import CustomerLoansPage from './Customer/CustomerLoansPage.jsx'
+import CustomerSavingsPage from './Customer/CustomerSavingsPage.jsx'
 
 
 
@@ -25,11 +26,15 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
+
         <Route path="/customer-homepage" element={<CustomerDashboard />} />
+        <Route path="/loans" element={<CustomerLoansPage />} />
+        <Route path="/savings" element={<CustomerSavingsPage />} />
+
         <Route path="/staff-homepage" element={<CustomerDashboard />} />
         <Route path="/customer-repayments" element={<CustomerRepaymentsForm />} />
         <Route path="/customer-transactions" element={<CustomerTransactionForm />} />
-        <Route path="/loans" element={<CustomerLoansPage />} />
+
         <Route path="/staff/*" element={<Staff />} />
         <Route path="/admin/*" element={<Admin />} />
       </Routes>
