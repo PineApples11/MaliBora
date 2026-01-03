@@ -103,7 +103,7 @@ function CustomerDashboard() {
             Savings
           </button>
 
-          <button onClick={() => navigate("/customer-transactions")}>
+          <button onClick={() => navigate("/transactions")}>
             <Wallet size={20} />
             Transactions
           </button>
