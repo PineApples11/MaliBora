@@ -13,6 +13,7 @@ import CustomerLoansPage from './Customer/CustomerLoansPage.jsx'
 import CustomerSavingsPage from './Customer/CustomerSavingsPage.jsx'
 import CustomerTransactionsPage from './Customer/CustomerTransactionsPage.jsx'
 import StaffDashboard from './Staff/StaffDashboard.jsx'
+import RepayLoan from './Customer/LoanRepayment.jsx'
 
 
 
@@ -30,6 +31,7 @@ function App() {
         <Route path="/loans" element={<CustomerLoansPage />} />
         <Route path="/savings" element={<CustomerSavingsPage />} />
         <Route path="/transactions" element={<CustomerTransactionsPage />} />
+        <Route path="/repay" element={<RepayLoan />} />
 
         <Route path="/staff-homepage" element={<StaffDashboard />} />
         {/* <Route path="/customer-repayments" element={<CustomerRepaymentsForm />} />
