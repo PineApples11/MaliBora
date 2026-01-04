@@ -183,11 +183,17 @@ function CustomerSavingsPage() {
             <p>Track your savings growth and manage your financial goals.</p>
           </div>
           <div className="header-actions">
-            <button className="withdraw-btn">
+            <button 
+             className="withdraw-btn"
+             onClick={() => navigate("/withdraw")}
+             >
               <ArrowDown size={18} />
               Withdraw
             </button>
-            <button className="deposit-btn">
+            <button 
+            className="deposit-btn"
+            onClick={() => navigate("/deposit-savings")}
+            >
               <ArrowUp size={18} />
               Deposit Savings
             </button>
