@@ -467,4 +467,94 @@
   .amount-input {
     font-size: 24px;
   }
+  /* Add these styles to your existing LoanRepayment.css */
+
+.loading-message {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 18px;
+  color: #6b7280;
+}
+
+.no-loans-message {
+  background: white;
+  border-radius: 12px;
+  padding: 60px 40px;
+  text-align: center;
+  margin-top: 40px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.no-loans-message p {
+  font-size: 16px;
+  color: #6b7280;
+}
+
+.alert {
+  padding: 16px 20px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.alert-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.alert-success {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  color: #166534;
+}
+
+.loans-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.loan-selector {
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.loan-selector:hover {
+  border-color: #3b82f6;
+  background: white;
+}
+
+.loan-selector.selected {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.confirm-button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.confirm-button:disabled:hover {
+  background: #9ca3af;
+}
+
+.amount-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.amount-btn:disabled:hover {
+  border-color: #e5e7eb;
+  color: #374151;
+  background: white;
+}
 }
