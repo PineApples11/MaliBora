@@ -345,7 +345,7 @@ function CustomerDashboard() {
 
                 <button 
                   className="action-btn"
-                  onClick={() => navigate("/savings")}
+                  onClick={() => navigate("/withdraw")}
                 >
                   <div className="action-icon">
                     <ArrowUp size={24} color="#f59e0b" />

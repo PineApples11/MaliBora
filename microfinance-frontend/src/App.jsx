@@ -15,6 +15,7 @@ import CustomerTransactionsPage from './Customer/CustomerTransactionsPage.jsx'
 import StaffDashboard from './Staff/StaffDashboard.jsx'
 import RepayLoan from './Customer/LoanRepayment.jsx'
 import DepositSavings from './Customer/DepositSavings.jsx'
+import WithdrawFunds from './WithdrawFunds.jsx'
 
 
 
@@ -34,6 +35,7 @@ function App() {
         <Route path="/transactions" element={<CustomerTransactionsPage />} />
         <Route path="/repay" element={<RepayLoan />} />
         <Route path="/deposit-savings" element={<DepositSavings />} />
+        <Route path="/withdraw" element={<WithdrawFunds />} />
 
         <Route path="/staff-homepage" element={<StaffDashboard />} />
  
