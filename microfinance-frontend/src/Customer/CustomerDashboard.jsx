@@ -335,7 +335,7 @@ function CustomerDashboard() {
 
                 <button 
                   className="action-btn"
-                  onClick={() => navigate("/savings")}
+                  onClick={() => navigate("/deposit-savings")}
                 >
                   <div className="action-icon">
                     <PiggyBank size={24} color="#10b981" />
