@@ -223,6 +223,84 @@ def create_app():
             import traceback
             traceback.print_exc()
             return {"error": f"Server error: {str(e)}"}, 500
+    
+    @app.route("/savings/<int:customer_id>")
+    def customer_savings(customer_id):
+            """
+            Get savings transactions for a specific customer by ID
+            """
+            if "user_id" not in session:
+                return {"error": "Not authenticated"}, 401
+
+            try:
+                from models import SavingsTransaction, Customer, StaffCustomer
+
+                user_role = session.get("role")
+                user_id = session.get("user_id")
+
+                # Authorization checks
+                if user_role == "customer":
+                    if user_id != customer_id:
+                        return {"error": "Unauthorized access"}, 403
+                elif user_role == "staff":
+                    is_managed = StaffCustomer.query.filter_by(
+                        staff_id=user_id,
+                        customer_id=customer_id
+                    ).first()
+                    if not is_managed:
+                        return {"error": "You are not assigned to this customer"}, 403
+                elif user_role != "admin":
+                    return {"error": "Invalid role"}, 403
+
+                customer = Customer.query.get(customer_id)
+                if not customer:
+                    return {"error": "Customer not found"}, 404
+
+                transactions = SavingsTransaction.query.filter_by(customer_id=customer_id).all()
+
+                result = []
+                for tx in transactions:
+                    try:
+                        # Safely format the date
+                        tx_date = None
+                        if hasattr(tx, 'date') and tx.date:
+                            try:
+                                tx_date = tx.date.strftime("%b %d, %Y")
+                            except Exception as date_err:
+                                print(f"Warning: Could not format date for transaction {tx.id}: {date_err}")
+                                tx_date = str(tx.date)
+
+                        result.append({
+                            "id": tx.id,
+                            "amount": tx.amount,
+                            "transaction_type": tx.transaction_type,
+                            "date": tx_date,
+                            "description": tx.description
+                        })
+                    except Exception as tx_err:
+                        print(f"Warning: Error processing transaction {tx.id}: {tx_err}")
+                        import traceback
+                        traceback.print_exc()
+                        continue
+
+                return {
+                    "customer": {
+                        "id": customer.id,
+                        "full_name": customer.full_name,
+                        "phone": getattr(customer, "phone", None),
+                        "national_id": getattr(customer, "national_id", None)
+                    },
+                    "savings_transactions": result
+                }
+
+            except Exception as e:
+                print(f"Customer savings endpoint error: {e}")
+                import traceback
+                traceback.print_exc()
+                return {"error": f"Server error: {str(e)}"}, 500
+
+
+
 
     @app.route("/loans/<int:customer_id>")
     def customer_loans(customer_id):

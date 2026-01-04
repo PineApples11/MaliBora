@@ -26,116 +26,107 @@ import {
 
 function CustomerSavingsPage() {
   const navigate = useNavigate();
-  const rawUser = localStorage.getItem("user");
-  const user = rawUser ? JSON.parse(rawUser) : null;
 
+  const [user, setUser] = useState(null);
+  const [savingsData, setSavingsData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  // Verify session and get current user
   useEffect(() => {
-    if (!user) {
-      navigate("/login", { replace: true });
-    }
-  }, [user, navigate]);
+    fetch("http://localhost:5555/me", { credentials: "include" })
+      .then(res => {
+        if (!res.ok) throw new Error("Not authenticated");
+        return res.json();
+      })
+      .then(data => {
+        setUser(data);
+      })
+      .catch(err => {
+        console.error("Session check failed:", err);
+        navigate("/login", { replace: true });
+      });
+  }, [navigate]);
 
+  // Fetch savings data for current customer
   useEffect(() => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
+    if (!user) return;
 
-    // Simulate loading
-    setTimeout(() => setLoading(false), 500);
+    fetch(`http://localhost:5555/savings/${user.id}`, {
+      credentials: "include"
+    })
+      .then(res => {
+        if (!res.ok) {
+          if (res.status === 404) {
+            // No savings accounts yet
+            setSavingsData({
+              customer: { id: user.id, full_name: user.full_name },
+              total_balance: 0,
+              growth_percentage: 0,
+              accounts: [],
+              recent_transactions: []
+            });
+            setError(null);
+            return null;
+          }
+          throw new Error("Failed to fetch savings data");
+        }
+        return res.json();
+      })
+      .then(data => {
+        if (data) {
+          setSavingsData(data);
+          setError(null);
+        }
+      })
+      .catch(err => {
+        console.error("Savings fetch failed:", err);
+        setError(err.message);
+        // Set empty data structure on error
+        setSavingsData({
+          customer: { id: user.id, full_name: user.full_name },
+          total_balance: 0,
+          growth_percentage: 0,
+          accounts: [],
+          recent_transactions: []
+        });
+      })
+      .finally(() => setLoading(false));
   }, [user]);
 
-  if (!user || loading) return null;
+  if (loading) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh'
+      }}>
+        Loading your savings...
+      </div>
+    );
+  }
 
-  // Mock data
-  const totalSavingsBalance = 5450000;
-  const totalInterestEarned = 324500;
-  const monthlyGoal = 400000;
-  const monthlyGoalProgress = 90;
-  const currentAPY = 8.5;
+  if (!user || !savingsData) return null;
 
-  const savingsAccounts = [
-    {
-      id: 1,
-      name: "Main Savings",
-      type: "Personal Account",
-      balance: 2150000,
-      lastDeposit: "50k",
-      icon: "wallet",
-      color: "blue",
-    },
-    {
-      id: 2,
-      name: "Emergency Fund",
-      type: "High Priority",
-      balance: 1800000,
-      saved: 1800000,
-      target: 3000000,
-      progress: 60,
-      icon: "alert",
-      color: "orange",
-    },
-    {
-      id: 3,
-      name: "School Fees",
-      type: "Goal",
-      balance: 1500000,
-      saved: 1500000,
-      target: 2000000,
-      progress: 75,
-      icon: "target",
-      color: "purple",
-    },
-  ];
+  // Extract data from API response
+  const totalSavingsBalance = savingsData.total_balance || 0;
+  const growthPercentage = savingsData.growth_percentage || 0;
+  const savingsAccounts = savingsData.accounts || [];
+  const recentTransactions = savingsData.recent_transactions || [];
 
-  const recentTransactions = [
-    {
-      id: 1,
-      name: "Mobile Deposit (M-Pesa)",
-      ref: "Ref: WD-28670",
-      date: "Oct 24, 2023, 10:30 AM",
-      category: "Deposit",
-      amount: "+150,000 TZS",
-      status: "Completed",
-      type: "deposit",
-      isPositive: true,
-    },
-    {
-      id: 2,
-      name: "Monthly Interest Payout",
-      ref: "System Generated",
-      date: "Oct 01, 2023, 08:00 AM",
-      category: "Interest",
-      amount: "+12,450 TZS",
-      status: "Completed",
-      type: "interest",
-      isPositive: true,
-    },
-    {
-      id: 3,
-      name: "Withdrawal to Bank",
-      ref: "Ref: WD-19220",
-      date: "Sep 28, 2023, 02:15 PM",
-      category: "Withdrawal",
-      amount: "-500,000 TZS",
-      status: "Processed",
-      type: "withdrawal",
-      isPositive: false,
-    },
-    {
-      id: 4,
-      name: "Mobile Deposit (Airtel)",
-      ref: "Ref: AD-15240",
-      date: "Sep 15, 2023, 11:45 AM",
-      category: "Deposit",
-      amount: "+200,000 TZS",
-      status: "Completed",
-      type: "deposit",
-      isPositive: true,
-    },
-  ];
+  // Calculate additional stats
+  const totalInterestEarned = savingsAccounts.reduce(
+    (sum, account) => sum + (account.interest_rate || 0) * (account.balance || 0) / 100,
+    0
+  );
+  const averageAPY = savingsAccounts.length > 0
+    ? savingsAccounts.reduce((sum, acc) => sum + (acc.interest_rate || 0), 0) / savingsAccounts.length
+    : 0;
+
+  // Mock monthly goal (you can add this to your backend later)
+  const monthlyGoal = 500000;
+  const monthlyGoalProgress = Math.min((totalSavingsBalance / monthlyGoal) * 100, 100);
 
   return (
     <div className="savings-page-container">
@@ -170,8 +161,12 @@ function CustomerSavingsPage() {
           <button
             className="logout-btn"
             onClick={() => {
-              localStorage.removeItem("user");
-              navigate("/login");
+              fetch("http://localhost:5555/logout", {
+                method: "POST",
+                credentials: "include"
+              }).then(() => {
+                navigate("/login");
+              });
             }}
           >
             <LogOut size={14} />
@@ -201,6 +196,18 @@ function CustomerSavingsPage() {
 
         {/* Main Content */}
         <main className="savings-main">
+          {error && (
+            <div style={{
+              padding: '1rem',
+              background: '#fef3cd',
+              color: '#856404',
+              borderRadius: '8px',
+              marginBottom: '1rem'
+            }}>
+              {error}
+            </div>
+          )}
+
           {/* Summary Stats */}
           <section className="savings-stats-grid">
             <div className="savings-stat-card">
@@ -211,7 +218,9 @@ function CustomerSavingsPage() {
               <div className="stat-value">
                 {totalSavingsBalance.toLocaleString()} TZS
               </div>
-              <p className="stat-subtitle success">+12% from last month</p>
+              <p className="stat-subtitle success">
+                {growthPercentage > 0 ? '+' : ''}{growthPercentage.toFixed(1)}% from last month
+              </p>
             </div>
 
             <div className="savings-stat-card">
@@ -220,9 +229,9 @@ function CustomerSavingsPage() {
               </div>
               <h4>Total Interest Earned</h4>
               <div className="stat-value">
-                {totalInterestEarned.toLocaleString()} TZS
+                {Math.round(totalInterestEarned).toLocaleString()} TZS
               </div>
-              <p className="stat-subtitle">Earned over 1 year</p>
+              <p className="stat-subtitle">Estimated annual earnings</p>
             </div>
 
             <div className="savings-stat-card">
@@ -231,12 +240,12 @@ function CustomerSavingsPage() {
               </div>
               <h4>This Month's Goal</h4>
               <div className="stat-value">
-                {monthlyGoal.toLocaleString()} TZS
+                {totalSavingsBalance.toLocaleString()} TZS
               </div>
-              <p className="stat-subtitle">Target: 500k</p>
+              <p className="stat-subtitle">Target: {monthlyGoal.toLocaleString()}</p>
               <div className="stat-progress-wrapper">
                 <div className="stat-progress-info">
-                  <span>{monthlyGoalProgress}% Reached</span>
+                  <span>{Math.round(monthlyGoalProgress)}% Reached</span>
                 </div>
                 <div className="stat-progress-bar">
                   <div
@@ -251,8 +260,8 @@ function CustomerSavingsPage() {
               <div className="stat-icon-wrapper orange">
                 <Percent size={20} />
               </div>
-              <h4>Current APY</h4>
-              <div className="stat-value">{currentAPY}%</div>
+              <h4>Average APY</h4>
+              <div className="stat-value">{averageAPY.toFixed(1)}%</div>
               <p className="stat-subtitle">On annual interest p.a.</p>
             </div>
           </section>
@@ -267,79 +276,82 @@ function CustomerSavingsPage() {
               </button>
             </div>
 
-            <div className="accounts-grid">
-              {savingsAccounts.map((account) => (
-                <div key={account.id} className="savings-account-card">
-                  <div className="account-header">
-                    <div className="account-icon-title">
-                      <div className={`account-icon ${account.color}`}>
-                        {account.icon === "wallet" && <WalletIcon size={20} />}
-                        {account.icon === "alert" && <AlertCircle size={20} />}
-                        {account.icon === "target" && <Target size={20} />}
-                      </div>
-                      <div className="account-title">
-                        <h3>{account.name}</h3>
-                        <p>{account.type}</p>
-                      </div>
-                    </div>
-                    <button className="account-menu-btn">
-                      <MoreVertical size={18} />
-                    </button>
-                  </div>
-
-                  <div className="account-balance">
-                    <div className="balance-label">Current Balance</div>
-                    <div className="balance-amount">
-                      {account.balance.toLocaleString()} TZS
-                    </div>
-                  </div>
-
-                  {account.target ? (
-                    <div className="account-meta with-progress">
-                      <div className="goal-progress">
-                        <div className="goal-progress-header">
-                          <div>
-                            <span className="saved">Saved: </span>
-                            <span className="target">
-                              {account.saved.toLocaleString()} /{" "}
-                              {account.target.toLocaleString()}
-                            </span>
+            {savingsAccounts.length === 0 ? (
+              <div style={{
+                textAlign: 'center',
+                padding: '3rem',
+                background: '#f8f9fa',
+                borderRadius: '12px',
+                marginBottom: '2rem'
+              }}>
+                <PiggyBank size={48} style={{ color: '#94a3b8', marginBottom: '1rem' }} />
+                <h3 style={{ color: '#475569', marginBottom: '0.5rem' }}>No Savings Accounts Yet</h3>
+                <p style={{ color: '#94a3b8', marginBottom: '1.5rem' }}>
+                  Create your first savings account to start building your financial future
+                </p>
+                <button className="deposit-btn">
+                  <Plus size={18} />
+                  Create Savings Account
+                </button>
+              </div>
+            ) : (
+              <div className="accounts-grid">
+                {savingsAccounts.map((account) => {
+                  const accountType = account.account_type || "Savings Account";
+                  const accountStatus = account.status || "active";
+                  
+                  return (
+                    <div key={account.id} className="savings-account-card">
+                      <div className="account-header">
+                        <div className="account-icon-title">
+                          <div className="account-icon blue">
+                            <WalletIcon size={20} />
                           </div>
-                          <span className="percentage">
-                            {account.progress}% Reached
+                          <div className="account-title">
+                            <h3>Account #{account.account_number}</h3>
+                            <p>{accountType}</p>
+                          </div>
+                        </div>
+                        <button className="account-menu-btn">
+                          <MoreVertical size={18} />
+                        </button>
+                      </div>
+
+                      <div className="account-balance">
+                        <div className="balance-label">Current Balance</div>
+                        <div className="balance-amount">
+                          {account.balance.toLocaleString()} TZS
+                        </div>
+                      </div>
+
+                      <div className="account-meta">
+                        <div className="meta-item">
+                          <Percent size={14} />
+                          Interest: {account.interest_rate || 0}% p.a.
+                        </div>
+                        <div className="meta-item">
+                          <Calendar size={14} />
+                          Since {account.created_at || "N/A"}
+                        </div>
+                        <div className="meta-item">
+                          <span className={`status-badge ${accountStatus}`}>
+                            {accountStatus.charAt(0).toUpperCase() + accountStatus.slice(1)}
                           </span>
                         </div>
-                        <div className="goal-progress-bar">
-                          <div
-                            className={`goal-progress-fill ${account.color}`}
-                            style={{ width: `${account.progress}%` }}
-                          />
-                        </div>
                       </div>
                     </div>
-                  ) : (
-                    <div className="account-meta">
-                      <div className="meta-item success">
-                        <ArrowUpRight size={14} />
-                        Last deposit: {account.lastDeposit}
-                      </div>
-                      <div className="meta-item">
-                        <Calendar size={14} />
-                        Oct 26
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+                  );
+                })}
 
-              {/* Create New Goal Card */}
-              <div className="create-goal-card">
-                <div className="create-icon">
-                  <Plus size={24} />
+                {/* Create New Account Card */}
+                <div className="create-goal-card">
+                  <div className="create-icon">
+                    <Plus size={24} />
+                  </div>
+                  <span>Create New Savings Account</span>
                 </div>
-                <span>Create New Savings Goal</span>
               </div>
-            </div>
+            )}
           </section>
 
           {/* Recent Transactions */}
@@ -359,66 +371,75 @@ function CustomerSavingsPage() {
             </div>
 
             <div className="transactions-table-container">
-              <table className="transactions-table">
-                <thead>
-                  <tr>
-                    <th>Transaction Details</th>
-                    <th>Date</th>
-                    <th>Category</th>
-                    <th className="text-right">Amount</th>
-                    <th className="text-right">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentTransactions.map((transaction) => (
-                    <tr key={transaction.id}>
-                      <td>
-                        <div className="transaction-details-cell">
-                          <div className={`transaction-icon ${transaction.type}`}>
-                            {transaction.type === "deposit" && (
-                              <ArrowDownLeft size={18} />
-                            )}
-                            {transaction.type === "interest" && (
-                              <DollarSign size={18} />
-                            )}
-                            {transaction.type === "withdrawal" && (
-                              <ArrowUpRight size={18} />
-                            )}
-                          </div>
-                          <div className="transaction-info">
-                            <p className="transaction-name">
-                              {transaction.name}
-                            </p>
-                            <p className="transaction-ref">{transaction.ref}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="transaction-date">{transaction.date}</td>
-                      <td className="transaction-category">
-                        {transaction.category}
-                      </td>
-                      <td
-                        className={`transaction-amount ${
-                          transaction.isPositive ? "positive" : "negative"
-                        }`}
-                      >
-                        {transaction.amount}
-                      </td>
-                      <td className="transaction-status">
-                        <span
-                          className={`status-badge ${
-                            transaction.status === "Completed"
-                              ? "completed"
-                              : "processed"
-                          }`}
-                        >
-                          {transaction.status}
-                        </span>
-                      </td>
+              {recentTransactions.length === 0 ? (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '3rem',
+                  color: '#64748b'
+                }}>
+                  <Wallet size={48} style={{ color: '#cbd5e1', marginBottom: '1rem' }} />
+                  <p>No transactions yet</p>
+                  <p style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}>
+                    Your savings transactions will appear here
+                  </p>
+                </div>
+              ) : (
+                <table className="transactions-table">
+                  <thead>
+                    <tr>
+                      <th>Transaction Details</th>
+                      <th>Date</th>
+                      <th>Category</th>
+                      <th className="text-right">Amount</th>
+                      <th className="text-right">Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {recentTransactions.map((transaction) => {
+                      const isDeposit = transaction.transaction_type === "deposit";
+                      
+                      return (
+                        <tr key={transaction.id}>
+                          <td>
+                            <div className="transaction-details-cell">
+                              <div className={`transaction-icon ${transaction.transaction_type}`}>
+                                {isDeposit ? (
+                                  <ArrowDownLeft size={18} />
+                                ) : (
+                                  <ArrowUpRight size={18} />
+                                )}
+                              </div>
+                              <div className="transaction-info">
+                                <p className="transaction-name">
+                                  {isDeposit ? "Deposit" : "Withdrawal"}
+                                </p>
+                                <p className="transaction-ref">
+                                  {transaction.reference || `Ref: ${transaction.id}`}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="transaction-date">
+                            {transaction.date || "N/A"}
+                          </td>
+                          <td className="transaction-category">
+                            {transaction.transaction_type.charAt(0).toUpperCase() + 
+                             transaction.transaction_type.slice(1)}
+                          </td>
+                          <td className={`transaction-amount ${isDeposit ? "positive" : "negative"}`}>
+                            {isDeposit ? "+" : "-"}{transaction.amount.toLocaleString()} TZS
+                          </td>
+                          <td className="transaction-status">
+                            <span className="status-badge completed">
+                              Completed
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
             </div>
           </section>
         </main>
