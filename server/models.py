@@ -55,6 +55,10 @@ class Customer(db.Model, SerializerMixin):
     repayments = db.relationship('Repayment', back_populates='customer', cascade="all, delete-orphan")
     savings_transactions = db.relationship('SavingsTransaction', back_populates='customer', cascade="all, delete-orphan")
     staff_customers = db.relationship('StaffCustomer', back_populates='customer', cascade="all, delete-orphan")
+    savings_accounts = db.relationship("SavingsAccount", back_populates="customer", cascade="all, delete-orphan")
+    savings_transactions = db.relationship("SavingsTransaction", back_populates="customer", cascade="all, delete-orphan")
+ 
+
 
     @validates('admin_id')
     def validates_admin_id(self, key, val):
@@ -139,17 +143,21 @@ class StaffCustomer(db.Model, SerializerMixin):
 
 class Loan(db.Model, SerializerMixin):
     __tablename__ = 'loans'
-    serialize_rules = ('-customer.loans',)
+    serialize_rules = ('-customer.loans','-repayments.loans',)
 
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
-    amount = db.Column(db.Float, nullable=False)
+    principal_amount = db.Column(db.Float, nullable=False)
     interest_rate = db.Column(db.Float, nullable=False)
+    loan_term_months = db.Column(db.Integer, nullable=False)
     status = db.Column(db.String(20), nullable=False)
     issued_date = db.Column(db.DateTime, default=db.func.current_timestamp())
     due_date = db.Column(db.DateTime, nullable=False)
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    
 
     customer = db.relationship('Customer', back_populates='loans')
+    repayments = db.relationship('Repayment', back_populates='loan', cascade="all, delete-orphan")
 
     @validates('customer_id')
     def validates_customer_id(self, key, val):
@@ -172,11 +180,15 @@ class Repayment(db.Model, SerializerMixin):
     serialize_rules = ('-customer.repayments',)
 
     id = db.Column(db.Integer, primary_key=True)
+    loan_id = db.Column(db.Integer, db.ForeignKey('loans.id'), nullable=False)
     customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
     amount = db.Column(db.Float, nullable=False)
+    payment_method = db.Column(db.String(50), nullable=False)
     date_paid = db.Column(db.DateTime, default=db.func.current_timestamp())
 
+
     customer = db.relationship('Customer', back_populates='repayments')
+    loan = db.relationship('Loan', back_populates='repayments')
 
     @validates('customer_id')
     def validates_customer_id(self, key, val):
@@ -187,33 +199,58 @@ class Repayment(db.Model, SerializerMixin):
     def __repr__(self):
         return f"<Repayment id={self.id}, amount={self.amount}>"
 
-
 class SavingsTransaction(db.Model, SerializerMixin):
-    __tablename__ = 'savings_transactions'
-    serialize_rules = ('-customer.savings_transactions',)
+    __tablename__ = "savings_transactions"
+    serialize_rules = (
+        '-account.transactions',
+        '-customer.savings_transactions',
+    )
 
     id = db.Column(db.Integer, primary_key=True)
-    customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
-    type = db.Column(db.String(20), nullable=False)  # 'deposit' or 'withdrawal'
+
+    account_id = db.Column(
+        db.Integer,
+        db.ForeignKey("savings_accounts.id"),
+        nullable=False
+    )
+
+    customer_id = db.Column(
+        db.Integer,
+        db.ForeignKey("customers.id"),
+        nullable=False
+    )
+
+    transaction_type = db.Column(
+        db.String(20),
+        nullable=False
+    )  # deposit | withdrawal
+
     amount = db.Column(db.Float, nullable=False)
-    transaction_date = db.Column(db.DateTime, default=db.func.current_timestamp())
+    reference = db.Column(db.String(50), nullable=True)
 
-    customer = db.relationship('Customer', back_populates='savings_transactions')
+    created_at = db.Column(
+        db.DateTime,
+        default=db.func.current_timestamp()
+    )
 
-    @validates('customer_id')
-    def validates_customer_id(self, key, val):
-        if not Customer.query.get(val):
-            raise ValueError("Customer ID does not exist")
-        return val
+    account = db.relationship(
+        "SavingsAccount",
+        back_populates="transactions"
+    )
 
-    @validates('type')
-    def validates_type(self, key, val):
-        if val not in ["deposit", "withdrawal"]:
-            raise ValueError("Invalid type: must be 'deposit' or 'withdrawal'")
-        return val
+    customer = db.relationship(
+        "Customer",
+        back_populates="savings_transactions"
+    )
+
+    @validates("transaction_type")
+    def validate_type(self, key, value):
+        if value not in ["deposit", "withdrawal"]:
+            raise ValueError("Invalid transaction type")
+        return value
 
     def __repr__(self):
-        return f"<SavingsTransaction id={self.id}, amount={self.amount}>"
+        return f"<SavingsTransaction {self.transaction_type} {self.amount}>"
 
 
 class AuditLog(db.Model, SerializerMixin):
@@ -242,3 +279,43 @@ class AuditLog(db.Model, SerializerMixin):
 
     def __repr__(self):
         return f"<AuditLog id={self.id}, action={self.action}>"
+
+
+class SavingsAccount(db.Model, SerializerMixin):
+    __tablename__ = "savings_accounts"
+    serialize_rules = (
+        '-customer.savings_accounts',
+        '-transactions.account',
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    customer_id = db.Column(
+        db.Integer,
+        db.ForeignKey("customers.id"),
+        nullable=False
+    )
+
+    account_number = db.Column(db.String(30), unique=True, nullable=False)
+    balance = db.Column(db.Float, default=0.0)
+    interest_rate = db.Column(db.Float, default=0.0)
+    status = db.Column(db.String(20), default="active")  # active | frozen | closed
+
+    created_at = db.Column(
+        db.DateTime,
+        default=db.func.current_timestamp()
+    )
+
+    customer = db.relationship(
+        "Customer",
+        back_populates="savings_accounts"
+    )
+
+    transactions = db.relationship(
+        "SavingsTransaction",
+        back_populates="account",
+        cascade="all, delete-orphan"
+    )
+
+    def __repr__(self):
+        return f"<SavingsAccount {self.account_number} balance={self.balance}>"
+

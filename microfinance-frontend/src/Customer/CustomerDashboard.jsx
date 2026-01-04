@@ -1,5 +1,5 @@
 // src/components/CustomerDashboard.jsx
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./CustomerDashboard.css";
 import {
@@ -7,7 +7,6 @@ import {
   CreditCard,
   Wallet,
   LogOut,
-  ArrowUpRight,
   DollarSign,
   PiggyBank,
   AlertTriangle,
@@ -19,67 +18,91 @@ import {
 function CustomerDashboard() {
   const navigate = useNavigate();
 
-  // ✅ Parse user safely from localStorage
-  const rawUser = localStorage.getItem("user");
-  const user = rawUser ? JSON.parse(rawUser) : null;
-
   // ✅ State hooks
-  const [loans, setLoans] = useState([]);
+  const [user, setUser] = useState(null);
+  const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // ✅ Redirect if not logged in
+  // ✅ Verify session and get current user
   useEffect(() => {
-    if (!user) {
-      navigate("/login", { replace: true });
-    }
-  }, [user, navigate]);
-
-  // ✅ Fetch loans
-  useEffect(() => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-
-    fetch("http://localhost:5000/loan", { credentials: "include" })
+    fetch("http://localhost:5555/me", { credentials: "include" })
       .then(res => {
         if (!res.ok) throw new Error("Not authenticated");
         return res.json();
       })
       .then(data => {
-        const customerLoans = data.filter(
-          loan => loan.customer_id === user.id
-        );
-        setLoans(customerLoans);
+        setUser(data);
       })
       .catch(err => {
-        console.error("Loan fetch failed:", err);
-        setLoans([]);
+        console.error("Session check failed:", err);
+        navigate("/login", { replace: true });
+      });
+  }, [navigate]);
+
+  // ✅ Fetch dashboard summary data
+  useEffect(() => {
+    if (!user) return;
+
+    fetch("http://localhost:5555/dashboard-summary", { 
+      credentials: "include" 
+    })
+      .then(res => {
+        if (!res.ok) {
+          if (res.status === 401) {
+            throw new Error("Not authenticated");
+          } else if (res.status === 403) {
+            throw new Error("Unauthorized access");
+          }
+          throw new Error("Failed to fetch dashboard data");
+        }
+        return res.json();
+      })
+      .then(data => {
+        setDashboardData(data);
+        setError(null);
+      })
+      .catch(err => {
+        console.error("Dashboard fetch failed:", err);
+        setError(err.message);
+        
+        if (err.message === "Not authenticated") {
+          navigate("/login", { replace: true });
+        }
       })
       .finally(() => setLoading(false));
-  }, [user]);
+  }, [user, navigate]);
 
-  // ✅ Derived data
-  const activeLoan = useMemo(
-    () => loans.find(l => l.status === "active"),
-    [loans]
-  );
-
-  const totalLoanBalance = useMemo(
-    () => loans.reduce((sum, loan) => sum + loan.amount, 0),
-    [loans]
-  );
-
-  const amountPaid = activeLoan?.amount_paid || 0;
-  const repaymentProgress = activeLoan
-    ? Math.min((amountPaid / activeLoan.amount) * 100, 100)
+  // ✅ Calculate repayment progress
+  const repaymentProgress = dashboardData?.active_loan
+    ? Math.min(
+        (dashboardData.active_loan.amount_paid / dashboardData.active_loan.amount) * 100,
+        100
+      )
     : 0;
 
-  // Mock savings data - replace with actual API
-  const totalSavings = 450000;
-
   // ✅ Early return after all hooks
-  if (!user || loading) return null;
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        fontSize: '1.2rem',
+        color: '#64748b'
+      }}>
+        Loading your dashboard...
+      </div>
+    );
+  }
+
+  if (!user || !dashboardData) return null;
+
+  const activeLoan = dashboardData.active_loan;
+  const totalSavings = dashboardData.total_savings || 0;
+  const totalLoanBalance = dashboardData.total_loan_balance || 0;
+  const savingsGrowth = dashboardData.savings_growth || 0;
 
   return (
     <div className="dashboard">
@@ -114,8 +137,12 @@ function CustomerDashboard() {
           <button
             className="logout-btn"
             onClick={() => {
-              localStorage.removeItem("user");
-              navigate("/login");
+              fetch("http://localhost:5555/logout", {
+                method: "POST",
+                credentials: "include"
+              }).then(() => {
+                navigate("/login");
+              });
             }}
           >
             <LogOut size={14} />
@@ -135,6 +162,19 @@ function CustomerDashboard() {
 
         {/* Main Content Area */}
         <main className="dashboard-main">
+          {/* Error Message */}
+          {error && (
+            <div style={{ 
+              padding: '1rem', 
+              background: '#fee', 
+              color: '#c33', 
+              borderRadius: '8px',
+              marginBottom: '1rem'
+            }}>
+              Error: {error}
+            </div>
+          )}
+
           {/* Stats Cards */}
           <section className="stats">
             <div className="stat-card">
@@ -145,7 +185,9 @@ function CustomerDashboard() {
               </div>
               <h4>Total Savings</h4>
               <p className="amount">{totalSavings.toLocaleString()} TZS</p>
-              <p className="subtitle">+12% from last month</p>
+              <p className="subtitle">
+                {savingsGrowth > 0 ? '+' : ''}{savingsGrowth}% from last month
+              </p>
             </div>
 
             <div className="stat-card">
@@ -157,7 +199,10 @@ function CustomerDashboard() {
               <h4>Active Loan Balance</h4>
               <p className="amount">{totalLoanBalance.toLocaleString()} TZS</p>
               <p className="subtitle">
-                {activeLoan ? activeLoan.status : "No active loans"}
+                {activeLoan 
+                  ? `${dashboardData.total_active_loans} active loan${dashboardData.total_active_loans > 1 ? 's' : ''}`
+                  : "No active loans"
+                }
               </p>
             </div>
           </section>
@@ -172,8 +217,11 @@ function CustomerDashboard() {
                 <h5>Upcoming Payment</h5>
                 <p>
                   Your loan repayment of{" "}
-                  {((activeLoan.amount - amountPaid) / 10).toLocaleString()} TZS
-                  is due in 2 days.
+                  {((activeLoan.amount - activeLoan.amount_paid) / 10).toLocaleString()} TZS
+                  {activeLoan.next_payment_date 
+                    ? ` is due on ${activeLoan.next_payment_date}` 
+                    : ' is due soon'
+                  }.
                 </p>
               </div>
             </div>
@@ -191,9 +239,20 @@ function CustomerDashboard() {
               </div>
 
               {!activeLoan ? (
-                <p style={{ color: "#64748b", textAlign: "center", padding: "2rem 0" }}>
-                  No active loans
-                </p>
+                <div style={{ 
+                  color: "#64748b", 
+                  textAlign: "center", 
+                  padding: "2rem 0" 
+                }}>
+                  <p>No active loans</p>
+                  <button 
+                    className="primary-btn" 
+                    style={{ marginTop: '1rem' }}
+                    onClick={() => navigate("/loans")}
+                  >
+                    Apply for a Loan
+                  </button>
+                </div>
               ) : (
                 <>
                   <div className="loan-info">
@@ -204,16 +263,30 @@ function CustomerDashboard() {
                       </div>
                     </div>
                     <div className="info-item">
-                      <label>Next Payment Due</label>
+                      <label>Amount Paid</label>
                       <div className="value">
-                        {activeLoan.next_payment_date || "Oct 25, 2023"}
+                        {activeLoan.amount_paid.toLocaleString()} TZS
                       </div>
                     </div>
+                    <div className="info-item">
+                      <label>Next Payment Due</label>
+                      <div className="value">
+                        {activeLoan.next_payment_date || "Not set"}
+                      </div>
+                    </div>
+                    {activeLoan.interest_rate && (
+                      <div className="info-item">
+                        <label>Interest Rate</label>
+                        <div className="value">
+                          {activeLoan.interest_rate}%
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="progress-section">
                     <div className="progress-header">
-                      <span>Repaid: {amountPaid.toLocaleString()} TZS</span>
+                      <span>Repayment Progress</span>
                       <span className="percentage">
                         {Math.round(repaymentProgress)}%
                       </span>
@@ -224,9 +297,19 @@ function CustomerDashboard() {
                         style={{ width: `${repaymentProgress}%` }}
                       />
                     </div>
+                    <p style={{ 
+                      fontSize: '0.875rem', 
+                      color: '#64748b', 
+                      marginTop: '0.5rem' 
+                    }}>
+                      {(activeLoan.amount - activeLoan.amount_paid).toLocaleString()} TZS remaining
+                    </p>
                   </div>
 
-                  <button className="primary-btn">
+                  <button 
+                    className="primary-btn"
+                    onClick={() => navigate("/repay")}
+                  >
                     <DollarSign size={18} />
                     Make Repayment
                   </button>
@@ -241,6 +324,8 @@ function CustomerDashboard() {
                 <button
                   className="action-btn"
                   onClick={() => navigate("/repay")}
+                  disabled={!activeLoan}
+                  style={!activeLoan ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
                 >
                   <div className="action-icon">
                     <ArrowDownLeft size={24} color="#4b7bec" />
@@ -248,21 +333,30 @@ function CustomerDashboard() {
                   Repay Loan
                 </button>
 
-                <button className="action-btn">
+                <button 
+                  className="action-btn"
+                  onClick={() => navigate("/savings")}
+                >
                   <div className="action-icon">
                     <PiggyBank size={24} color="#10b981" />
                   </div>
                   Deposit
                 </button>
 
-                <button className="action-btn">
+                <button 
+                  className="action-btn"
+                  onClick={() => navigate("/savings")}
+                >
                   <div className="action-icon">
                     <ArrowUp size={24} color="#f59e0b" />
                   </div>
                   Withdraw
                 </button>
 
-                <button className="action-btn">
+                <button 
+                  className="action-btn"
+                  onClick={() => navigate("/transactions")}
+                >
                   <div className="action-icon">
                     <Clock size={24} color="#8b5cf6" />
                   </div>
