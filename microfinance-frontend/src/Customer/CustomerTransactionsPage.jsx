@@ -27,163 +27,108 @@ import {
 
 function CustomerTransactionsPage() {
   const navigate = useNavigate();
-  const rawUser = localStorage.getItem("user");
-  const user = rawUser ? JSON.parse(rawUser) : null;
-
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState({});
+  const [transactionsData, setTransactionsData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("All Types");
   const [dateRange, setDateRange] = useState("Last 30 Days");
   const [statusFilter, setStatusFilter] = useState("Any Status");
-  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Verify session and get current user
+  useEffect(() => {
+    fetch("http://localhost:5555/me", { credentials: "include" })
+      .then(res => {
+        if (!res.ok) throw new Error("Not authenticated");
+        return res.json();
+      })
+      .then(data => {
+        setUser(data);
+      })
+      .catch(err => {
+        console.error("Session check failed:", err);
+        navigate("/login", { replace: true });
+      });
+  }, [navigate]);
 
   useEffect(() => {
-    if (!user) {
-      navigate("/login", { replace: true });
-    }
-  }, [user, navigate]);
+    if (!user?.id) return;
 
-  useEffect(() => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-
-    // Simulate loading
-    setTimeout(() => setLoading(false), 500);
+    setLoading(true);
+    fetch(`http://localhost:5555/transactions/${user.id}`, {
+      credentials: "include",
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch transactions");
+        return res.json();
+      })
+      .then((data) => {
+        console.log("Received data:", data);
+        // Transform backend data to match frontend expectations
+        const transformedTransactions = (data.savings_transactions || []).map(tx => ({
+          id: tx.id,
+          date: tx.date || "N/A",
+          time: "12:00 PM", // Backend doesn't provide time
+          title: tx.transaction_type === "deposit" ? "Deposit" : "Withdrawal",
+          subtitle: tx.description || "No description",
+          account: "Savings Account",
+          reference: `TXN-${tx.id}`,
+          amount: tx.transaction_type === "deposit" ? `+KSh ${tx.amount}` : `-KSh ${tx.amount}`,
+          isPositive: tx.transaction_type === "deposit",
+          status: "Completed", // Backend doesn't provide status
+          type: tx.transaction_type
+        }));
+        setTransactionsData(transformedTransactions);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching transactions:", err);
+        setError(err.message);
+        setLoading(false);
+      });
   }, [user]);
 
-  if (!user || loading) return null;
+  if (loading) {
+    return (
+      <div style={{ padding: "2rem", textAlign: "center" }}>
+        Loading transactions...
+      </div>
+    );
+  }
 
-  // Mock transactions data
-  const transactions = [
-    {
-      id: 1,
-      date: "Oct 24, 2023",
-      time: "10:30 AM",
-      title: "Mobile Deposit",
-      subtitle: "Via M-Pesa",
-      account: "Main Savings",
-      reference: "DP-28526",
-      amount: "+150,000 TZS",
-      status: "Completed",
-      type: "deposit",
-      isPositive: true,
-    },
-    {
-      id: 2,
-      date: "Oct 22, 2023",
-      time: "09:15 AM",
-      title: "Loan Repayment",
-      subtitle: "Weekly Installment",
-      account: "Business Loan #4302",
-      reference: "LR-19321",
-      amount: "-45,000 TZS",
-      status: "Completed",
-      type: "withdrawal",
-      isPositive: false,
-    },
-    {
-      id: 3,
-      date: "Oct 01, 2023",
-      time: "08:00 AM",
-      title: "Interest Payout",
-      subtitle: "Monthly Interest",
-      account: "Main Savings",
-      reference: "SYS-INT-OCT",
-      amount: "+12,450 TZS",
-      status: "Completed",
-      type: "interest",
-      isPositive: true,
-    },
-    {
-      id: 4,
-      date: "Sep 28, 2023",
-      time: "02:15 PM",
-      title: "Withdrawal",
-      subtitle: "Transfer to CRDB Bank",
-      account: "Emergency Fund",
-      reference: "WD-19220",
-      amount: "-500,000 TZS",
-      status: "Processed",
-      type: "withdrawal",
-      isPositive: false,
-    },
-    {
-      id: 5,
-      date: "Sep 25, 2023",
-      time: "11:45 AM",
-      title: "Internal Transfer",
-      subtitle: "To School Fees Goal",
-      account: "Main Savings",
-      reference: "TRF-14021",
-      amount: "-200,000 TZS",
-      status: "Completed",
-      type: "transfer",
-      isPositive: false,
-    },
-    {
-      id: 6,
-      date: "Sep 15, 2023",
-      time: "01:45 PM",
-      title: "Mobile Deposit",
-      subtitle: "Via Airtel Money",
-      account: "Main Savings",
-      reference: "AB-11298",
-      amount: "+200,000 TZS",
-      status: "Completed",
-      type: "deposit",
-      isPositive: true,
-    },
-    {
-      id: 7,
-      date: "Sep 10, 2023",
-      time: "03:30 PM",
-      title: "Failed Deposit",
-      subtitle: "Network Error",
-      account: "Main Savings",
-      reference: "FL-09901",
-      amount: "50,000 TZS",
-      status: "Failed",
-      type: "failed",
-      isPositive: false,
-    },
-    {
-      id: 8,
-      date: "Sep 01, 2023",
-      time: "10:00 AM",
-      title: "Scheduled Deposit",
-      subtitle: "Standing Order",
-      account: "School Fees Goal",
-      reference: "SD-21198",
-      amount: "+100,000 TZS",
-      status: "Pending",
-      type: "scheduled",
-      isPositive: true,
-    },
-  ];
+  if (error) {
+    return (
+      <div style={{ padding: "2rem", textAlign: "center", color: "red" }}>
+        Error: {error}
+      </div>
+    );
+  }
 
-  const activeFilters = [];
-  if (typeFilter !== "All Types") activeFilters.push({ key: "type", value: typeFilter });
-  if (dateRange !== "Last 30 Days") activeFilters.push({ key: "date", value: dateRange });
+  // Filtering logic
+  const filteredTransactions = transactionsData.filter((transaction) => {
+    const matchesSearch =
+      transaction.reference.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      transaction.subtitle.toLowerCase().includes(searchTerm.toLowerCase());
 
-  const removeFilter = (key) => {
-    if (key === "type") setTypeFilter("All Types");
-    if (key === "date") setDateRange("Last 30 Days");
-  };
+    const matchesType =
+      typeFilter === "All Types" ||
+      transaction.type === typeFilter.toLowerCase();
 
-  const clearAllFilters = () => {
-    setSearchTerm("");
-    setTypeFilter("All Types");
-    setDateRange("Last 30 Days");
-    setStatusFilter("Any Status");
-  };
+    const matchesStatus =
+      statusFilter === "Any Status" ||
+      transaction.status === statusFilter;
 
-  const totalPages = Math.ceil(transactions.length / rowsPerPage);
+    return matchesSearch && matchesType && matchesStatus;
+  });
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredTransactions.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
-  const endIndex = Math.min(startIndex + rowsPerPage, transactions.length);
-  const currentTransactions = transactions.slice(startIndex, endIndex);
+  const endIndex = Math.min(startIndex + rowsPerPage, filteredTransactions.length);
+  const currentTransactions = filteredTransactions.slice(startIndex, endIndex);
 
   return (
     <div className="transactions-page-container">
@@ -218,8 +163,12 @@ function CustomerTransactionsPage() {
           <button
             className="logout-btn"
             onClick={() => {
-              localStorage.removeItem("user");
-              navigate("/login");
+              fetch("http://localhost:5555/logout", { 
+                method: "POST",
+                credentials: "include" 
+              }).then(() => {
+                navigate("/login");
+              });
             }}
           >
             <LogOut size={14} />
@@ -309,29 +258,6 @@ function CustomerTransactionsPage() {
 
               <button className="filter-btn">Filter</button>
             </div>
-
-            {activeFilters.length > 0 && (
-              <div className="active-filters">
-                <span style={{ fontSize: "0.75rem", color: "#617289" }}>
-                  Type: All
-                </span>
-                {activeFilters.map((filter) => (
-                  <div key={filter.key} className="filter-tag">
-                    {filter.key === "type" && `Type: ${filter.value}`}
-                    {filter.key === "date" && `Date: ${filter.value}`}
-                    <button
-                      className="filter-tag-close"
-                      onClick={() => removeFilter(filter.key)}
-                    >
-                      <X size={12} />
-                    </button>
-                  </div>
-                ))}
-                <button className="clear-all-filters" onClick={clearAllFilters}>
-                  Clear all filters
-                </button>
-              </div>
-            )}
           </section>
 
           {/* Transactions Table */}
@@ -350,69 +276,77 @@ function CustomerTransactionsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {currentTransactions.map((transaction) => (
-                    <tr key={transaction.id}>
-                      <td>
-                        <div className="date-cell">
-                          {transaction.date}
-                          <span className="date-time">{transaction.time}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="description-cell">
-                          <div className={`transaction-type-icon ${transaction.type}`}>
-                            {transaction.type === "deposit" && (
-                              <ArrowDownLeft size={18} />
-                            )}
-                            {transaction.type === "withdrawal" && (
-                              <ArrowUpRight size={18} />
-                            )}
-                            {transaction.type === "interest" && (
-                              <DollarSign size={18} />
-                            )}
-                            {transaction.type === "transfer" && (
-                              <RefreshCw size={18} />
-                            )}
-                            {transaction.type === "failed" && (
-                              <AlertTriangle size={18} />
-                            )}
-                            {transaction.type === "scheduled" && (
-                              <Clock size={18} />
-                            )}
-                          </div>
-                          <div className="transaction-details">
-                            <div className="transaction-title">
-                              {transaction.title}
-                            </div>
-                            <div className="transaction-subtitle">
-                              {transaction.subtitle}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="account-cell">{transaction.account}</td>
-                      <td className="reference-cell">{transaction.reference}</td>
-                      <td
-                        className={`amount-cell ${
-                          transaction.isPositive ? "positive" : "negative"
-                        }`}
-                      >
-                        {transaction.amount}
-                      </td>
-                      <td className="status-cell">
-                        <span
-                          className={`transaction-status-badge ${transaction.status.toLowerCase()}`}
-                        >
-                          {transaction.status}
-                        </span>
-                      </td>
-                      <td className="actions-cell">
-                        <button className="view-action-btn">
-                          <Eye size={16} />
-                        </button>
+                  {currentTransactions.length === 0 ? (
+                    <tr>
+                      <td colSpan="7" style={{ textAlign: "center", padding: "2rem" }}>
+                        No transactions found
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    currentTransactions.map((transaction) => (
+                      <tr key={transaction.id}>
+                        <td>
+                          <div className="date-cell">
+                            {transaction.date}
+                            <span className="date-time">{transaction.time}</span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="description-cell">
+                            <div className={`transaction-type-icon ${transaction.type}`}>
+                              {transaction.type === "deposit" && (
+                                <ArrowDownLeft size={18} />
+                              )}
+                              {transaction.type === "withdrawal" && (
+                                <ArrowUpRight size={18} />
+                              )}
+                              {transaction.type === "interest" && (
+                                <DollarSign size={18} />
+                              )}
+                              {transaction.type === "transfer" && (
+                                <RefreshCw size={18} />
+                              )}
+                              {transaction.type === "failed" && (
+                                <AlertTriangle size={18} />
+                              )}
+                              {transaction.type === "scheduled" && (
+                                <Clock size={18} />
+                              )}
+                            </div>
+                            <div className="transaction-details">
+                              <div className="transaction-title">
+                                {transaction.title}
+                              </div>
+                              <div className="transaction-subtitle">
+                                {transaction.subtitle}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="account-cell">{transaction.account}</td>
+                        <td className="reference-cell">{transaction.reference}</td>
+                        <td
+                          className={`amount-cell ${
+                            transaction.isPositive ? "positive" : "negative"
+                          }`}
+                        >
+                          {transaction.amount}
+                        </td>
+                        <td className="status-cell">
+                          <span
+                            className={`transaction-status-badge ${transaction.status.toLowerCase()}`}
+                          >
+                            {transaction.status}
+                          </span>
+                        </td>
+                        <td className="actions-cell">
+                          <button className="view-action-btn">
+                            <Eye size={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -420,8 +354,8 @@ function CustomerTransactionsPage() {
             {/* Table Footer */}
             <div className="table-footer">
               <div className="footer-info">
-                Showing <span>{startIndex + 1}</span> to <span>{endIndex}</span> of{" "}
-                <span>{transactions.length}</span> transactions
+                Showing <span>{filteredTransactions.length > 0 ? startIndex + 1 : 0}</span> to <span>{endIndex}</span> of{" "}
+                <span>{filteredTransactions.length}</span> transactions
               </div>
 
               <div className="pagination-controls">

@@ -3,10 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import CustomerDashboard from './Customer/CustomerDashboard.jsx'
 import SignUp from './CustomerLogs/Signup'
 import Login from './CustomerLogs/Login'
-import CustomerTransactionForm from './Customer/CustomerTransactionForm'
-
 import Home from './Home'
-import CustomerRepaymentsForm from './Customer/CustomerRepayments'
 import Staff from './Staff/staff.jsx'
 // import { useState } from 'react'
 
