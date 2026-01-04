@@ -88,7 +88,7 @@ def create_app():
             result.append({
                 "customer_id": customer.id,
                 "name": customer.full_name,
-                "loans": [{"loan_id": l.id, "amount": l.amount, "status": l.status} for l in customer.loans]
+                "loans": [{"loan_id": l.id, "amount": l.principal_amount, "status": l.status} for l in customer.loans]
             })
         return {"data": result}
 
@@ -144,285 +144,248 @@ def create_app():
         if "user_id" not in session:
             return {"error": "Not authenticated"}, 401
         
-        from models import Loan, StaffCustomer
-        
-        user_role = session.get("role")
-        user_id = session.get("user_id")
-        
-        if user_role == "admin":
-            # Admin sees all loans
-            loans = Loan.query.all()
+        try:
+            from models import Loan, StaffCustomer, Repayment
+            from sqlalchemy import func
             
-        elif user_role == "staff":
-            # Staff sees loans of customers they manage
-            staff_customer_ids = [
-                sc.customer_id for sc in StaffCustomer.query.filter_by(staff_id=user_id).all()
-            ]
-            loans = Loan.query.filter(Loan.customer_id.in_(staff_customer_ids)).all()
+            user_role = session.get("role")
+            user_id = session.get("user_id")
             
-        elif user_role == "customer":
-            # Customer sees only their own loans
-            loans = Loan.query.filter_by(customer_id=user_id).all()
+            if user_role == "admin":
+                loans = Loan.query.all()
+            elif user_role == "staff":
+                staff_customer_ids = [
+                    sc.customer_id for sc in StaffCustomer.query.filter_by(staff_id=user_id).all()
+                ]
+                loans = Loan.query.filter(Loan.customer_id.in_(staff_customer_ids)).all()
+            elif user_role == "customer":
+                loans = Loan.query.filter_by(customer_id=user_id).all()
+            else:
+                return {"error": "Invalid role"}, 403
             
-        else:
-            return {"error": "Invalid role"}, 403
-        
-        return {
-            "loans": [
-                {
-                    "id": loan.id,
-                    "amount": loan.amount,
-                    "status": loan.status,
-                    "customer_id": loan.customer_id,
-                    "amount_paid": getattr(loan, 'amount_paid', 0),
-                    "interest_rate": getattr(loan, 'interest_rate', None),
-                    "next_payment_date": loan.next_payment_date.strftime("%b %d, %Y") if hasattr(loan, 'next_payment_date') and loan.next_payment_date else None,
-                    "created_at": loan.created_at.strftime("%b %d, %Y") if hasattr(loan, 'created_at') and loan.created_at else None,
-                    "customer_name": loan.customer.full_name if hasattr(loan, 'customer') else None
-                } for loan in loans
-            ]
-        }
+            result = []
+            for loan in loans:
+                try:
+                    # Calculate total amount paid from repayments
+                    total_paid = db.session.query(func.sum(Repayment.amount)).filter_by(loan_id=loan.id).scalar() or 0
+                    
+                    # Calculate total amount (principal + interest)
+                    total_amount = loan.principal_amount * (1 + (loan.interest_rate / 100))
+                    
+                    # Safely format dates
+                    issued_date = None
+                    if hasattr(loan, 'issued_date') and loan.issued_date:
+                        try:
+                            issued_date = loan.issued_date.strftime("%b %d, %Y")
+                        except:
+                            issued_date = str(loan.issued_date)
+                    
+                    due_date = None
+                    if hasattr(loan, 'due_date') and loan.due_date:
+                        try:
+                            due_date = loan.due_date.strftime("%b %d, %Y")
+                        except:
+                            due_date = str(loan.due_date)
+                    
+                    created_at = None
+                    if hasattr(loan, 'created_at') and loan.created_at:
+                        try:
+                            created_at = loan.created_at.strftime("%b %d, %Y")
+                        except:
+                            created_at = str(loan.created_at)
+                    
+                    customer_name = None
+                    if hasattr(loan, 'customer') and loan.customer:
+                        customer_name = loan.customer.full_name
+                    
+                    result.append({
+                        "id": loan.id,
+                        "amount": loan.principal_amount,
+                        "total_amount": round(total_amount, 2),
+                        "amount_paid": round(total_paid, 2),
+                        "remaining_balance": round(total_amount - total_paid, 2),
+                        "status": loan.status,
+                        "customer_id": loan.customer_id,
+                        "interest_rate": loan.interest_rate,
+                        "loan_term_months": loan.loan_term_months,
+                        "issued_date": issued_date,
+                        "due_date": due_date,
+                        "created_at": created_at,
+                        "customer_name": customer_name
+                    })
+                except Exception as loan_error:
+                    print(f"Error processing loan {loan.id}: {loan_error}")
+                    continue
+            
+            return {"loans": result}
+        except Exception as e:
+            print(f"Loans endpoint error: {e}")
+            import traceback
+            traceback.print_exc()
+            return {"error": f"Server error: {str(e)}"}, 500
 
     @app.route("/loans/<int:customer_id>")
     def customer_loans(customer_id):
         """
         Get loans for a specific customer by ID
-        - Admin: can access any customer's loans
-        - Staff: can only access loans of customers they manage
-        - Customer: can only access their own loans
         """
         if "user_id" not in session:
             return {"error": "Not authenticated"}, 401
         
-        from models import Loan, Customer, StaffCustomer
-        
-        user_role = session.get("role")
-        user_id = session.get("user_id")
-        
-        # Authorization checks
-        if user_role == "customer":
-            # Customer can only view their own loans
-            if user_id != customer_id:
-                return {"error": "Unauthorized access"}, 403
-                
-        elif user_role == "staff":
-            # Staff can only view loans of customers they manage
-            is_managed = StaffCustomer.query.filter_by(
-                staff_id=user_id, 
-                customer_id=customer_id
-            ).first()
+        try:
+            from models import Loan, Customer, StaffCustomer, Repayment
+            from sqlalchemy import func
             
-            if not is_managed:
-                return {"error": "You are not assigned to this customer"}, 403
-                
-        elif user_role != "admin":
-            return {"error": "Invalid role"}, 403
-        
-        # Fetch customer and their loans
-        customer = Customer.query.get(customer_id)
-        if not customer:
-            return {"error": "Customer not found"}, 404
-        
-        loans = Loan.query.filter_by(customer_id=customer_id).all()
-        
-        return {
-            "customer": {
-                "id": customer.id,
-                "full_name": customer.full_name,
-                "email": getattr(customer, 'email', None),
-                "phone": getattr(customer, 'phone', None)
-            },
-            "loans": [
-                {
-                    "id": loan.id,
-                    "amount": loan.amount,
-                    "status": loan.status,
-                    "amount_paid": getattr(loan, 'amount_paid', 0),
-                    "interest_rate": getattr(loan, 'interest_rate', None),
-                    "next_payment_date": loan.next_payment_date.strftime("%b %d, %Y") if hasattr(loan, 'next_payment_date') and loan.next_payment_date else None,
-                    "created_at": loan.created_at.strftime("%b %d, %Y") if hasattr(loan, 'created_at') and loan.created_at else None,
-                    "loan_term": getattr(loan, 'loan_term', None),
-                    "purpose": getattr(loan, 'purpose', None)
-                } for loan in loans
-            ]
-        }
-
-    @app.route("/savings")
-    def savings():
-        """
-        Role-based savings access:
-        - Admin: sees ALL savings accounts
-        - Staff: sees savings of customers they manage
-        - Customer: sees only their own savings
-        """
-        if "user_id" not in session:
-            return {"error": "Not authenticated"}, 401
-        
-        from models import SavingsAccount, StaffCustomer
-        
-        user_role = session.get("role")
-        user_id = session.get("user_id")
-        
-        if user_role == "admin":
-            # Admin sees all savings
-            savings_accounts = SavingsAccount.query.all()
+            user_role = session.get("role")
+            user_id = session.get("user_id")
             
-        elif user_role == "staff":
-            # Staff sees savings of customers they manage
-            staff_customer_ids = [
-                sc.customer_id for sc in StaffCustomer.query.filter_by(staff_id=user_id).all()
-            ]
-            savings_accounts = SavingsAccount.query.filter(
-                SavingsAccount.customer_id.in_(staff_customer_ids)
-            ).all()
+            # Authorization checks
+            if user_role == "customer":
+                if user_id != customer_id:
+                    return {"error": "Unauthorized access"}, 403
+            elif user_role == "staff":
+                is_managed = StaffCustomer.query.filter_by(
+                    staff_id=user_id, 
+                    customer_id=customer_id
+                ).first()
+                if not is_managed:
+                    return {"error": "You are not assigned to this customer"}, 403
+            elif user_role != "admin":
+                return {"error": "Invalid role"}, 403
             
-        elif user_role == "customer":
-            # Customer sees only their own savings
-            savings_accounts = SavingsAccount.query.filter_by(customer_id=user_id).all()
+            customer = Customer.query.get(customer_id)
+            if not customer:
+                return {"error": "Customer not found"}, 404
             
-        else:
-            return {"error": "Invalid role"}, 403
-        
-        return {
-            "savings": [
-                {
-                    "id": sa.id,
-                    "customer_id": sa.customer_id,
-                    "balance": getattr(sa, 'balance', 0),
-                    "account_number": getattr(sa, 'account_number', None),
-                    "account_type": getattr(sa, 'account_type', None),
-                    "interest_rate": getattr(sa, 'interest_rate', None),
-                    "created_at": sa.created_at.strftime("%b %d, %Y") if hasattr(sa, 'created_at') and sa.created_at else None,
-                    "customer_name": sa.customer.full_name if hasattr(sa, 'customer') else None
-                } for sa in savings_accounts
-            ]
-        }
-
-    @app.route("/savings/<int:customer_id>")
-    def customer_savings(customer_id):
-        """
-        Get savings for a specific customer by ID
-        - Admin: can access any customer's savings
-        - Staff: can only access savings of customers they manage
-        - Customer: can only access their own savings
-        """
-        if "user_id" not in session:
-            return {"error": "Not authenticated"}, 401
-        
-        from models import SavingsAccount, Customer, StaffCustomer, SavingsTransaction
-        from sqlalchemy import func
-        
-        user_role = session.get("role")
-        user_id = session.get("user_id")
-        
-        # Authorization checks
-        if user_role == "customer":
-            if user_id != customer_id:
-                return {"error": "Unauthorized access"}, 403
-                
-        elif user_role == "staff":
-            is_managed = StaffCustomer.query.filter_by(
-                staff_id=user_id, 
-                customer_id=customer_id
-            ).first()
+            loans = Loan.query.filter_by(customer_id=customer_id).all()
             
-            if not is_managed:
-                return {"error": "You are not assigned to this customer"}, 403
-                
-        elif user_role != "admin":
-            return {"error": "Invalid role"}, 403
-        
-        # Fetch customer and their savings
-        customer = Customer.query.get(customer_id)
-        if not customer:
-            return {"error": "Customer not found"}, 404
-        
-        savings_accounts = SavingsAccount.query.filter_by(customer_id=customer_id).all()
-        
-        # Calculate total savings balance
-        total_balance = sum(getattr(sa, 'balance', 0) for sa in savings_accounts)
-        
-        # Get recent transactions
-        recent_transactions = SavingsTransaction.query.filter_by(
-            customer_id=customer_id
-        ).order_by(SavingsTransaction.created_at.desc()).limit(5).all()
-        
-        # Calculate growth (example: last month comparison)
-        # This is simplified - you'd need proper date filtering
-        growth_percentage = 12.0  # Placeholder
-        
-        return {
-            "customer": {
-                "id": customer.id,
-                "full_name": customer.full_name,
-                "email": getattr(customer, 'email', None),
-                "phone": getattr(customer, 'phone', None)
-            },
-            "total_balance": total_balance,
-            "growth_percentage": growth_percentage,
-            "accounts": [
-                {
-                    "id": sa.id,
-                    "balance": getattr(sa, 'balance', 0),
-                    "account_number": getattr(sa, 'account_number', None),
-                    "account_type": getattr(sa, 'account_type', None),
-                    "interest_rate": getattr(sa, 'interest_rate', None),
-                    "created_at": sa.created_at.strftime("%b %d, %Y") if hasattr(sa, 'created_at') and sa.created_at else None
-                } for sa in savings_accounts
-            ],
-            "recent_transactions": [
-                {
-                    "id": t.id,
-                    "amount": getattr(t, 'amount', 0),
-                    "transaction_type": getattr(t, 'transaction_type', None),
-                    "date": t.created_at.strftime("%b %d, %Y") if hasattr(t, 'created_at') and t.created_at else None,
-                    "description": getattr(t, 'description', None)
-                } for t in recent_transactions
-            ]
-        }
+            result = []
+            for loan in loans:
+                try:
+                    total_paid = db.session.query(func.sum(Repayment.amount)).filter_by(loan_id=loan.id).scalar() or 0
+                    total_amount = loan.principal_amount * (1 + (loan.interest_rate / 100))
+                    
+                    # Safely format dates
+                    issued_date = None
+                    if hasattr(loan, 'issued_date') and loan.issued_date:
+                        try:
+                            issued_date = loan.issued_date.strftime("%b %d, %Y")
+                        except:
+                            issued_date = str(loan.issued_date)
+                    
+                    due_date = None
+                    if hasattr(loan, 'due_date') and loan.due_date:
+                        try:
+                            due_date = loan.due_date.strftime("%b %d, %Y")
+                        except:
+                            due_date = str(loan.due_date)
+                    
+                    created_at = None
+                    if hasattr(loan, 'created_at') and loan.created_at:
+                        try:
+                            created_at = loan.created_at.strftime("%b %d, %Y")
+                        except:
+                            created_at = str(loan.created_at)
+                    
+                    result.append({
+                        "id": loan.id,
+                        "amount": loan.principal_amount,
+                        "total_amount": round(total_amount, 2),
+                        "amount_paid": round(total_paid, 2),
+                        "remaining_balance": round(total_amount - total_paid, 2),
+                        "status": loan.status,
+                        "interest_rate": loan.interest_rate,
+                        "loan_term_months": loan.loan_term_months,
+                        "issued_date": issued_date,
+                        "due_date": due_date,
+                        "created_at": created_at
+                    })
+                except Exception as loan_error:
+                    print(f"Error processing loan {loan.id}: {loan_error}")
+                    import traceback
+                    traceback.print_exc()
+                    continue
+            
+            return {
+                "customer": {
+                    "id": customer.id,
+                    "full_name": customer.full_name,
+                    "phone": customer.phone,
+                    "national_id": customer.national_id
+                },
+                "loans": result
+            }
+        except Exception as e:
+            print(f"Customer loans error: {e}")
+            import traceback
+            traceback.print_exc()
+            return {"error": f"Server error: {str(e)}"}, 500
 
     @app.route("/dashboard-summary")
     def dashboard_summary():
         """
         Get dashboard summary for current user
-        Returns: total savings, active loans, upcoming payments
         """
         if "user_id" not in session:
             return {"error": "Not authenticated"}, 401
         
-        from models import SavingsAccount, Loan
-        from sqlalchemy import func
-        
-        user_id = session.get("user_id")
-        user_role = session.get("role")
-        
-        if user_role != "customer":
-            return {"error": "This endpoint is for customers only"}, 403
-        
-        # Get total savings
-        savings_accounts = SavingsAccount.query.filter_by(customer_id=user_id).all()
-        total_savings = sum(getattr(sa, 'balance', 0) for sa in savings_accounts)
-        
-        # Get active loans
-        active_loans = Loan.query.filter_by(customer_id=user_id, status="active").all()
-        total_loan_balance = sum(loan.amount for loan in active_loans)
-        
-        # Get first active loan for details
-        active_loan = active_loans[0] if active_loans else None
-        
-        return {
-            "total_savings": total_savings,
-            "savings_growth": 12.0,  # Placeholder - calculate actual growth
-            "total_loan_balance": total_loan_balance,
-            "active_loan": {
-                "id": active_loan.id,
-                "amount": active_loan.amount,
-                "amount_paid": getattr(active_loan, 'amount_paid', 0),
-                "interest_rate": getattr(active_loan, 'interest_rate', None),
-                "next_payment_date": active_loan.next_payment_date.strftime("%b %d, %Y") if hasattr(active_loan, 'next_payment_date') and active_loan.next_payment_date else None,
-                "status": active_loan.status
-            } if active_loan else None,
-            "total_active_loans": len(active_loans)
-        }
+        try:
+            from models import Loan, SavingsAccount, Repayment
+            from sqlalchemy import func
+            
+            user_id = session.get("user_id")
+            user_role = session.get("role")
+            
+            if user_role != "customer":
+                return {"error": "This endpoint is for customers only"}, 403
+            
+            # Get total savings
+            total_savings = 0
+            try:
+                savings_accounts = SavingsAccount.query.filter_by(customer_id=user_id).all()
+                total_savings = sum(sa.balance for sa in savings_accounts)
+            except Exception as e:
+                print(f"Error fetching savings: {e}")
+            
+            # Get active loans (approved status)
+            active_loans = Loan.query.filter_by(customer_id=user_id, status="approved").all()
+            
+            # Calculate total loan balance
+            total_loan_balance = 0
+            for loan in active_loans:
+                total_amount = loan.principal_amount * (1 + (loan.interest_rate / 100))
+                total_paid = db.session.query(func.sum(Repayment.amount)).filter_by(loan_id=loan.id).scalar() or 0
+                total_loan_balance += (total_amount - total_paid)
+            
+            # Get first active loan for details
+            active_loan = None
+            if active_loans:
+                loan = active_loans[0]
+                total_paid = db.session.query(func.sum(Repayment.amount)).filter_by(loan_id=loan.id).scalar() or 0
+                total_amount = loan.principal_amount * (1 + (loan.interest_rate / 100))
+                
+                active_loan = {
+                    "id": loan.id,
+                    "amount": loan.principal_amount,
+                    "total_amount": round(total_amount, 2),
+                    "amount_paid": round(total_paid, 2),
+                    "remaining_balance": round(total_amount - total_paid, 2),
+                    "interest_rate": loan.interest_rate,
+                    "due_date": loan.due_date.strftime("%b %d, %Y") if loan.due_date else None,
+                    "status": loan.status
+                }
+            
+            return {
+                "total_savings": round(total_savings, 2),
+                "savings_growth": 12.0,
+                "total_loan_balance": round(total_loan_balance, 2),
+                "active_loan": active_loan,
+                "total_active_loans": len(active_loans)
+            }
+        except Exception as e:
+            print(f"Dashboard summary error: {e}")
+            import traceback
+            traceback.print_exc()
+            return {"error": f"Server error: {str(e)}"}, 500
      
     return app

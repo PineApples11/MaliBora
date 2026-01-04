@@ -22,52 +22,104 @@ import {
 
 function CustomerLoansPage() {
   const navigate = useNavigate();
-  const rawUser = localStorage.getItem("user");
-  const user = rawUser ? JSON.parse(rawUser) : null;
 
+  const [user, setUser] = useState(null);
   const [loans, setLoans] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  // Verify session and get current user
   useEffect(() => {
-    if (!user) {
-      navigate("/login", { replace: true });
-    }
-  }, [user, navigate]);
+    fetch("http://localhost:5555/me", { credentials: "include" })
+      .then(res => {
+        if (!res.ok) throw new Error("Not authenticated");
+        return res.json();
+      })
+      .then(data => {
+        setUser(data);
+      })
+      .catch(err => {
+        console.error("Session check failed:", err);
+        navigate("/login", { replace: true });
+      });
+  }, [navigate]);
 
+  // Fetch loans for current customer
   useEffect(() => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
+    if (!user) return;
 
-    // Mock data - replace with actual API call
-    setLoans([
-      {
-        id: "LN-2023-8842",
-        type: "Business Expansion Loan",
-        amount: 2000000,
-        amountPaid: 800000,
-        interestRate: 12,
-        nextPaymentAmount: 150000,
-        nextPaymentDate: "Oct 25, 2023",
-        status: "active",
-        dateApplied: "Jun 10, 2023",
-      },
-    ]);
-    setLoading(false);
+    fetch(`http://localhost:5555/loans/${user.id}`, {
+      credentials: "include"
+    })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch loans");
+        }
+        return res.json();
+      })
+      .then(data => {
+        setLoans(data.loans || []);
+        setError(null);
+      })
+      .catch(err => {
+        console.error("Loan fetch failed:", err);
+        setError(err.message);
+        setLoans([]);
+      })
+      .finally(() => setLoading(false));
   }, [user]);
 
-  if (!user || loading) return null;
+  if (loading) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh'
+      }}>
+        Loading...
+      </div>
+    );
+  }
 
-  const activeLoan = loans.find((l) => l.status === "active");
-  const totalLoanBalance = loans.reduce((sum, loan) => sum + loan.amount, 0);
-  const amountPaid = activeLoan?.amountPaid || 0;
-  const remainingBalance = activeLoan
-    ? activeLoan.amount - activeLoan.amountPaid
+  if (!user) return null;
+
+  // Calculate summary data
+  const activeLoans = loans.filter(l => l.status === "approved");
+  const activeLoan = activeLoans[0];
+  
+  const totalLoanBalance = activeLoans.reduce(
+    (sum, loan) => sum + loan.remaining_balance, 
+    0
+  );
+  
+  const totalAmountPaid = activeLoans.reduce(
+    (sum, loan) => sum + loan.amount_paid, 
+    0
+  );
+  
+  const totalAmount = activeLoans.reduce(
+    (sum, loan) => sum + loan.total_amount, 
+    0
+  );
+  
+  const repaymentProgress = totalAmount > 0 
+    ? (totalAmountPaid / totalAmount) * 100 
     : 0;
-  const repaymentProgress = activeLoan
-    ? (activeLoan.amountPaid / activeLoan.amount) * 100
-    : 0;
+
+  // Calculate days until due date
+  const calculateDaysUntil = (dateString) => {
+    if (!dateString) return null;
+    const dueDate = new Date(dateString);
+    const today = new Date();
+    const diffTime = dueDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  const daysUntilDue = activeLoan?.due_date 
+    ? calculateDaysUntil(activeLoan.due_date) 
+    : null;
 
   return (
     <div className="loans-page-container">
@@ -102,8 +154,12 @@ function CustomerLoansPage() {
           <button
             className="logout-btn"
             onClick={() => {
-              localStorage.removeItem("user");
-              navigate("/login");
+              fetch("http://localhost:5555/logout", {
+                method: "POST",
+                credentials: "include"
+              }).then(() => {
+                navigate("/login");
+              });
             }}
           >
             <LogOut size={14} />
@@ -127,6 +183,18 @@ function CustomerLoansPage() {
 
         {/* Main Content */}
         <main className="loans-main">
+          {error && (
+            <div style={{
+              padding: '1rem',
+              background: '#fee',
+              color: '#c33',
+              borderRadius: '8px',
+              marginBottom: '1rem'
+            }}>
+              Error: {error}
+            </div>
+          )}
+
           {/* Summary Cards */}
           <section className="loans-summary-grid">
             <div className="loan-summary-card">
@@ -146,7 +214,7 @@ function CustomerLoansPage() {
               <h4>Amount Repaid</h4>
               <div className="summary-amount">
                 <h3 style={{ color: "#22c55e" }}>
-                  {amountPaid.toLocaleString()} TZS
+                  {totalAmountPaid.toLocaleString()} TZS
                 </h3>
                 <span className="percentage">
                   {Math.round(repaymentProgress)}%
@@ -163,7 +231,7 @@ function CustomerLoansPage() {
             <div className="loan-summary-card">
               <h4>Remaining Balance</h4>
               <div className="summary-amount">
-                <h3>{remainingBalance.toLocaleString()} TZS</h3>
+                <h3>{totalLoanBalance.toLocaleString()} TZS</h3>
               </div>
               <div className="summary-progress-bar">
                 <div
@@ -176,13 +244,22 @@ function CustomerLoansPage() {
             <div className="loan-summary-card">
               <h4>Next Payment Due</h4>
               <div className="next-payment-info">
-                <h3>{activeLoan?.nextPaymentDate?.split(",")[0] || "N/A"}</h3>
-                <span className="due-badge">In 5 Days</span>
+                <h3>{activeLoan?.due_date || "N/A"}</h3>
+                {daysUntilDue !== null && (
+                  <span className="due-badge">
+                    {daysUntilDue > 0 
+                      ? `In ${daysUntilDue} Days` 
+                      : daysUntilDue === 0 
+                      ? "Due Today"
+                      : "Overdue"
+                    }
+                  </span>
+                )}
               </div>
               <p className="payment-amount">
-                Amount:{" "}
+                Remaining:{" "}
                 <span>
-                  {activeLoan?.nextPaymentAmount?.toLocaleString() || 0} TZS
+                  {activeLoan?.remaining_balance?.toLocaleString() || 0} TZS
                 </span>
               </p>
             </div>
@@ -203,8 +280,8 @@ function CustomerLoansPage() {
                         <Store size={24} />
                       </div>
                       <div>
-                        <h3>{activeLoan.type}</h3>
-                        <p className="loan-id">ID: #{activeLoan.id}</p>
+                        <h3>Business Loan</h3>
+                        <p className="loan-id">ID: #LN-{activeLoan.id}</p>
                       </div>
                     </div>
                     <span className="active-badge">Active</span>
@@ -213,26 +290,37 @@ function CustomerLoansPage() {
                   {/* Loan Details Grid */}
                   <div className="loan-details-grid">
                     <div className="loan-detail-item">
-                      <label>Total Loan Amount</label>
+                      <label>Principal Amount</label>
                       <div className="value">
                         {activeLoan.amount.toLocaleString()} TZS
                       </div>
                     </div>
                     <div className="loan-detail-item">
+                      <label>Total Amount (with interest)</label>
+                      <div className="value">
+                        {activeLoan.total_amount.toLocaleString()} TZS
+                      </div>
+                    </div>
+                    <div className="loan-detail-item">
                       <label>Interest Rate</label>
                       <div className="value">
-                        {activeLoan.interestRate}%{" "}
+                        {activeLoan.interest_rate}%{" "}
                         <span className="subvalue">/ annum</span>
                       </div>
                     </div>
                     <div className="loan-detail-item">
-                      <label>Next Payment</label>
-                      <div className="value">
-                        {activeLoan.nextPaymentAmount.toLocaleString()} TZS
-                      </div>
-                      <p className="due-date">
-                        Due {activeLoan.nextPaymentDate}
-                      </p>
+                      <label>Due Date</label>
+                      <div className="value">{activeLoan.due_date}</div>
+                      {daysUntilDue !== null && (
+                        <p className="due-date">
+                          {daysUntilDue > 0 
+                            ? `${daysUntilDue} days remaining`
+                            : daysUntilDue === 0
+                            ? "Due today"
+                            : "Overdue"
+                          }
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -241,32 +329,34 @@ function CustomerLoansPage() {
                     <div className="progress-info">
                       <div className="paid-info">
                         <span>Paid:</span>
-                        <span>{activeLoan.amountPaid.toLocaleString()} TZS</span>
+                        <span>{activeLoan.amount_paid.toLocaleString()} TZS</span>
                       </div>
                       <div className="remaining-info">
                         <span>Remaining:</span>
                         <span>
-                          {(
-                            activeLoan.amount - activeLoan.amountPaid
-                          ).toLocaleString()}{" "}
-                          TZS
+                          {activeLoan.remaining_balance.toLocaleString()} TZS
                         </span>
                       </div>
                       <span className="progress-percentage">
-                        {Math.round(repaymentProgress)}%
+                        {Math.round((activeLoan.amount_paid / activeLoan.total_amount) * 100)}%
                       </span>
                     </div>
                     <div className="loan-progress-bar">
                       <div
                         className="loan-progress-fill"
-                        style={{ width: `${repaymentProgress}%` }}
+                        style={{ 
+                          width: `${(activeLoan.amount_paid / activeLoan.total_amount) * 100}%` 
+                        }}
                       />
                     </div>
                   </div>
 
                   {/* Action Buttons */}
                   <div className="loan-actions">
-                    <button className="loan-action-btn primary">
+                    <button 
+                      className="loan-action-btn primary"
+                      onClick={() => navigate("/repay")}
+                    >
                       <PaymentIcon size={16} />
                       Repay Loan
                     </button>
@@ -282,7 +372,20 @@ function CustomerLoansPage() {
                 </div>
               </div>
             ) : (
-              <p>No active loans</p>
+              <div style={{ 
+                textAlign: 'center', 
+                padding: '3rem', 
+                color: '#64748b' 
+              }}>
+                <p>No active loans</p>
+                <button 
+                  className="apply-loan-btn" 
+                  style={{ marginTop: '1rem' }}
+                >
+                  <Plus size={18} />
+                  Apply for Your First Loan
+                </button>
+              </div>
             )}
           </section>
 
@@ -293,13 +396,14 @@ function CustomerLoansPage() {
               <div className="history-filters">
                 <select className="filter-select">
                   <option>All Status</option>
-                  <option>Completed</option>
-                  <option>Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="pending">Pending</option>
+                  <option value="rejected">Rejected</option>
                 </select>
                 <select className="filter-select">
                   <option>Last 12 Months</option>
-                  <option>2022</option>
-                  <option>2021</option>
+                  <option>2024</option>
+                  <option>2023</option>
                 </select>
               </div>
             </div>
@@ -308,98 +412,74 @@ function CustomerLoansPage() {
               <table className="loans-table">
                 <thead>
                   <tr>
-                    <th>Loan Type</th>
+                    <th>Loan ID</th>
                     <th>Date Applied</th>
-                    <th className="text-right">Amount</th>
+                    <th className="text-right">Principal</th>
+                    <th className="text-right">Total Amount</th>
                     <th className="text-center">Status</th>
-                    <th className="text-right">Repayment Date</th>
+                    <th className="text-right">Due Date</th>
                     <th className="text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>
-                      <div className="loan-type-cell">
-                        <div className="loan-type-icon pending">
-                          <AlertCircle size={18} />
-                        </div>
-                        <div className="loan-type-info">
-                          <p className="loan-name">Emergency Loan</p>
-                          <p className="loan-ref">#LN-APP-009</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="table-text-muted">Oct 18, 2023</td>
-                    <td className="table-text-right">500,000 TZS</td>
-                    <td className="table-text-center">
-                      <span className="table-status-badge pending">
-                        Pending Approval
-                      </span>
-                    </td>
-                    <td className="table-text-right table-text-muted">-</td>
-                    <td className="table-text-center">
-                      <button className="view-details-btn">View Details</button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div className="loan-type-cell">
-                        <div className="loan-type-icon education">
-                          <GraduationCap size={18} />
-                        </div>
-                        <div className="loan-type-info">
-                          <p className="loan-name">Education Loan</p>
-                          <p className="loan-ref">#LN-2022-5501</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="table-text-muted">Jan 10, 2023</td>
-                    <td className="table-text-right">1,500,000 TZS</td>
-                    <td className="table-text-center">
-                      <span className="table-status-badge completed">
-                        Fully Paid
-                      </span>
-                    </td>
-                    <td className="table-text-right table-text-muted">
-                      Jun 15, 2023
-                    </td>
-                    <td className="table-text-center">
-                      <button className="view-details-btn">Receipt</button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div className="loan-type-cell">
-                        <div className="loan-type-icon asset">
-                          <Bike size={18} />
-                        </div>
-                        <div className="loan-type-info">
-                          <p className="loan-name">Asset Financing</p>
-                          <p className="loan-ref">#LN-2021-1120</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="table-text-muted">Mar 05, 2021</td>
-                    <td className="table-text-right">3,000,000 TZS</td>
-                    <td className="table-text-center">
-                      <span className="table-status-badge completed">
-                        Fully Paid
-                      </span>
-                    </td>
-                    <td className="table-text-right table-text-muted">
-                      Dec 01, 2021
-                    </td>
-                    <td className="table-text-center">
-                      <button className="view-details-btn">Receipt</button>
-                    </td>
-                  </tr>
+                  {loans.length === 0 ? (
+                    <tr>
+                      <td colSpan="7" style={{ textAlign: 'center', padding: '2rem' }}>
+                        No loans found
+                      </td>
+                    </tr>
+                  ) : (
+                    loans.map((loan) => (
+                      <tr key={loan.id}>
+                        <td>
+                          <div className="loan-type-cell">
+                            <div className={`loan-type-icon ${loan.status}`}>
+                              {loan.status === "approved" ? (
+                                <Store size={18} />
+                              ) : loan.status === "pending" ? (
+                                <AlertCircle size={18} />
+                              ) : (
+                                <FileText size={18} />
+                              )}
+                            </div>
+                            <div className="loan-type-info">
+                              <p className="loan-name">Loan #{loan.id}</p>
+                              <p className="loan-ref">{loan.interest_rate}% interest</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="table-text-muted">
+                          {loan.created_at || "N/A"}
+                        </td>
+                        <td className="table-text-right">
+                          {loan.amount.toLocaleString()} TZS
+                        </td>
+                        <td className="table-text-right">
+                          {loan.total_amount.toLocaleString()} TZS
+                        </td>
+                        <td className="table-text-center">
+                          <span className={`table-status-badge ${loan.status}`}>
+                            {loan.status.charAt(0).toUpperCase() + loan.status.slice(1)}
+                          </span>
+                        </td>
+                        <td className="table-text-right table-text-muted">
+                          {loan.due_date || "N/A"}
+                        </td>
+                        <td className="table-text-center">
+                          <button className="view-details-btn">
+                            View Details
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
 
               <div className="table-footer">
                 <p className="table-footer-info">
-                  Showing <span>1</span> to <span>3</span> of <span>3</span>{" "}
-                  results
+                  Showing <span>1</span> to <span>{loans.length}</span> of{" "}
+                  <span>{loans.length}</span> results
                 </p>
                 <div className="pagination-controls">
                   <button className="pagination-btn" disabled>
