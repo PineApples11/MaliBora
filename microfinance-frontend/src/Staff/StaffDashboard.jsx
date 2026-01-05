@@ -209,7 +209,10 @@ useEffect(() => {
             <LayoutDashboard size={18} />
             Dashboard
           </button>
-          <button className="staff-nav-btn">
+          <button 
+          className="staff-nav-btn"
+          onClick={() => navigate("/customer-list")}
+          >
             <Users size={18} />
             Customers
           </button>

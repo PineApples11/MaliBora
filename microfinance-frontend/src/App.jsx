@@ -18,6 +18,7 @@ import DepositSavings from './Customer/DepositSavings.jsx'
 import WithdrawFunds from './WithdrawFunds.jsx'
 import LoanApplicationForm from './Customer/LoanApplicationForm.jsx'
 import CreateSavingsGoal from './Customer/CreateSavingsGoal.jsx'
+import StaffCustomers from './Staff/StaffCustomers.jsx'
 
 
 
@@ -41,12 +42,12 @@ function App() {
         <Route path="/withdraw" element={<WithdrawFunds />} />
         <Route path="/apply-loan" element={<LoanApplicationForm />} />
         <Route path="/create-savings" element={<CreateSavingsGoal />} />
-        
+
 
         <Route path="/staff-homepage" element={<StaffDashboard />} />
+        <Route path="/customer-list" element={<StaffCustomers />} />
  
-        <Route path="/staff/*" element={<Staff />} />
-        <Route path="/admin/*" element={<Admin />} />
+        
       </Routes>
     </Router>   
     </>
