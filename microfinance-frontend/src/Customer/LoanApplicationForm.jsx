@@ -1,11 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import "./LoanApplicationForm.css";
 
 const LoanApplicationForm = () => {
   const [selectedCategory, setSelectedCategory] = useState('business');
-  const [loanAmount, setLoanAmount] = useState('2,000,000');
+  const [loanAmount, setLoanAmount] = useState('2000000');
   const [repaymentPeriod, setRepaymentPeriod] = useState('12');
   const [purpose, setPurpose] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [customerData, setCustomerData] = useState(null);
+
+  const API_BASE_URL = 'http://localhost:5555'; // Adjust port if needed
+
+  // Fetch current customer data on component mount
+  useEffect(() => {
+    fetchCurrentCustomer();
+  }, []);
+
+  const fetchCurrentCustomer = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/current-customer`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCustomerData(data);
+      } else {
+        setError('Failed to fetch customer data');
+      }
+    } catch (err) {
+      console.error('Error fetching customer:', err);
+      setError('Unable to connect to server');
+    }
+  };
 
   const loanCategories = [
     { id: 'business', name: 'Business', icon: '💼', color: '#3b82f6' },
@@ -25,9 +56,69 @@ const LoanApplicationForm = () => {
     const months = parseInt(repaymentPeriod);
     const interestRate = 0.12; // 12% annual interest
     const monthlyRate = interestRate / 12;
+    
+    if (isNaN(amount) || amount <= 0) return '0.00';
+    
     const payment = (amount * monthlyRate * Math.pow(1 + monthlyRate, months)) / 
                    (Math.pow(1 + monthlyRate, months) - 1);
     return payment.toFixed(2);
+  };
+
+  const handleSubmitLoan = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Calculate due date based on repayment period
+      const dueDate = new Date();
+      dueDate.setMonth(dueDate.getMonth() + parseInt(repaymentPeriod));
+
+      const loanData = {
+        principal_amount: parseFloat(loanAmount.replace(/,/g, '')),
+        interest_rate: 12.0, // 12% annual interest
+        loan_term_months: parseInt(repaymentPeriod),
+        status: 'pending',
+        due_date: dueDate.toISOString(),
+        loan_category: selectedCategory,
+        purpose: purpose
+      };
+
+      const response = await fetch(`${API_BASE_URL}/loan`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(loanData)
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        alert('Loan application submitted successfully!');
+        // Redirect to loans page or dashboard
+        window.location.href = '/loans'; // Adjust based on your routing
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Failed to submit loan application');
+      }
+    } catch (err) {
+      console.error('Error submitting loan:', err);
+      setError('Unable to submit loan application. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatCurrency = (value) => {
+    const numValue = parseFloat(value.replace(/,/g, ''));
+    return isNaN(numValue) ? '0' : numValue.toLocaleString();
+  };
+
+  const handleAmountChange = (e) => {
+    const value = e.target.value.replace(/,/g, '');
+    if (!isNaN(value) || value === '') {
+      setLoanAmount(value);
+    }
   };
 
   return (
@@ -35,16 +126,16 @@ const LoanApplicationForm = () => {
       <header className="loan-header">
         <div className="header-left">
           <button
-           className="back-btn"
-           onClick={() => window.history.back()}
-           >← Back to My Loans</button>
+            className="back-btn"
+            onClick={() => window.history.back()}
+          >← Back to My Loans</button>
         </div>
         <div className="logo">MaliBora</div>
         <nav className="nav-menu">
-          <a href="#" className="nav-link">Dashboard</a>
-          <a href="#" className="nav-link active">Loans</a>
-          <a href="#" className="nav-link">Savings</a>
-          <a href="#" className="nav-link">Profile</a>
+          <a href="/dashboard" className="nav-link">Dashboard</a>
+          <a href="/loans" className="nav-link active">Loans</a>
+          <a href="/savings" className="nav-link">Savings</a>
+          <a href="/profile" className="nav-link">Profile</a>
         </nav>
         <div className="header-right">
           <span className="notification-icon">🔔</span>
@@ -58,6 +149,19 @@ const LoanApplicationForm = () => {
           <p className="form-subtitle">
             Complete the application below to request funding. Our automated system will review your eligibility instantly.
           </p>
+
+          {error && (
+            <div className="error-message">
+              {error}
+            </div>
+          )}
+
+          {customerData && (
+            <div className="customer-info">
+              <p><strong>Customer:</strong> {customerData.full_name}</p>
+              <p><strong>Phone:</strong> {customerData.phone}</p>
+            </div>
+          )}
 
           <div className="progress-steps">
             <div className="step active">
@@ -107,8 +211,8 @@ const LoanApplicationForm = () => {
             <input
               type="text"
               className="form-input"
-              value={loanAmount}
-              onChange={(e) => setLoanAmount(e.target.value)}
+              value={formatCurrency(loanAmount)}
+              onChange={handleAmountChange}
             />
             <div className="input-hint">
               <span>Min: 10,000 TZS</span>
@@ -152,8 +256,19 @@ const LoanApplicationForm = () => {
           </div>
 
           <div className="form-actions">
-            <button className="cancel-btn">Cancel</button>
-            <button className="next-btn">Next Step →</button>
+            <button 
+              className="cancel-btn"
+              onClick={() => window.history.back()}
+            >
+              Cancel
+            </button>
+            <button 
+              className="next-btn"
+              onClick={handleSubmitLoan}
+              disabled={loading}
+            >
+              {loading ? 'Submitting...' : 'Submit Application →'}
+            </button>
           </div>
         </div>
 
@@ -163,7 +278,7 @@ const LoanApplicationForm = () => {
             
             <div className="summary-item">
               <span className="summary-label">Principal Amount:</span>
-              <span className="summary-value">2,000,000 TZS</span>
+              <span className="summary-value">{formatCurrency(loanAmount)} TZS</span>
             </div>
 
             <div className="summary-item">
@@ -173,12 +288,14 @@ const LoanApplicationForm = () => {
 
             <div className="summary-item">
               <span className="summary-label">Duration:</span>
-              <span className="summary-value">12 Months</span>
+              <span className="summary-value">{repaymentPeriod} Months</span>
             </div>
 
             <div className="monthly-payment">
               <span className="payment-label">Estimated Monthly Payment</span>
-              <span className="payment-amount">{calculateMonthlyPayment().toLocaleString()} TZS</span>
+              <span className="payment-amount">
+                {parseFloat(calculateMonthlyPayment()).toLocaleString()} TZS
+              </span>
             </div>
 
             <div className="info-note">
@@ -188,29 +305,12 @@ const LoanApplicationForm = () => {
           </div>
 
           <div className="amount-deposit-card">
-            <h4>Amount to Deposit</h4>
-            <input
-              type="text"
-              className="deposit-input"
-              placeholder="0.00"
-              defaultValue="TZS"
-            />
-            <div className="deposit-amounts">
-              <button className="deposit-btn">+ 10,000</button>
-              <button className="deposit-btn">+ 50,000</button>
-              <button className="deposit-btn">+ 100,000</button>
-            </div>
-            <div className="phone-input-group">
-              <label>Phone Number</label>
-              <input
-                type="text"
-                placeholder="+255 712 345 678"
-                className="phone-input"
-              />
-            </div>
-            <button className="confirm-deposit-btn">Confirm</button>
-            <p className="deposit-note">
-              By clicking confirm, you agree to the terms...
+            <h4>Savings Information</h4>
+            <p className="savings-info">
+              Current Savings Balance: <strong>{customerData?.savings_balance?.toLocaleString() || '0'} TZS</strong>
+            </p>
+            <p className="savings-note">
+              Having sufficient savings may improve your loan approval chances and interest rates.
             </p>
           </div>
         </div>
