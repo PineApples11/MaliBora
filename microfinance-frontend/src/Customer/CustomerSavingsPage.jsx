@@ -295,7 +295,10 @@ function CustomerSavingsPage() {
                 <p style={{ color: '#94a3b8', marginBottom: '1.5rem' }}>
                   Create your first savings account to start building your financial future
                 </p>
-                <button className="deposit-btn">
+                <button 
+                className="deposit-btn"
+                onClick={() => navigate("/create-savings")}
+                >
                   <Plus size={18} />
                   Create Savings Account
                 </button>
