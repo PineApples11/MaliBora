@@ -26,10 +26,10 @@ const WithdrawDashboard = () => {
       <header className="dashboard-header">
         <div className="logo">
           <button className="beta-badge"
-          onClick={() => navigate('/customer-homepage')}
+          onClick={() => navigate('/savings')}
           
           
-          >Back To Dashboard</button>
+          >Back To Savings</button>
         </div>
         <h2 className="page-title">Withdraw Funds</h2>
        

@@ -43,9 +43,9 @@ const DepositSavings = () => {
       <div className="deposit-main-content">
         <button 
           className="back-to-dashboard"
-          onClick={() => navigate('/customer-homepage')}
+          onClick={() => navigate('/savings')}
         >
-          ← Back to Dashboard
+          ← Back to Savings
         </button>
 
         <div className="deposit-header">

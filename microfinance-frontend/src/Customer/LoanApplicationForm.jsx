@@ -124,23 +124,23 @@ const LoanApplicationForm = () => {
   return (
     <div className="loan-app-container">
       <header className="loan-header">
-        <div className="header-left">
+        {/* <div className="header-left">
           <button
             className="back-btn"
             onClick={() => window.history.back()}
           >← Back to My Loans</button>
-        </div>
+        </div> */}
         <div className="logo">MaliBora</div>
         <nav className="nav-menu">
-          <a href="/dashboard" className="nav-link">Dashboard</a>
+          <a href="/customer-homepage" className="nav-link">Dashboard</a>
           <a href="/loans" className="nav-link active">Loans</a>
           <a href="/savings" className="nav-link">Savings</a>
           <a href="/profile" className="nav-link">Profile</a>
         </nav>
-        <div className="header-right">
+        {/* <div className="header-right">
           <span className="notification-icon">🔔</span>
           <span className="user-avatar">👤</span>
-        </div>
+        </div> */}
       </header>
 
       <div className="loan-content">

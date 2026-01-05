@@ -135,12 +135,12 @@ function CustomerSavingsPage() {
         <div className="logo">MaliBora</div>
 
         <nav className="sidebar-nav">
-          <button onClick={() => navigate("/customer-dashboard")}>
+          <button onClick={() => navigate("/customer-homepage")}>
             <LayoutDashboard size={20} />
             Dashboard
           </button>
 
-          <button onClick={() => navigate("/customer-loans")}>
+          <button onClick={() => navigate("/loans")}>
             <CreditCard size={20} />
             Loans
           </button>
@@ -150,7 +150,7 @@ function CustomerSavingsPage() {
             Savings
           </button>
 
-          <button onClick={() => navigate("/customer-transactions")}>
+          <button onClick={() => navigate("/transactions")}>
             <Wallet size={20} />
             Transactions
           </button>

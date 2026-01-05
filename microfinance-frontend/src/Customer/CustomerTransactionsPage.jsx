@@ -137,17 +137,17 @@ function CustomerTransactionsPage() {
         <div className="logo">MaliBora</div>
 
         <nav className="sidebar-nav">
-          <button onClick={() => navigate("/customer-dashboard")}>
+          <button onClick={() => navigate("/customer-homepage")}>
             <LayoutDashboard size={20} />
             Dashboard
           </button>
 
-          <button onClick={() => navigate("/customer-loans")}>
+          <button onClick={() => navigate("/loans")}>
             <CreditCard size={20} />
             Loans
           </button>
 
-          <button onClick={() => navigate("/customer-savings")}>
+          <button onClick={() => navigate("/savings")}>
             <PiggyBank size={20} />
             Savings
           </button>

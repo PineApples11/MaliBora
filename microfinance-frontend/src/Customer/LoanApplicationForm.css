@@ -1,16 +1,16 @@
-* {
+/* * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-}
+} */
 
-.loan-app-container {
+/* .loan-app-container {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   background: #f8fafc;
   min-height: 100vh;
-}
+} */
 
-.loan-header {
+/* .loan-header {
   background: white;
   padding: 1rem 2rem;
   display: flex;
@@ -18,13 +18,13 @@
   justify-content: space-between;
   border-bottom: 1px solid #e2e8f0;
   gap: 2rem;
-}
+} */
 
-.header-left {
+/* .header-left {
   flex: 1;
-}
+} */
 
-.back-btn {
+/* .back-btn {
   background: none;
   border: none;
   color: #64748b;
@@ -38,7 +38,7 @@
 
 .back-btn:hover {
   color: #3b82f6;
-}
+} */
 
 .logo {
   font-size: 1.5rem;
@@ -81,15 +81,15 @@
   background: #3b82f6;
 }
 
-.header-right {
+/* .header-right {
   display: flex;
   gap: 1rem;
   align-items: center;
   flex: 1;
   justify-content: flex-end;
-}
+} */
 
-.notification-icon,
+/* .notification-icon,
 .user-avatar {
   font-size: 1.2rem;
   cursor: pointer;
@@ -103,7 +103,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
+} */
 
 .loan-content {
   padding: 2rem;
