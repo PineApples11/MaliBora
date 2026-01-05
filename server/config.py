@@ -132,7 +132,82 @@ def create_app():
             "role": session["role"],
             "full_name": session["full_name"]
         }, 200
+    
 
+    @app.route("/recent-repayments")
+    def recent_repayments():
+        """
+        Get recent repayment transactions
+        """
+        if "user_id" not in session:
+            return {"error": "Not authenticated"}, 401
+        
+        try:
+            from models import Repayment
+            repayments = (
+
+                Repayment.query
+                .order_by(Repayment.date_paid.desc())
+                .limit(10)
+                .all()
+            )
+            result = []
+            from models import Loan, Customer
+            for repayment in repayments:
+                loan=Loan.query.get(repayment.loan_id)
+                customer_name = None
+                if loan and loan.customer_id:
+                    customer = Customer.query.get(loan.customer_id)
+
+                result.append({
+                    "id": repayment.id,
+                    "amount": repayment.amount,
+                    "date": repayment.date_paid.strftime("%b %d, %Y") if repayment.date_paid else None,
+                    "loan_id": repayment.loan_id,
+                    "customer_name": customer.full_name if customer else None
+                })
+            return {"recent_repayments": result},200
+        except Exception as e:
+            print(f"Recent repayments error: {e}")
+            import traceback
+            traceback.print_exc()
+            return {"error": f"Server error: {str(e)}"}, 500
+
+           
+           
+    
+    @app.route("/staff-dashboard-stats")
+    def staff_dashboard_stats():
+        """
+        Get dashboard statistics for staff users
+        """
+        if "user_id" not in session:
+            return {"error": "Not authenticated"}, 401
+        
+        try:
+            from models import StaffCustomer, Loan
+            user_id = session.get("user_id")
+            
+            # Get number of assigned customers
+            assigned_customers_count = StaffCustomer.query.filter_by(staff_id=user_id).count()
+            
+            # Get number of loans for assigned customers
+            assigned_customer_ids = [
+                sc.customer_id for sc in StaffCustomer.query.filter_by(staff_id=user_id).all()
+            ]
+            loans_count = Loan.query.filter(Loan.customer_id.in_(assigned_customer_ids)).count()
+            
+            return {
+                "assigned_customers_count": assigned_customers_count,
+                "loans_count": loans_count
+            }
+        except Exception as e:
+            print(f"Staff dashboard stats error: {e}")
+            import traceback
+            traceback.print_exc()
+            return {"error": f"Server error: {str(e)}"}, 500
+
+    
     @app.route("/loans")
     def loans():
         """

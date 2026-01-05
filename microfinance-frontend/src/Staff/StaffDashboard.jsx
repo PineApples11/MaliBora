@@ -22,6 +22,8 @@ import {
   TrendingDown,
 } from "lucide-react";
 
+const API_BASE_URL = "http://localhost:5555"; // Update this to match your Flask port
+
 function StaffDashboard() {
   const navigate = useNavigate();
   const rawUser = localStorage.getItem("user");
@@ -29,6 +31,11 @@ function StaffDashboard() {
 
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loans, setLoans] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [recentRepayments, setRecentRepayments] = useState([]);
+  const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     if (!user) {
@@ -36,124 +43,152 @@ function StaffDashboard() {
     }
   }, [user, navigate]);
 
-  useEffect(() => {
-    if (!user) {
-      setLoading(false);
-      return;
+  // Fetch all data
+useEffect(() => {
+  if (!user) return;
+
+  const fetchLoans = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/loans`, {
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setLoans(data.loans || []);
+      }
+    } catch (err) {
+      console.error("Loans fetch error:", err);
     }
+  };
 
-    setTimeout(() => setLoading(false), 500);
-  }, [user]);
+  const fetchStats = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/staff-dashboard-stats`, {
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setStats(data);
+      }
+    } catch (err) {
+      console.error("Stats fetch error:", err);
+    }
+  };
 
-  if (!user || loading) return null;
+  const fetchRepayments = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/recent-repayments`, {
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setRecentRepayments(data.recent_repayments || []);
+      }
+    } catch (err) {
+      console.error("Repayments fetch error:", err);
+    }
+  };
 
-  // Mock data
+  fetchLoans();
+  fetchStats();
+  fetchRepayments();
+}, [user]);
+
+
+
+  if (error) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        fontSize: '18px',
+        color: '#e74c3c'
+      }}>
+        <div>Error: {error}</div>
+        <button 
+          onClick={() => window.location.reload()} 
+          style={{
+            marginTop: '20px',
+            padding: '10px 20px',
+            background: '#3b82f6',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer'
+          }}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   const currentDate = new Date().toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
   });
 
+  // Use stats from API
   const metrics = {
-    assignedCustomers: 142,
-    customersGrowth: "+12% vs last month",
-    overdueLoans: 5,
+    assignedCustomers: stats?.assigned_customers || 0,
+    customersGrowth: stats?.customers_growth || "+0%",
+    overdueLoans: stats?.overdue_loans || 0,
     actionRequired: "Action Required",
-    dueThisWeek: "KES 124,500",
-    repaymentsExpected: "18 Repayments expected",
-    collectionRate: 85,
+    dueThisWeek: `KES ${(stats?.due_this_week_amount || 0).toLocaleString()}`,
+    repaymentsExpected: `${stats?.due_this_week_count || 0} Repayments expected`,
+    collectionRate: stats?.collection_rate || 0,
     rateChange: "+5%",
   };
 
-  const activeLoans = [
-    {
-      id: 1,
-      customer: "John Doe",
-      customerId: "ID: 452003",
-      avatar: "JD",
-      avatarColor: "#a78bfa",
-      loanId: "#LN-2023-88",
-      loanType: "Personal",
-      balance: "KES 18,000",
-      balanceDetail: "of 50,000",
-      nextDue: "Oct 30, 2023",
-      daysLate: "5 days late",
-      isOverdue: true,
-    },
-    {
-      id: 2,
-      customer: "Mary Kimani",
-      customerId: "ID: 987653",
-      avatar: "MK",
-      avatarColor: "#60a5fa",
-      loanId: "#LN-2023-92",
-      loanType: "Business",
-      balance: "KES 8,500",
-      balanceDetail: "of 30,000",
-      nextDue: "Oct 26, 2023",
-      daysRemaining: "Due in 4 days",
-      isOverdue: false,
-    },
-    {
-      id: 3,
-      customer: "Peter Omondi",
-      customerId: "ID: 196098",
-      avatar: "PO",
-      avatarColor: "#fb923c",
-      loanId: "#LN-2023-75",
-      loanType: "Agriculture",
-      balance: "KES 42,000",
-      balanceDetail: "of 100,000",
-      nextDue: "Oct 28, 2023",
-      daysRemaining: "Due in 6 days",
-      isOverdue: false,
-    },
-    {
-      id: 4,
-      customer: "Alice Mwangi",
-      customerId: "ID: 354012",
-      avatar: "AM",
-      avatarColor: "#a3e635",
-      loanId: "#LN-2023-101",
-      loanType: "Business",
-      balance: "KES 30,000",
-      balanceDetail: "of 75,000",
-      nextDue: "Nov 02, 2023",
-      daysRemaining: "Approved",
-      isOverdue: false,
-    },
-  ];
+  // Transform loans data for display
+  const activeLoans = loans
+    .filter(loan => loan.status === 'approved')
+    .slice((currentPage - 1) * 4, currentPage * 4)
+    .map((loan, index) => {
+      const isOverdue = loan.due_date && new Date(loan.due_date) < new Date() && loan.remaining_balance > 0;
+      const dueDate = loan.due_date ? new Date(loan.due_date) : null;
+      const today = new Date();
+      const daysUntilDue = dueDate ? Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24)) : null;
+      
+      // Generate avatar initials from customer name
+      const nameParts = (loan.customer_name || "Unknown").split(" ");
+      const initials = nameParts.map(part => part[0]).join("").toUpperCase().slice(0, 2);
+      
+      const colors = ["#a78bfa", "#60a5fa", "#fb923c", "#a3e635", "#f472b6", "#facc15"];
+      
+      return {
+        id: loan.id,
+        customer: loan.customer_name || "Unknown",
+        customerId: `ID: ${loan.customer_id}`,
+        avatar: initials,
+        avatarColor: colors[index % colors.length],
+        loanId: `#LN-${loan.id}`,
+        loanType: "Personal",
+        balance: `KES ${loan.remaining_balance?.toLocaleString() || 0}`,
+        balanceDetail: `of ${loan.total_amount?.toLocaleString() || 0}`,
+        nextDue: loan.due_date || "N/A",
+        daysLate: isOverdue ? `${Math.abs(daysUntilDue)} days late` : null,
+        daysRemaining: !isOverdue && daysUntilDue !== null ? 
+          (daysUntilDue > 0 ? `Due in ${daysUntilDue} days` : "Due today") : "Approved",
+        isOverdue: isOverdue,
+      };
+    });
 
-  const recentRepayments = [
-    {
-      id: 1,
-      name: "Jane Smith",
-      account: "MPESA",
-      time: "2 min ago",
-      amount: "+KES 200",
-    },
-    {
-      id: 2,
-      name: "David Kamau",
-      account: "Cash",
-      time: "43 min ago",
-      amount: "+KES 1,000",
-    },
-    {
-      id: 3,
-      name: "Grace Wanjiku",
-      account: "MPESA",
-      time: "2 hours ago",
-      amount: "+KES 800",
-    },
-    {
-      id: 4,
-      name: "Tom Otieno",
-      account: "MPESA",
-      time: "5 hours ago",
-      amount: "+KES 500",
-    },
-  ];
+  const totalActiveLoans = loans.filter(l => l.status === 'approved').length;
+  const totalPages = Math.ceil(totalActiveLoans / 4);
+
+  // Transform repayments for display
+  const displayRepayments = recentRepayments.slice(0, 4).map(rep => ({
+    id: rep.id,
+    name: rep.customer_name,
+    account: rep.payment_method || "MPESA",
+    time: rep.date,
+    amount: `+KES ${rep.amount.toLocaleString()}`,
+  }));
 
   return (
     <div className="staff-dashboard-container">
@@ -196,11 +231,11 @@ function StaffDashboard() {
           <div className="staff-profile-avatar">
             <img
               src="https://i.pravatar.cc/150?img=47"
-              alt="Sarah Jensen"
+              alt={user?.full_name || "Staff"}
             />
           </div>
           <div className="staff-profile-info">
-            <div className="staff-profile-name">Sarah Jensen</div>
+            <div className="staff-profile-name">{user?.full_name || "Staff Member"}</div>
             <div className="staff-profile-role">Loan Officer</div>
           </div>
           <button className="staff-profile-menu">
@@ -215,7 +250,9 @@ function StaffDashboard() {
         <header className="staff-header">
           <div className="staff-header-left">
             <div className="staff-date">{currentDate}</div>
-            <h1 className="staff-greeting">Good morning, Sarah</h1>
+            <h1 className="staff-greeting">
+              Good morning, {user?.full_name?.split(' ')[0] || "Staff"}
+            </h1>
             <p className="staff-subtitle">
               Here is your portfolio overview for today.
             </p>
@@ -305,76 +342,96 @@ function StaffDashboard() {
               </div>
 
               <div className="loans-table-wrapper">
-                <table className="loans-data-table">
-                  <thead>
-                    <tr>
-                      <th>CUSTOMERS</th>
-                      <th>LOAN ID</th>
-                      <th>BALANCE</th>
-                      <th>NEXT DUE</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {activeLoans.map((loan) => (
-                      <tr key={loan.id}>
-                        <td>
-                          <div className="customer-cell">
-                            <div
-                              className="customer-avatar"
-                              style={{ backgroundColor: loan.avatarColor }}
-                            >
-                              {loan.avatar}
-                            </div>
-                            <div className="customer-info">
-                              <div className="customer-name">
-                                {loan.customer}
-                              </div>
-                              <div className="customer-id">
-                                {loan.customerId}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="loan-id-cell">{loan.loanId}</div>
-                          <div className="loan-type-cell">{loan.loanType}</div>
-                        </td>
-                        <td>
-                          <div className="balance-cell">{loan.balance}</div>
-                          <div className="loan-type-cell">
-                            {loan.balanceDetail}
-                          </div>
-                        </td>
-                        <td>
-                          <div className="due-date-cell">
-                            <div className="due-date">{loan.nextDue}</div>
-                            {loan.isOverdue ? (
-                              <div className="days-late">{loan.daysLate}</div>
-                            ) : (
-                              <div className="days-remaining">
-                                {loan.daysRemaining}
-                              </div>
-                            )}
-                          </div>
-                        </td>
+                {activeLoans.length > 0 ? (
+                  <table className="loans-data-table">
+                    <thead>
+                      <tr>
+                        <th>CUSTOMERS</th>
+                        <th>LOAN ID</th>
+                        <th>BALANCE</th>
+                        <th>NEXT DUE</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {activeLoans.map((loan) => (
+                        <tr key={loan.id}>
+                          <td>
+                            <div className="customer-cell">
+                              <div
+                                className="customer-avatar"
+                                style={{ backgroundColor: loan.avatarColor }}
+                              >
+                                {loan.avatar}
+                              </div>
+                              <div className="customer-info">
+                                <div className="customer-name">
+                                  {loan.customer}
+                                </div>
+                                <div className="customer-id">
+                                  {loan.customerId}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <div className="loan-id-cell">{loan.loanId}</div>
+                            <div className="loan-type-cell">{loan.loanType}</div>
+                          </td>
+                          <td>
+                            <div className="balance-cell">{loan.balance}</div>
+                            <div className="loan-type-cell">
+                              {loan.balanceDetail}
+                            </div>
+                          </td>
+                          <td>
+                            <div className="due-date-cell">
+                              <div className="due-date">{loan.nextDue}</div>
+                              {loan.isOverdue ? (
+                                <div className="days-late">{loan.daysLate}</div>
+                              ) : (
+                                <div className="days-remaining">
+                                  {loan.daysRemaining}
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
+                    No active loans found
+                  </div>
+                )}
               </div>
 
               <div className="table-footer">
                 <div className="footer-text">
-                  Showing 1 to 4 of 42 results
+                  Showing {(currentPage - 1) * 4 + 1} to {Math.min(currentPage * 4, totalActiveLoans)} of {totalActiveLoans} results
                 </div>
                 <div className="pagination-controls">
-                  <button className="page-btn" disabled>
+                  <button 
+                    className="page-btn" 
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  >
                     <ChevronLeft size={16} />
                   </button>
-                  <button className="page-btn active">1</button>
-                  <button className="page-btn">2</button>
-                  <button className="page-btn">3</button>
-                  <button className="page-btn">
+                  {[...Array(Math.min(3, totalPages))].map((_, i) => (
+                    <button 
+                      key={i + 1}
+                      className={`page-btn ${currentPage === i + 1 ? 'active' : ''}`}
+                      onClick={() => setCurrentPage(i + 1)}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                  <button 
+                    className="page-btn"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  >
                     <ChevronRight size={16} />
                   </button>
                 </div>
@@ -390,22 +447,28 @@ function StaffDashboard() {
                   <button className="view-all-link">View All</button>
                 </div>
                 <div className="repayments-list">
-                  {recentRepayments.map((repayment) => (
-                    <div key={repayment.id} className="repayment-item">
-                      <div className="repayment-icon">
-                        <ArrowDownLeft size={18} />
-                      </div>
-                      <div className="repayment-info">
-                        <div className="repayment-name">{repayment.name}</div>
-                        <div className="repayment-details">
-                          {repayment.account} • {repayment.time}
+                  {displayRepayments.length > 0 ? (
+                    displayRepayments.map((repayment) => (
+                      <div key={repayment.id} className="repayment-item">
+                        <div className="repayment-icon">
+                          <ArrowDownLeft size={18} />
+                        </div>
+                        <div className="repayment-info">
+                          <div className="repayment-name">{repayment.name}</div>
+                          <div className="repayment-details">
+                            {repayment.account} • {repayment.time}
+                          </div>
+                        </div>
+                        <div className="repayment-amount">
+                          {repayment.amount}
                         </div>
                       </div>
-                      <div className="repayment-amount">
-                        {repayment.amount}
-                      </div>
+                    ))
+                  ) : (
+                    <div style={{ padding: '20px', textAlign: 'center', color: '#999' }}>
+                      No recent repayments
                     </div>
-                  ))}
+                  )}
                 </div>
               </section>
 
