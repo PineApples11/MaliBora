@@ -175,7 +175,10 @@ function CustomerLoansPage() {
             <h1>My Loans</h1>
             <p>Manage your active loans and view your repayment history.</p>
           </div>
-          <button className="apply-loan-btn">
+          <button 
+          className="apply-loan-btn"
+          onClick={() => navigate("/apply-loan")}
+          >
             <Plus size={18} />
             Apply for New Loan
           </button>
